@@ -35,16 +35,7 @@ import (
 	webAssets "whiteprivatedns/web"
 )
 
-const banner = `
-   _    _                           _____  _   _  _____ 
-  | |  | |                         |  __ \| \ | |/ ____|
-  | |__| |_   _ _ __   ___ _ __    | |  | |  \| | (___  
-  |  __  | | | | '_ \ / _ \ '__|   | |  | | . ' |\___ \ 
-  | |  | | |_| | |_) |  __/ |      | |__| | |\  |____) |
-  |_|  |_|\__, | .__/ \___|_|      |_____/|_| \_|_____/ 
-           __/ | |                                      
-          |___/|_|      Next-Gen Standalone SmartDNS
-`
+const banner = "\n  WhitePrivateDns\n"
 
 func main() {
 	dbPath := flag.String("db", "", "Path to database file (e.g. /opt/whiteprivatedns/data.db)")

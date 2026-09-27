@@ -16,22 +16,10 @@ PURPLE='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# Clear screen & display Cyberpunk ASCII Banner.
-# Guarded because this script runs under `set -e` and clear exits non-zero when
-# TERM is unset or unknown to terminfo -- which is exactly the case for
-# `ssh host 'bash install.sh'`, cron, CI and setsid, none of which allocate a
-# terminal. Unguarded, the offline installer died on line 20 with
-# "TERM environment variable not set." and installed nothing.
+# Keep non-interactive installs readable when TERM is unset.
 clear 2>/dev/null || true
-echo -e "${CYAN}${BOLD}"
-echo "  ██╗  ██╗██╗   ██╗██████╗ ███████╗██████╗ ██████╗ ███╗   ██╗███████╗"
-echo "  ██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔════╝"
-echo "  ███████║ ╚████╔╝ ██████╔╝█████╗  ██████╔╝██║  ██║██╔██╗ ██║███████╗"
-echo "  ██╔══██║  ╚██╔╝  ██╔═══╝ ██╔══╝  ██╔══██╗██║  ██║██║╚██╗██║╚════██║"
-echo "  ██║  ██║   ██║   ██║     ███████╗██║  ██║██████╔╝██║ ╚████║███████║"
-echo "  ╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═══╝╚══════╝"
-echo -e "       ${PURPLE}⚡ Standalone Low-Latency SmartDNS & Anti-Sanction Gaming Gateway ⚡${NC}"
-echo -e "       ${YELLOW}Package: ONLINE INSTALLER · Single Binary · Go 1.26 · OWASP Hardened${NC}"
+echo -e "${CYAN}${BOLD}WhitePrivateDns${NC}"
+echo -e "${PURPLE}Online installer${NC}"
 echo ""
 
 if [ "$EUID" -ne 0 ]; then
@@ -196,7 +184,7 @@ echo -e "  ${GREEN}✓ Architecture detected: ${ARCH} (${BIN_ARCH})${NC}"
 # beta installer pulling from it silently fetches the older stable binary and
 # the install fails deep in the v2.2.0 flow. Both URLs derive from the single
 # ref so the binary and the auxiliary files can never disagree.
-WHITEPRIVATEDNS_REF="${WHITEPRIVATEDNS_REF:-v2.2.0-beta.1}"
+WHITEPRIVATEDNS_REF="${WHITEPRIVATEDNS_REF:-v2.2.0-beta.2}"
 ONLINE_CONFIG_EXAMPLE="$(mktemp /tmp/whiteprivatedns-cfg.XXXXXX)"
 ONLINE_RESTORE="$(mktemp /tmp/whiteprivatedns-restore.XXXXXX)"
 ONLINE_UNINSTALL="$(mktemp /tmp/whiteprivatedns-uninstall.XXXXXX)"

@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v2.2.0-beta.2] — Branding and installation correction
+
+- Replaced the inherited ASCII banner in the online installer, both offline installers, the daemon, and the terminal manager with the WhitePrivateDns name.
+- Removed inherited installer marketing claims from the startup screen.
+- Added an installer output check so a release cannot reintroduce the former banner unnoticed.
+
 ## 🔐 [v2.2.0-beta.1] — Whitelist by Default, Built-In ACME, API v2, Google/AI Presets & a Real Console
 
 ### ✨ Added
@@ -145,10 +151,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **First ES Module:** the 2FA/LDAP settings panel (`js/modules/twofa.js`) is the dashboard's first `<script type="module">` — strict mode, deferred execution, reading shared state through the `window.__wpdns` bridge at call time.
 
 ### 📦 Changed
-- Version bumped to **v2.1.0-beta (HyperSHIELD)**; installer banner and UI placeholders updated.
+- Version bumped to **v2.1.0-beta**; installer banner and UI placeholders updated.
 
 ---
-## 🔒 [v2.1.0-beta] - 2026-09-07 (Codename: HyperSHIELD)
+## 🔒 [v2.1.0-beta] - 2026-09-07
 
 ### 🔐 Highlights
 - **HTTPS Panel, Done Properly (Phase 1):** The dashboard listener serves TLS with `tls.LoadX509KeyPair`, validates that the certificate covers the configured domain and is currently usable, and **fails closed at startup** otherwise. An optional redirect listener answers GET/HEAD with `https://…` (405 + `Allow` for anything else, never redirecting attacker-typed hosts). HSTS `max-age=31536000` goes out only on responses that actually arrived over TLS.

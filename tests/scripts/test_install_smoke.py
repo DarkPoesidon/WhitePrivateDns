@@ -24,7 +24,7 @@ import uuid
 
 
 FIXTURE = Path('/smoke')
-REF = 'v2.2.0-beta.1-smoke-pinned'
+REF = 'v2.2.0-beta.2-smoke-pinned'
 DOMAIN = 'installer-smoke.invalid'
 ADMIN_PATH = '0123456789abcdef'
 
@@ -128,6 +128,9 @@ def inside():
                 line = line.split(' ', 1)[0] + ' <redacted>'
             print(line)
         raise AssertionError(f'Installer exit: {result.returncode}')
+    displayed = '\n'.join(line for line in result.stdout.splitlines() if not line.startswith('+'))
+    assert 'WhitePrivateDns' in displayed and 'Online installer' in displayed, 'Wrong installer banner'
+    assert 'HYPERDNS' not in displayed.upper(), 'Legacy installer banner is visible'
     try:
         assert result.returncode == 0, f'Installer exit: {result.returncode}'
         assert not (FIXTURE / 'unexpected').exists(), 'Unexpected external command/URL'

@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	banner = "\n  WhitePrivateDns"
 	Cyan   = "\033[36m"
 	Green  = "\033[32m"
 	Yellow = "\033[33m"
@@ -62,15 +63,7 @@ func RunInteractiveManager(
 
 	for {
 		clearScreen()
-		fmt.Println(Cyan + Bold + `
-   _    _                           _____  _   _  _____ 
-  | |  | |                         |  __ \| \ | |/ ____|
-  | |__| |_   _ _ __   ___ _ __    | |  | |  \| | (___  
-  |  __  | | | | '_ \ / _ \ '__|   | |  | | . ' |\___ \ 
-  | |  | | |_| | |_) |  __/ |      | |__| | |\  |____) |
-  |_|  |_|\__, | .__/ \___|_|      |_____/|_| \_|_____/ 
-           __/ | |                                      
-          |___/|_|      Next-Gen Standalone SmartDNS` + Reset)
+		fmt.Println(Cyan + Bold + banner + Reset)
 
 		// The banner is redrawn on every pass through the menu, and PublicIP/APIBind
 		// can be rewritten by the dashboard while the console sits at this prompt, so

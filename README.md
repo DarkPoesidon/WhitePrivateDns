@@ -123,8 +123,8 @@ Run as root on Debian or Ubuntu. The commands work from any directory, including
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.1/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.2/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 bash /tmp/whiteprivatedns-install.sh
 ```
 
 On AlmaLinux, Rocky Linux, RHEL or CentOS with working package repositories, replace the first line with `dnf install -y ca-certificates curl openssl`. The installer detects Linux amd64 or arm64, downloads the matching release binary, verifies its SHA-256 checksum, and configures the systemd service. Have a panel domain pointed at this server before running it.

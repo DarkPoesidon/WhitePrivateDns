@@ -111,8 +111,8 @@ python3 scripts/network_probe.py --dns-ip 203.0.113.10 \
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.1/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.2/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>

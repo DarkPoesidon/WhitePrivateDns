@@ -152,7 +152,7 @@ curl -s http://127.0.0.1:8080/api/v1/version
 ```json
 {
   "version": "1.5.0",
-  "channel": "beta",
+  "channel": "beta.2",
   "codename": "WhitePrivateDns",
   "display": "v1.5.0-beta",
   "hash": "3585f9bf",
@@ -184,7 +184,7 @@ same payload the dashboard polls. Every field below is present on every response
   "status": "healthy",
   "version": {
     "version": "1.5.0",
-    "channel": "beta",
+    "channel": "beta.2",
     "codename": "WhitePrivateDns",
     "display": "v1.5.0-beta",
     "hash": "3585f9bf",

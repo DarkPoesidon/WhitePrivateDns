@@ -1,6 +1,6 @@
 # نصب WhitePrivateDns روی سیستم‌عامل‌های پشتیبانی‌شده
 
-نسخهٔ `v2.2.0-beta.1` برای Linux با معماری‌های amd64/arm64، Windows amd64 و macOS amd64/arm64 باینری آماده دارد. دستورهای نصب از Release به Go یا سورس کلون‌شده نیاز ندارند.
+نسخهٔ `v2.2.0-beta.2` برای Linux با معماری‌های amd64/arm64، Windows amd64 و macOS amd64/arm64 باینری آماده دارد. دستورهای نصب از Release به Go یا سورس کلون‌شده نیاز ندارند.
 
 ## سرور لینوکس با systemd
 
@@ -21,13 +21,13 @@ dnf install -y ca-certificates curl openssl
 سپس از **هر پوشه‌ای** این دو دستور را اجرا کنید:
 
 ```bash
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.1/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.2/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 bash /tmp/whiteprivatedns-install.sh
 ```
 
 نصاب معماری را تشخیص می‌دهد، باینری مناسب را دانلود و SHA-256 آن را بررسی می‌کند و سرویس، اسکریپت بازیابی و اسکریپت حذف را نصب می‌کند. دامنه و ایمیل ACME را می‌پرسد. رمز مدیر و مسیر خصوصی پنل را که فقط یک بار چاپ می‌شوند نگه دارید. **اجرای دوبارهٔ نصاب، نصب قبلی را پس از آرشیو کردن جایگزین می‌کند**؛ پیش از واردکردن `FRESH` پیام تأیید را بخوانید.
 
-اگر GitHub روی VPS در دسترس نیست، فایل `whiteprivatedns-offline-bundle.tar.gz` را از [صفحهٔ Release](https://github.com/DarkPoesidon/WhitePrivateDns/releases/tag/v2.2.0-beta.1) با دستگاه دیگری بگیرید و به سرور منتقل کنید:
+اگر GitHub روی VPS در دسترس نیست، فایل `whiteprivatedns-offline-bundle.tar.gz` را از [صفحهٔ Release](https://github.com/DarkPoesidon/WhitePrivateDns/releases/tag/v2.2.0-beta.2) با دستگاه دیگری بگیرید و به سرور منتقل کنید:
 
 ```bash
 mkdir -p /root/whiteprivatedns-bundle
@@ -45,7 +45,7 @@ PowerShell را باز کنید. این مسیر برای **آزمایش محل�
 ```powershell
 $folder = Join-Path $HOME 'WhitePrivateDns'
 New-Item -ItemType Directory -Force -Path $folder | Out-Null
-$base = 'https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.1'
+$base = 'https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.2'
 $binary = Join-Path $folder 'whiteprivatedns-windows-amd64.exe'
 Invoke-WebRequest -UseBasicParsing "$base/whiteprivatedns-windows-amd64.exe" -OutFile $binary
 $manifest = (Invoke-WebRequest -UseBasicParsing "$base/checksums.txt").Content
@@ -75,7 +75,7 @@ esac
 mkdir -p "$HOME/WhitePrivateDns"
 cd "$HOME/WhitePrivateDns"
 asset="whiteprivatedns-darwin-$arch"
-base='https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.1'
+base='https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.2'
 curl -fL --retry 3 "$base/$asset" -o "$asset"
 curl -fL --retry 3 "$base/checksums.txt" -o checksums.txt
 grep " $asset\$" checksums.txt | shasum -a 256 -c -

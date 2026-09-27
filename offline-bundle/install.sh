@@ -16,22 +16,10 @@ PURPLE='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# Clear screen & display Cyberpunk ASCII Banner.
-# Guarded because this script runs under `set -e` and clear exits non-zero when
-# TERM is unset or unknown to terminfo -- which is exactly the case for
-# `ssh host 'bash install.sh'`, cron, CI and setsid, none of which allocate a
-# terminal. Unguarded, the offline installer died on line 20 with
-# "TERM environment variable not set." and installed nothing.
+# Keep non-interactive installs readable when TERM is unset.
 clear 2>/dev/null || true
-echo -e "${CYAN}${BOLD}"
-echo "  ██╗  ██╗██╗   ██╗██████╗ ███████╗██████╗ ██████╗ ███╗   ██╗███████╗"
-echo "  ██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔════╝"
-echo "  ███████║ ╚████╔╝ ██████╔╝█████╗  ██████╔╝██║  ██║██╔██╗ ██║███████╗"
-echo "  ██╔══██║  ╚██╔╝  ██╔═══╝ ██╔══╝  ██╔══██╗██║  ██║██║╚██╗██║╚════██║"
-echo "  ██║  ██║   ██║   ██║     ███████╗██║  ██║██████╔╝██║ ╚████║███████║"
-echo "  ╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═══╝╚══════╝"
-echo -e "       ${PURPLE}⚡ Standalone Low-Latency SmartDNS & Anti-Sanction Gaming Gateway ⚡${NC}"
-echo -e "       ${YELLOW}Package: STANDALONE INSTALLER · Single Binary · Go 1.26 · OWASP Hardened${NC}"
+echo -e "${CYAN}${BOLD}WhitePrivateDns${NC}"
+echo -e "${PURPLE}Offline installer${NC}"
 echo ""
 
 if [ "$EUID" -ne 0 ]; then
