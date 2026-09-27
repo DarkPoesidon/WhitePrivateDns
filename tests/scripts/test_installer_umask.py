@@ -13,6 +13,7 @@ umask 077. systemctl/curl/journalctl are stubbed; nothing is installed on the
 host, no network is reached, no daemon is started.
 """
 import argparse
+import hashlib
 import io
 import os
 from pathlib import Path
@@ -69,11 +70,18 @@ def stub(command, args):
             if '/whiteprivatedns-linux-amd64' in url:
                 shutil.copyfile(FIXTURE / 'whiteprivatedns', out)
                 return 0
+            if url.endswith('/checksums.txt'):
+                digest = hashlib.sha256((FIXTURE / 'whiteprivatedns').read_bytes()).hexdigest()
+                Path(out).write_text(f'{digest}  whiteprivatedns-linux-amd64\n')
+                return 0
             if url.endswith('/config.example.json'):
                 shutil.copyfile(FIXTURE / 'config.example.json', out)
                 return 0
             if url.endswith('/scripts/restore.sh'):
                 shutil.copyfile(FIXTURE / 'scripts' / 'restore.sh', out)
+                return 0
+            if url.endswith('/scripts/uninstall.sh'):
+                shutil.copyfile(FIXTURE / 'scripts' / 'uninstall.sh', out)
                 return 0
             if url.endswith('/version.json'):
                 shutil.copyfile(FIXTURE / 'offline-bundle' / 'version.json', out)
@@ -175,6 +183,7 @@ def main():
                    repo / 'scripts' / 'install-offline.sh',
                    repo / 'offline-bundle' / 'install.sh',
                    repo / 'scripts' / 'restore.sh',
+                   repo / 'scripts' / 'uninstall.sh',
                    repo / 'config.example.json',
                    repo / 'offline-bundle' / 'version.json',
                    Path(__file__).resolve()]

@@ -66,28 +66,36 @@
 
 ## ۱. نصب WhitePrivateDns
 
-### ۱-آ. ساخت و نصب از همین سورس
+### ۱-آ. نصب نسخهٔ آماده روی لینوکس بدون Go
+
+روی Debian یا Ubuntu با کاربر `root` اجرا کنید. محل فعلی ترمینال مهم نیست:
 
 <div dir="ltr">
 
 ```bash
-go build -trimpath -o bin/whiteprivatedns ./cmd/whiteprivatedns
-sudo env WHITEPRIVATEDNS_BINARY="$PWD/bin/whiteprivatedns" bash scripts/install.sh
-```
-
-نصاب در صورت وجود ترمینال تعاملی است. برای کاملاً اسکریپتی‌کردن:
-
-```bash
-# ضروری: دامنهٔ پنل، و یک ایمیل برای مرجع گواهی
-sudo env WHITEPRIVATEDNS_BINARY="$PWD/bin/whiteprivatedns" \
-  WHITEPRIVATEDNS_DOMAIN=dns.example.com \
-  WHITEPRIVATEDNS_EMAIL=you@example.com \
-  bash scripts/install.sh
+apt-get update && apt-get install -y ca-certificates curl openssl
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.1/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>
 
-برای نصب از نسخهٔ منتشرشده، `WHITEPRIVATEDNS_REPOSITORY=owner/repo` را به مخزنی که واقعاً باینری WhitePrivateDns دارد تنظیم کنید و نصاب همان نسخه را اجرا کنید. این مقدار اجباری است تا باینری پروژهٔ قدیمی زیر نام جدید نصب نشود.
+در RHEL، AlmaLinux، Rocky Linux یا CentOS با مخزن بستهٔ فعال، به‌جای خط اول `dnf install -y ca-certificates curl openssl` را اجرا کنید. برای Windows، macOS، بستهٔ آفلاین و ساخت از سورس [راهنمای نصب همهٔ سیستم‌عامل‌ها](INSTALL.fa.md) را ببینید.
+
+نصاب در صورت وجود ترمینال تعاملی است. برای دادن دامنه و ایمیل ACME بدون پرسش:
+
+<div dir="ltr">
+
+```bash
+# ضروری: دامنهٔ پنل، و یک ایمیل برای مرجع گواهی
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 \
+  WHITEPRIVATEDNS_DOMAIN=dns.example.com \
+  WHITEPRIVATEDNS_EMAIL=you@example.com \
+  bash /tmp/whiteprivatedns-install.sh
+```
+
+</div>
+
 
 ### ۱-ب. نصاب چه می‌کند (و از چه چیزی سر باز می‌زند)
 

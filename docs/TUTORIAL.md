@@ -71,24 +71,27 @@
 
 ## 1. Install WhitePrivateDns
 
-### 1a. Build and install from this checkout
+### 1a. Install a release on Linux without Go
+
+Run as `root` on Debian or Ubuntu. These commands work from any directory:
 
 ```bash
-go build -trimpath -o bin/whiteprivatedns ./cmd/whiteprivatedns
-sudo env WHITEPRIVATEDNS_BINARY="$PWD/bin/whiteprivatedns" bash scripts/install.sh
+apt-get update && apt-get install -y ca-certificates curl openssl
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.1/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 bash /tmp/whiteprivatedns-install.sh
 ```
 
-The installer is interactive when a TTY is present. To fully script it from this checkout:
+On RHEL, AlmaLinux, Rocky Linux or CentOS with working package repositories, use `dnf install -y ca-certificates curl openssl` for the first line. See [all platform install paths](INSTALL.md) for Windows, macOS, offline bundles and source builds.
+
+The installer is interactive when a TTY is present. To pass a domain and ACME email without prompts:
 
 ```bash
 # Required: the panel domain, and an email for the certificate authority
-sudo env WHITEPRIVATEDNS_BINARY="$PWD/bin/whiteprivatedns" \
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 \
   WHITEPRIVATEDNS_DOMAIN=dns.example.com \
   WHITEPRIVATEDNS_EMAIL=you@example.com \
-  bash scripts/install.sh
+  bash /tmp/whiteprivatedns-install.sh
 ```
-
-For a published online release, set `WHITEPRIVATEDNS_REPOSITORY=owner/repo` to a repository that publishes WhitePrivateDns binaries and run that release's installer. The repository is required to prevent an old upstream binary from being installed under the new name.
 
 ### 1b. What the installer does (and what it refuses to do)
 

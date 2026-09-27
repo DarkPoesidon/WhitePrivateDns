@@ -78,6 +78,9 @@ jobs:
           python3 tests/scripts/test_restore_production.py
           python3 tests/scripts/test_restore.py
 
+      - name: Online installer smoke test
+        run: python3 tests/scripts/test_install_smoke.py
+
       # The installer writes the resolved drop-in with a shell redirect, so its
       # mode follows the caller's umask. Under umask 077 the drop-in is 0600 and
       # unreadable by systemd-resolved's own unprivileged user, which silently

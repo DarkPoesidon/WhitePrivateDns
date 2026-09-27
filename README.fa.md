@@ -103,20 +103,23 @@ python3 scripts/network_probe.py --dns-ip 203.0.113.10 \
 
 ## 🚀 نصب سریع و راه‌اندازی
 
-### روش ۱: ساخت و نصب از همین سورس
+### روش ۱: نصب سرویس لینوکس از نسخهٔ آماده، بدون Go یا کلون کردن پروژه
 
-دستور زیر را با دسترسی کاربر `root` روی اوبونتو 20.04+، دبیان 11+، یا AlmaLinux/Rocky 8+ اجرا کنید:
+دستورهای زیر را با کاربر `root` روی Debian یا Ubuntu اجرا کنید. از هر پوشه‌ای، حتی `/root`، کار می‌کنند:
 
 <div dir="ltr">
 
 ```bash
-go build -trimpath -o bin/whiteprivatedns ./cmd/whiteprivatedns
-sudo env WHITEPRIVATEDNS_BINARY="$PWD/bin/whiteprivatedns" bash scripts/install.sh
+apt-get update && apt-get install -y ca-certificates curl openssl
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.1/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>
 
-برای نصب از نسخهٔ منتشرشده، متغیر `WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns` را تنظیم و اسکریپت `scripts/install.sh` همین مخزن را اجرا کنید. نصاب به نام صریح مخزن و باینری نسخهٔ منتشرشده نیاز دارد.
+روی AlmaLinux، Rocky Linux، RHEL یا CentOS با مخزن بستهٔ فعال، خط اول را با `dnf install -y ca-certificates curl openssl` جایگزین کنید. نصاب باینری متناسب با معماری `amd64` یا `arm64` را دریافت می‌کند، SHA-256 آن را بررسی می‌کند و سرویس systemd را می‌سازد. پیش از نصب، رکورد A دامنهٔ پنل را به آی‌پی سرور وصل کنید.
+
+برای **Windows و macOS** از دستورهای مخصوص همان سیستم‌عامل در [راهنمای نصب همهٔ سیستم‌عامل‌ها](docs/INSTALL.fa.md) استفاده کنید. نصاب systemd لینوکس روی دسکتاپ اجرا نمی‌شود.
 
 > **ورود به پنل در صفحه‌ای کاملاً مستقل انجام می‌شود:** آدرس `/<admin-path>/login` یک سند ورود خودکفا را ارائه می‌دهد (مسیر قدیمی `/dash/login` به این آدرس هدایت می‌شود). فیلد ورود دومرحله‌ای تنها زمانی نمایش داده می‌شود که رمز عبور اولیه تأیید شده باشد و صرفاً کد اعتبارسنجی ارسال نشده یا اشتباه باشد — بنابراین در صورت اشتباه بودن رمز اصلی، فیلد 2FA هرگز نشان داده نمی‌شود.
 >
@@ -126,39 +129,29 @@ sudo env WHITEPRIVATEDNS_BINARY="$PWD/bin/whiteprivatedns" bash scripts/install.
 >
 > **تنظیم دامنه برای پنل اجباری است:** نصاب از شما دامنه‌ای درخواست می‌کند که رکورد A آن به آی‌پی سرور اشاره کرده باشد؛ سپس خود دیمن گواهی Let's Encrypt را **مستقیماً صادر می‌کند** — کلاینت ACME توکار (RFC 8555) چالش HTTP-01 را روی لیسنر پورت ۸۰ خود سرور پاسخ می‌دهد، بنابراین هیچ نیازی به certbot، acme.sh یا متوقف کردن سرویس نیست. پنل مدیریت فقط از طریق HTTPS روی دامنه در دسترس است و گواهی‌های نامعتبر Self-Signed را رد می‌کند. برای نصب‌های خودکار غیرتعاملی می‌توانید از دستور روبرو استفاده کنید: `WHITEPRIVATEDNS_DOMAIN=dns.example.com WHITEPRIVATEDNS_EMAIL=you@example.com bash install.sh`. در صورت بروز خطا در صدور گواهی، نصاب علت دقیق را اعلام کرده (عدم تطابق رکورد A، مسدود بودن پورت ۸۰ یا محدودیت نرخ) و بدون چاپ بنر موفقیت خارج می‌شود؛ بنر پایانی نصاب تنها پس از راستی‌آزمایی کامل ارتباط امن HTTPS با داشبورد، استایل‌ها و اسکریپت‌ها چاپ می‌گردد. تمدید گواهی‌ها نیز به‌صورت روزانه و کاملاً خودکار در پس‌زمینه انجام می‌شود.
 
-### روش ۲: اجرای باینری آماده
+### روش ۲: ساخت از سورس برای توسعه‌دهندگان
+
+ابتدا Go نسخهٔ 1.26.4 یا جدیدتر و Git را نصب کنید، سپس:
 
 <div dir="ltr">
 
 ```bash
-# روی لینوکس:
-chmod +x ./bin/whiteprivatedns_linux_amd64
-sudo ./bin/whiteprivatedns_linux_amd64 -server -web-port 8080
-
-# روی ویندوز (از طریق PowerShell یا cmd در پوشهٔ مربوطه):
-.\bin\whiteprivatedns.exe -server -web-port 8080
+git clone https://github.com/DarkPoesidon/WhitePrivateDns.git
+cd WhitePrivateDns
+mkdir -p bin
+go build -trimpath -o bin/whiteprivatedns ./cmd/whiteprivatedns
+./bin/whiteprivatedns -version
 ```
 
 </div>
 
-### روش ۳: کامپایل از سورس
+### روش ۳: داکر (Docker / Docker Compose)
 
 <div dir="ltr">
 
 ```bash
-# از داخل پوشهٔ سورس WhitePrivateDns:
-go build -ldflags="-s -w" -o bin/whiteprivatedns ./cmd/whiteprivatedns
-./bin/whiteprivatedns -server
-```
-
-</div>
-
-### روش ۴: داکر (Docker / Docker Compose)
-
-<div dir="ltr">
-
-```bash
-# از داخل پوشهٔ سورس WhitePrivateDns:
+git clone https://github.com/DarkPoesidon/WhitePrivateDns.git
+cd WhitePrivateDns
 mkdir -p data certs
 docker compose up -d
 ```

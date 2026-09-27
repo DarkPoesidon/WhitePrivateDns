@@ -199,16 +199,19 @@ echo -e "  ${GREEN}✓ Architecture detected: ${ARCH} (${BIN_ARCH})${NC}"
 WHITEPRIVATEDNS_REF="${WHITEPRIVATEDNS_REF:-v2.2.0-beta.1}"
 ONLINE_CONFIG_EXAMPLE="$(mktemp /tmp/whiteprivatedns-cfg.XXXXXX)"
 ONLINE_RESTORE="$(mktemp /tmp/whiteprivatedns-restore.XXXXXX)"
+ONLINE_UNINSTALL="$(mktemp /tmp/whiteprivatedns-uninstall.XXXXXX)"
 ONLINE_VERSION_JSON="$(mktemp /tmp/whiteprivatedns-ver.XXXXXX)"
+ONLINE_CHECKSUMS="$(mktemp /tmp/whiteprivatedns-sums.XXXXXX)"
 if [ -n "${WHITEPRIVATEDNS_BINARY:-}" ]; then
     SOURCE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-    if [ ! -s "${WHITEPRIVATEDNS_BINARY}" ] || [ ! -s "${SOURCE_ROOT}/config.example.json" ] || [ ! -s "${SOURCE_ROOT}/scripts/restore.sh" ] || [ ! -s "${SOURCE_ROOT}/offline-bundle/version.json" ]; then
+    if [ ! -s "${WHITEPRIVATEDNS_BINARY}" ] || [ ! -s "${SOURCE_ROOT}/config.example.json" ] || [ ! -s "${SOURCE_ROOT}/scripts/restore.sh" ] || [ ! -s "${SOURCE_ROOT}/scripts/uninstall.sh" ] || [ ! -s "${SOURCE_ROOT}/offline-bundle/version.json" ]; then
         echo -e "${RED}[Error] The local binary or required files are missing. Build from this checkout first.${NC}"
         exit 1
     fi
     SRC_BIN="${WHITEPRIVATEDNS_BINARY}"
     cp "${SOURCE_ROOT}/config.example.json" "${ONLINE_CONFIG_EXAMPLE}"
     cp "${SOURCE_ROOT}/scripts/restore.sh" "${ONLINE_RESTORE}"
+    cp "${SOURCE_ROOT}/scripts/uninstall.sh" "${ONLINE_UNINSTALL}"
     cp "${SOURCE_ROOT}/offline-bundle/version.json" "${ONLINE_VERSION_JSON}"
 else
     # A renamed checkout must never silently install artifacts from the old
@@ -222,9 +225,20 @@ else
     RELEASE_BASE="https://github.com/${WHITEPRIVATEDNS_REPOSITORY}/releases/download/${WHITEPRIVATEDNS_REF}"
     DL_BIN="$(mktemp /tmp/whiteprivatedns-bin.XXXXXX)"
     if curl -fL --retry 3 --connect-timeout 10 "${RELEASE_BASE}/whiteprivatedns-linux-${BIN_ARCH}" -o "${DL_BIN}" 2>/dev/null && [ -s "${DL_BIN}" ]; then
+        if ! curl -fsL --retry 3 "${RELEASE_BASE}/checksums.txt" -o "${ONLINE_CHECKSUMS}" || [ ! -s "${ONLINE_CHECKSUMS}" ]; then
+            echo -e "${RED}[Error] Could not download release checksums.${NC}"
+            exit 1
+        fi
+        EXPECTED_SHA="$(awk -v name="whiteprivatedns-linux-${BIN_ARCH}" '$2 == name {print $1}' "${ONLINE_CHECKSUMS}")"
+        ACTUAL_SHA="$(sha256sum "${DL_BIN}" | awk '{print $1}')"
+        if [[ ! "${EXPECTED_SHA}" =~ ^[a-fA-F0-9]{64}$ ]] || [ "${EXPECTED_SHA,,}" != "${ACTUAL_SHA,,}" ]; then
+            echo -e "${RED}[Error] Release binary checksum does not match checksums.txt.${NC}"
+            exit 1
+        fi
+        rm -f "${ONLINE_CHECKSUMS}"
         chmod +x "${DL_BIN}"
         SRC_BIN="${DL_BIN}"
-        echo -e "  ${GREEN}✓ Downloaded release binary (${BIN_ARCH})${NC}"
+        echo -e "  ${GREEN}✓ Downloaded and verified release binary (${BIN_ARCH})${NC}"
     else
         echo -e "${RED}[Error] Could not download the WhitePrivateDns binary from GitHub Releases.${NC}"
         exit 1
@@ -235,6 +249,10 @@ else
     fi
     if ! curl -fsL --retry 3 "${RAW_BASE}/scripts/restore.sh" -o "${ONLINE_RESTORE}" || [ ! -s "${ONLINE_RESTORE}" ]; then
         echo -e "${RED}[Error] Could not download restore.sh from ${WHITEPRIVATEDNS_REF}.${NC}"
+        exit 1
+    fi
+    if ! curl -fsL --retry 3 "${RAW_BASE}/scripts/uninstall.sh" -o "${ONLINE_UNINSTALL}" || [ ! -s "${ONLINE_UNINSTALL}" ]; then
+        echo -e "${RED}[Error] Could not download uninstall.sh from ${WHITEPRIVATEDNS_REF}.${NC}"
         exit 1
     fi
     curl -fsL --retry 3 "${RAW_BASE}/offline-bundle/version.json" -o "${ONLINE_VERSION_JSON}" 2>/dev/null || true
@@ -329,13 +347,8 @@ install -d -o root -g root -m 0755 "${INSTALL_DIR}/scripts"
 # (embedded ACME client) at first start and renews daily — there is no
 # stop-the-service issuance step for an operator to run by hand either.
 
-if [ -f "${SCRIPT_DIR}/scripts/uninstall.sh" ]; then
-    cp -f "${SCRIPT_DIR}/scripts/uninstall.sh" "${INSTALL_DIR}/scripts/uninstall.sh"
-    chmod +x "${INSTALL_DIR}/scripts/uninstall.sh"
-elif [ -f "./scripts/uninstall.sh" ]; then
-    cp -f ./scripts/uninstall.sh "${INSTALL_DIR}/scripts/uninstall.sh"
-    chmod +x "${INSTALL_DIR}/scripts/uninstall.sh"
-fi
+install -o root -g root -m 0755 "${ONLINE_UNINSTALL}" "${INSTALL_DIR}/scripts/uninstall.sh"
+rm -f "${ONLINE_UNINSTALL}"
 
 install -o root -g root -m 0755 "${ONLINE_RESTORE}" "${INSTALL_DIR}/scripts/restore.sh"
 rm -f "${ONLINE_RESTORE}"

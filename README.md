@@ -117,14 +117,19 @@ The CDN or Tunnel route must already work; saving a URL does not create it.
 
 ## 🚀 Quick Installation & Deployment
 
-### Option 1: Build and install from this checkout
-Run on Ubuntu 20.04+, Debian 11+, or AlmaLinux/Rocky 8+:
+### Option 1: Install the Linux service from a release (no Go or checkout)
+
+Run as root on Debian or Ubuntu. The commands work from any directory, including `/root`:
+
 ```bash
-go build -trimpath -o bin/whiteprivatedns ./cmd/whiteprivatedns
-sudo env WHITEPRIVATEDNS_BINARY="$PWD/bin/whiteprivatedns" bash scripts/install.sh
+apt-get update && apt-get install -y ca-certificates curl openssl
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.1/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.1 bash /tmp/whiteprivatedns-install.sh
 ```
 
-For an online release install, set `WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns` and run `scripts/install.sh` from this repository. The installer requires an explicit repository and a published release binary.
+On AlmaLinux, Rocky Linux, RHEL or CentOS with working package repositories, replace the first line with `dnf install -y ca-certificates curl openssl`. The installer detects Linux amd64 or arm64, downloads the matching release binary, verifies its SHA-256 checksum, and configures the systemd service. Have a panel domain pointed at this server before running it.
+
+For **Windows and macOS**, use the platform-specific portable commands in [Installation on every supported platform](docs/INSTALL.md). The Linux systemd installer is not a desktop installer.
 
 > [!IMPORTANT]
 > **The installer never upgrades in place.** An existing install is archived to `/root/whiteprivatedns-preinstall-<date>.tar.gz` (its sha256 printed — the only copy of the old data), then **replaced**: fresh config, fresh credentials, fresh certificates. An interactive run types `FRESH` to confirm the wipe; a piped `curl | bash` run refuses unless `WHITEPRIVATEDNS_FRESH=1` is set. When migrating a legacy v1 installation, run `bash migrate-from-v1.sh` from the offline bundle first.
@@ -133,26 +138,22 @@ For an online release install, set `WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/Whit
 >
 > **Subscribers self-serve IP changes** through a secret: `/sub/<token>` is a read-only portal, and moving the binding is `POST /ip/<token>` with the account's registration secret. A leaked portal link alone cannot steal the binding.
 
-### Option 2: Pre-Compiled Standalone Binary
-```bash
-# On Linux:
-chmod +x ./bin/whiteprivatedns_linux_amd64
-sudo ./bin/whiteprivatedns_linux_amd64 -server -web-port 8080
+### Option 2: Build from source (developers)
 
-# On Windows (PowerShell or cmd, from the folder you extracted):
-.\bin\whiteprivatedns.exe -server -web-port 8080
-```
+Install Go 1.26.4 or newer and Git first, then clone the repository:
 
-### Option 3: Compile from Source
 ```bash
-# From the WhitePrivateDns checkout:
+git clone https://github.com/DarkPoesidon/WhitePrivateDns.git
+cd WhitePrivateDns
+mkdir -p bin
 go build -ldflags="-s -w" -o bin/whiteprivatedns ./cmd/whiteprivatedns
-./bin/whiteprivatedns -server
+./bin/whiteprivatedns -version
 ```
 
-### Option 4: Docker / Docker Compose
+### Option 3: Docker / Docker Compose
 ```bash
-# From the WhitePrivateDns checkout:
+git clone https://github.com/DarkPoesidon/WhitePrivateDns.git
+cd WhitePrivateDns
 mkdir -p data certs
 docker compose up -d
 ```

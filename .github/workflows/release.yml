@@ -42,6 +42,11 @@ jobs:
           cmp scripts/uninstall.sh offline-bundle/scripts/uninstall.sh
           python3 tests/scripts/test_restore.py
 
+      - name: Online installer smoke test
+        run: |
+          docker pull golang:1.26-bookworm
+          python3 tests/scripts/test_install_smoke.py
+
       - name: Vet
         run: go vet ./...
 

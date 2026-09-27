@@ -34,8 +34,10 @@ def downloads():
     release = f'https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/{REF}'
     return {
         f'{release}/whiteprivatedns-linux-amd64': 'whiteprivatedns',
+        f'{release}/checksums.txt': 'checksums.txt',
         f'{raw}/config.example.json': 'config.example.json',
         f'{raw}/scripts/restore.sh': 'restore.sh',
+        f'{raw}/scripts/uninstall.sh': 'uninstall.sh',
         f'{raw}/offline-bundle/version.json': 'version.json',
     }
 
@@ -137,11 +139,13 @@ def inside():
         assert all(f'/{REF}/' in url for url in fetched)
         for name, installed in [('whiteprivatedns', target / 'whiteprivatedns'),
                                 ('restore.sh', target / 'scripts/restore.sh'),
+                                ('uninstall.sh', target / 'scripts/uninstall.sh'),
                                 ('version.json', target / 'version.json')]:
             assert installed.read_bytes() == (FIXTURE / name).read_bytes(), f'Not exact: {name}'
         assert (target / 'whiteprivatedns').read_bytes()[:4] == b'\x7fELF', 'Not a real Linux binary'
         assert os.access(target / 'whiteprivatedns', os.X_OK)
         assert (target / 'scripts/restore.sh').stat().st_mode & 0o777 == 0o755
+        assert (target / 'scripts/uninstall.sh').stat().st_mode & 0o777 == 0o755
         assert Path('/usr/local/bin/wpdns').resolve() == target / 'whiteprivatedns'
         # Execute ONLY the real pre-DB version command, never daemon/ACME startup.
         version = subprocess.check_output([str(target / 'whiteprivatedns'), '-version'],
@@ -155,7 +159,7 @@ def inside():
         assert not (target / 'data.db').exists(), 'Version command unexpectedly initialized DB'
         assert sum('endpoint verified on port' in line for line in result.stdout.splitlines()
                    if not line.startswith('+')) == 3, 'Did not exercise all health probes'
-        print('PASS: actual scripts/install.sh exit 0; all four artifact URLs share WHITEPRIVATEDNS_REF')
+        print('PASS: actual scripts/install.sh exit 0; all six artifact URLs share WHITEPRIVATEDNS_REF')
         for url in fetched:
             print('  ' + url)
         print('PASS: installed binary is byte-identical to the local Go build, executable ELF')
@@ -187,6 +191,9 @@ def main():
         build = ['go', 'build', '-trimpath', '-o', str(binary), './cmd/whiteprivatedns']
         print('BUILD (offline, linux/amd64): ' + ' '.join(build), flush=True)
         subprocess.run(build, cwd=repo, env=env, check=True, timeout=180)
+        (Path(temp) / 'checksums.txt').write_text(
+            f'{hashlib.sha256(binary.read_bytes()).hexdigest()}  whiteprivatedns-linux-amd64\n'
+        )
         # Do not tar the repo: it may contain private configs, databases, and keys.
         # The installer runs its exact working-tree bytes. .gitattributes requires
         # eol=lf for *.sh; if the tree still has CRLF the test fails here and says
@@ -199,8 +206,10 @@ def main():
         payload = io.BytesIO()
         with tarfile.open(fileobj=payload, mode='w') as archive:
             for source, name in [(binary, 'whiteprivatedns'),
+                                 (Path(temp) / 'checksums.txt', 'checksums.txt'),
                                  (repo / 'scripts/install.sh', 'install.sh'),
                                  (repo / 'scripts/restore.sh', 'restore.sh'),
+                                 (repo / 'scripts/uninstall.sh', 'uninstall.sh'),
                                  (repo / 'config.example.json', 'config.example.json'),
                                  (repo / 'offline-bundle/version.json', 'version.json'),
                                  (Path(__file__).resolve(), 'test_install_smoke.py')]:
