@@ -74,8 +74,8 @@
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.2/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.3/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.3 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>
@@ -88,7 +88,7 @@ env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=
 
 ```bash
 # ضروری: دامنهٔ پنل، و یک ایمیل برای مرجع گواهی
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 \
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.3 \
   WHITEPRIVATEDNS_DOMAIN=dns.example.com \
   WHITEPRIVATEDNS_EMAIL=you@example.com \
   bash /tmp/whiteprivatedns-install.sh
@@ -102,7 +102,7 @@ env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=
 - باینری نسخهٔ پین‌شده را دانلود، تأیید و در `/opt/whiteprivatedns/` نصب می‌کند و سرویس systemd به نام `whiteprivatedns` را ثبت می‌کند.
 - **یک رمز عبور تصادفی** و **یک مسیر مدیریت ۱۶ نویسه‌ای تصادفی** تولید کرده و هر دو را **دقیقاً یک بار** چاپ می‌کند. همین حالا آن‌ها را در یک مدیریت رمزعبور کپی کنید — رمز عبور هرگز ذخیره نمی‌شود و قابل بازیابی نیست، فقط قابل تغییر.
 - گواهی Let's Encrypt برای دامنهٔ پنل را **خودش**، روی لیسنر پورت ۸۰ خودش صادر می‌کند. نه certbot، نه acme.sh، نه توقف سرویس. اگر صدور ناموفق باشد، دلیل را چاپ کرده و خارج می‌شود — هرگز روی یک نصب خراب پیام موفقیت نمی‌دهد.
-- **هیچ‌وقت درجا ارتقا نمی‌دهد.** اگر نصب قبلی پیدا کند، آن را در `/root/whiteprivatedns-preinstall-<date>.tar.gz` آرشیو می‌کند (با چاپ sha256 آن — تنها کپی از داده‌های قدیمی) و بعد کامل جایگزین می‌کند: کانفیگ تازه، اعتبارنامهٔ تازه، گواهی تازه. در حالت تعاملی باید کلمهٔ `FRESH` تایپ شود تا پاک‌سازی تأیید گردد؛ و در حالت `curl | bash` به‌جز با `WHITEPRIVATEDNS_FRESH=1` اصلاً قبول نمی‌کند.
+- **هیچ‌وقت درجا ارتقا نمی‌دهد.** اگر نصب قبلی پیدا کند، ابتدا تأیید `FRESH` را می‌گیرد؛ سپس سرویس را متوقف می‌کند، آرشیو یکتایی در `/root/whiteprivatedns-preinstall-*.tar.gz` می‌سازد و صحت آن را بررسی می‌کند. فقط بعد از این مراحل نصب قبلی را با کانفیگ، اعتبارنامه و گواهی تازه جایگزین می‌کند. لغو کردن سرویس و فایل‌ها را دست‌نخورده می‌گذارد. در حالت `curl | bash` بدون `WHITEPRIVATEDNS_FRESH=1` نصب مجدد انجام نمی‌شود.
 - `systemd-resolved` را کنار می‌گذارد (چون روی 127.0.0.53:53 می‌نشیند و پورت ۵۳ را می‌گیرد) با یک فایل drop-in در `/etc/systemd/resolved.conf.d/whiteprivatedns.conf` و دسترسی‌های ایمن (دایرکتوری `755`، فایل `644`).
 
 > **از WhitePrivateDns 1.x می‌آیید؟** اول `bash migrate-from-v1.sh` (از باندل آفلاین) را اجرا کنید، بعد نصب کنید.
@@ -418,7 +418,7 @@ print(client["registration_secret"]) # این را از یک کانال دوم
 wpdns status      # گزارش زندهٔ سرویس: پورت‌ها، لیسنرها، تست دی‌ان‌اس، گواهی‌ها.
                    # نیازی به دیتابیس ندارد — کنار یک دیمن شلوغ امن است
 wpdns flush       # درخواست از دیمن در حال اجرا برای پاک‌سازی کش دی‌ان‌اس
-wpdns version     # چیزی که باینری چاپ می‌کند (مثلاً WhitePrivateDns v2.2.0-beta.2)
+wpdns version     # چیزی که باینری چاپ می‌کند (مثلاً WhitePrivateDns v2.2.0-beta.3)
 wpdns uninstall   # حذف تعاملی
 ```
 

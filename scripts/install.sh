@@ -184,7 +184,7 @@ echo -e "  ${GREEN}✓ Architecture detected: ${ARCH} (${BIN_ARCH})${NC}"
 # beta installer pulling from it silently fetches the older stable binary and
 # the install fails deep in the v2.2.0 flow. Both URLs derive from the single
 # ref so the binary and the auxiliary files can never disagree.
-WHITEPRIVATEDNS_REF="${WHITEPRIVATEDNS_REF:-v2.2.0-beta.2}"
+WHITEPRIVATEDNS_REF="${WHITEPRIVATEDNS_REF:-v2.2.0-beta.3}"
 ONLINE_CONFIG_EXAMPLE="$(mktemp /tmp/whiteprivatedns-cfg.XXXXXX)"
 ONLINE_RESTORE="$(mktemp /tmp/whiteprivatedns-restore.XXXXXX)"
 ONLINE_UNINSTALL="$(mktemp /tmp/whiteprivatedns-uninstall.XXXXXX)"
@@ -246,71 +246,66 @@ else
     curl -fsL --retry 3 "${RAW_BASE}/offline-bundle/version.json" -o "${ONLINE_VERSION_JSON}" 2>/dev/null || true
 fi
 
-install -d -o root -g root -m 0755 "${INSTALL_DIR}"
-install -d -o root -g root -m 0700 "${INSTALL_DIR}/certs"
-
 # ==============================================================================
-# SAFE INSTALL: every run of this installer produces a completely fresh
-# install. An existing installation is archived to /root (that archive is the
-# only copy of the old data — the old database is not v2-compatible), then
-# REPLACED, and every step below runs from the beginning: fresh config, fresh
-# credentials, fresh admin path, fresh certificates. No upgrade path, no
-# half-migrated state — that is what "safe" means here: the installer can
-# never leave an old record behind to drift.
+# REINSTALL: an existing installation is replaced with a fresh config,
+# credentials, admin path, and certificates only after explicit confirmation.
+# Its complete data directory is archived and checked before deletion.
+# This installer does not perform an in-place upgrade.
 # ==============================================================================
-IS_UPGRADE=false
 PREV_VERSION=""
 
 if [ -f "${INSTALL_DIR}/whiteprivatedns" ] || [ -f "${INSTALL_DIR}/config.json" ] || [ -f "${INSTALL_DIR}/data.db" ] || [ -f "${INSTALL_DIR}/master.key" ] || systemctl is-active --quiet whiteprivatedns 2>/dev/null || systemctl is-enabled --quiet whiteprivatedns 2>/dev/null; then
-    IS_UPGRADE=true
     if [ -x "${INSTALL_DIR}/whiteprivatedns" ]; then
         PREV_VERSION="$("${INSTALL_DIR}/whiteprivatedns" -version 2>/dev/null | head -n1 || true)"
     fi
     [ -z "${PREV_VERSION}" ] && PREV_VERSION="unknown (pre-2.2.0)"
+    TARGET_VERSION="$("${SRC_BIN}" -version 2>/dev/null | head -n1 || true)"
+    [ -z "${TARGET_VERSION}" ] && TARGET_VERSION="${WHITEPRIVATEDNS_REF}"
 
     echo -e "${YELLOW}${BOLD}\u250c${NC}"
-    echo -e "${YELLOW}│ SAFE INSTALL — an existing WhitePrivateDns installation was detected${NC}"
+    echo -e "${YELLOW}│ REINSTALL — an existing WhitePrivateDns installation was detected${NC}"
     echo -e "${YELLOW}│ • Installed Version : ${CYAN}${PREV_VERSION}${NC}"
-    echo -e "${YELLOW}│ • Target Version    : ${GREEN}v2.2.0 (this package)${NC}"
+    echo -e "${YELLOW}│ • Target Version    : ${GREEN}${TARGET_VERSION}${NC}"
     echo -e "${YELLOW}│ • Mode              : ${GREEN}Fresh install — old data ARCHIVED, then REPLACED${NC}"
     echo -e "${YELLOW}\u2514${NC}"
     echo ""
 
-    # Archive the WHOLE install tree to /root — outside /opt/whiteprivatedns, so it
-    # survives the wipe below. data.db + master.key + config.json + certs are
-    # one unit; the archive keeps them together. 600 on the archive: it holds
-    # master.key and plaintext credentials.
-    if systemctl is-active --quiet whiteprivatedns 2>/dev/null; then
-        echo -e "  ${CYAN}Gracefully stopping the running service...${NC}"
-        systemctl stop whiteprivatedns || true
-    fi
-
-    ARCHIVE="/root/whiteprivatedns-preinstall-$(date +%Y%m%d_%H%M%S).tar.gz"
-    tar czf "${ARCHIVE}" -C / opt/whiteprivatedns 2>/dev/null || true
-    chmod 600 "${ARCHIVE}" 2>/dev/null || true
-    if [ -s "${ARCHIVE}" ]; then
-        echo -e "  ${GREEN}\u2713 Previous install archived to: ${ARCHIVE}${NC}"
-        echo -e "  ${GREEN}  archive sha256: $(sha256sum "${ARCHIVE}" | awk '{print $1}')${NC}"
-        echo -e "  ${YELLOW}  This is the ONLY copy of the old data once this installer finishes.${NC}"
-    else
-        echo -e "  ${RED}✗ ARCHIVE FAILED — ${ARCHIVE} is empty or missing.${NC}"
-        echo -e "  ${RED}  The old install was NOT touched and will NOT be wiped.${NC}"
-        echo -e "  ${RED}  Free space in /root (or investigate the tar error) and re-run.${NC}"
-        exit 1
-    fi
-
-    # The wipe is destructive and must never happen silently: an interactive
-    # run types FRESH, an unattended run (piped stdin) sets WHITEPRIVATEDNS_FRESH=1.
+    # Confirm before stopping the live service or touching its data.
     if [ "${WHITEPRIVATEDNS_FRESH:-0}" = "1" ]; then
         echo -e "  ${CYAN}WHITEPRIVATEDNS_FRESH=1 — wipe confirmed by environment.${NC}"
     elif [ -t 0 ]; then
         printf "%b" "${YELLOW}Type ${RED}FRESH${YELLOW} to wipe the existing install and reinstall: ${NC}"
         read -r CONFIRM
-        [ "${CONFIRM}" = "FRESH" ] || { echo -e "  ${YELLOW}Cancelled — the existing install is untouched (archive kept).${NC}"; exit 0; }
+        [ "${CONFIRM}" = "FRESH" ] || { echo -e "  ${YELLOW}Cancelled — the existing install and service are untouched.${NC}"; exit 0; }
     else
-        echo -e "  ${RED}\u2717 Non-interactive run detected and WHITEPRIVATEDNS_FRESH=1 is not set.${NC}"
-        echo -e "  ${RED}  Refusing to wipe an existing install silently. Re-run with:${NC}"
-        echo -e "  ${RED}    WHITEPRIVATEDNS_FRESH=1 bash install.sh${NC}"
+        echo -e "  ${RED}✗ Non-interactive run detected and WHITEPRIVATEDNS_FRESH=1 is not set.${NC}"
+        echo -e "  ${RED}  Refusing to wipe an existing install silently.${NC}"
+        exit 1
+    fi
+
+    WAS_ACTIVE=0
+    if systemctl is-active --quiet whiteprivatedns 2>/dev/null; then
+        echo -e "  ${CYAN}Gracefully stopping the running service...${NC}"
+        systemctl stop whiteprivatedns || { echo -e "  ${RED}Could not stop the existing service; no files replaced.${NC}"; exit 1; }
+        WAS_ACTIVE=1
+    fi
+
+    # A unique archive holds the complete installation, including the database,
+    # master key, config, and certificates. Verify it before removing anything.
+    if ! ARCHIVE="$(mktemp --suffix=.tar.gz "/root/whiteprivatedns-preinstall-$(date +%Y%m%d_%H%M%S).XXXXXX")"; then
+        if [ "${WAS_ACTIVE}" = "1" ]; then systemctl start whiteprivatedns || true; fi
+        echo -e "  ${RED}✗ Could not create a backup path; no files replaced.${NC}"
+        exit 1
+    fi
+    chmod 600 "${ARCHIVE}"
+    if tar czf "${ARCHIVE}" -C / opt/whiteprivatedns && [ -s "${ARCHIVE}" ] && tar tzf "${ARCHIVE}" >/dev/null; then
+        echo -e "  ${GREEN}✓ Previous install archived to: ${ARCHIVE}${NC}"
+        echo -e "  ${GREEN}  archive sha256: $(sha256sum "${ARCHIVE}" | awk '{print $1}')${NC}"
+        echo -e "  ${YELLOW}  This is the ONLY copy of the old data once this installer finishes.${NC}"
+    else
+        rm -f "${ARCHIVE}"
+        if [ "${WAS_ACTIVE}" = "1" ]; then systemctl start whiteprivatedns || true; fi
+        echo -e "  ${RED}✗ ARCHIVE FAILED — existing files were not replaced.${NC}"
         exit 1
     fi
 

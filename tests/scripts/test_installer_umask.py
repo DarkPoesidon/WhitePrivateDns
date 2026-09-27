@@ -25,7 +25,7 @@ import tempfile
 import uuid
 
 FIXTURE = Path('/umask')
-REF = 'v2.2.0-beta.2-umask-pinned'
+REF = 'v2.2.0-beta.3-umask-pinned'
 DOMAIN = 'installer-umask.invalid'
 ADMIN_PATH = '0123456789abcdef'
 

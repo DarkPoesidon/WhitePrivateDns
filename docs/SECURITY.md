@@ -26,7 +26,7 @@ and how to report a problem.
 
 | Version | Status | Security fixes |
 | :--- | :--- | :--- |
-| `v2.2.0-beta.2` (WhitePrivateDns) | Current beta | ✅ Yes |
+| `v2.2.0-beta.3` (WhitePrivateDns) | Current beta | ✅ Yes |
 | `v2.0.x`–`v2.1.x` beta | Superseded | ❌ Upgrade first |
 | `v1.x` | End of life | ❌ No |
 

@@ -77,8 +77,8 @@ Run as `root` on Debian or Ubuntu. These commands work from any directory:
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.2/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.3/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.3 bash /tmp/whiteprivatedns-install.sh
 ```
 
 On RHEL, AlmaLinux, Rocky Linux or CentOS with working package repositories, use `dnf install -y ca-certificates curl openssl` for the first line. See [all platform install paths](INSTALL.md) for Windows, macOS, offline bundles and source builds.
@@ -87,7 +87,7 @@ The installer is interactive when a TTY is present. To pass a domain and ACME em
 
 ```bash
 # Required: the panel domain, and an email for the certificate authority
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 \
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.3 \
   WHITEPRIVATEDNS_DOMAIN=dns.example.com \
   WHITEPRIVATEDNS_EMAIL=you@example.com \
   bash /tmp/whiteprivatedns-install.sh
@@ -104,10 +104,11 @@ env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=
   own port-80 listener. No certbot, no acme.sh, no service stop. If issuance
   fails, the installer prints the reason and exits — it never prints success on
   a broken install.
-- **Never upgrades in place.** If it finds an existing install, it archives it
-  to `/root/whiteprivatedns-preinstall-<date>.tar.gz` (with its sha256 printed) and then
-  replaces it wholesale: fresh config, fresh credentials, fresh certificates.
-  An interactive run must type `FRESH` to confirm the wipe; a piped
+- **Never upgrades in place.** If it finds an existing install, it first asks
+  for `FRESH`. Only after confirmation does it stop the service, create and
+  verify an archive under `/root/whiteprivatedns-preinstall-*.tar.gz`, and
+  replace the install with fresh config, credentials and certificates. Cancelling
+  leaves the existing service and files untouched. A piped
   `curl | bash` run refuses outright unless `WHITEPRIVATEDNS_FRESH=1` is set.
 - Sets `systemd-resolved` aside (it binds 127.0.0.53:53 and would block port 53)
   via a drop-in at `/etc/systemd/resolved.conf.d/whiteprivatedns.conf`, with safe
@@ -501,7 +502,7 @@ print(client["registration_secret"]) # send this via a second channel
 wpdns status      # live service report: ports, listeners, DNS test, certs.
                    # needs no database — safe beside a busy daemon
 wpdns flush       # ask the running daemon to flush its DNS cache
-wpdns version     # what the binary reports (e.g. WhitePrivateDns v2.2.0-beta.2)
+wpdns version     # what the binary reports (e.g. WhitePrivateDns v2.2.0-beta.3)
 wpdns uninstall   # interactive uninstaller
 ```
 

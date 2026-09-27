@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v2.2.0-beta.3] — Safer reinstall confirmation
+
+- The installer asks for `FRESH` before stopping the existing service or creating an archive. Cancelling leaves the installation running.
+- A confirmed reinstall uses a unique archive path and checks both tar completion and archive readability before removing the old files. Archive failure restarts a previously running service.
+- The reinstall prompt shows the actual target binary version.
+
 ## [v2.2.0-beta.2] — Branding and installation correction
 
 - Replaced the inherited ASCII banner in the online installer, both offline installers, the daemon, and the terminal manager with the WhitePrivateDns name.

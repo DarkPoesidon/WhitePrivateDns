@@ -24,7 +24,7 @@ import uuid
 
 
 FIXTURE = Path('/smoke')
-REF = 'v2.2.0-beta.2-smoke-pinned'
+REF = 'v2.2.0-beta.3-smoke-pinned'
 DOMAIN = 'installer-smoke.invalid'
 ADMIN_PATH = '0123456789abcdef'
 
@@ -77,6 +77,9 @@ def stub(command, args):
             return 3
         if args == ['restart', 'whiteprivatedns']:
             (FIXTURE / 'started').touch()  # Never starts the daemon.
+            return 0
+        if args == ['stop', 'whiteprivatedns']:
+            (FIXTURE / 'started').unlink(missing_ok=True)
             return 0
         if args in (['daemon-reload'], ['enable', 'whiteprivatedns']):
             return 0
@@ -160,6 +163,37 @@ def inside():
                                                 ensure_ascii=False).encode()).hexdigest()[:8]
         assert display in version and f'hash:{fingerprint}' in version, (metadata, version)
         assert not (target / 'data.db').exists(), 'Version command unexpectedly initialized DB'
+        calls_before_cancel = len((FIXTURE / 'calls.jsonl').read_text().splitlines())
+        archives_before_cancel = set(Path('/root').glob('whiteprivatedns-preinstall-*.tar.gz'))
+        cancelled = subprocess.run(['bash', '/smoke/install.sh'], cwd=FIXTURE,
+                                   env=env, stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   text=True, timeout=30)
+        assert cancelled.returncode != 0, 'Unconfirmed reinstall unexpectedly proceeded'
+        assert version in cancelled.stdout, 'Reinstall prompt did not display the actual target version'
+        assert (FIXTURE / 'started').exists(), 'Unconfirmed reinstall stopped the service'
+        assert set(Path('/root').glob('whiteprivatedns-preinstall-*.tar.gz')) == archives_before_cancel, \
+            'Unconfirmed reinstall created an archive'
+        assert (target / 'whiteprivatedns').read_bytes() == (FIXTURE / 'whiteprivatedns').read_bytes(), \
+            'Unconfirmed reinstall replaced the binary'
+        cancel_calls = [json.loads(line) for line in
+                        (FIXTURE / 'calls.jsonl').read_text().splitlines()[calls_before_cancel:]]
+        assert not any(command == 'systemctl' and args == ['stop', 'whiteprivatedns']
+                       for command, args in cancel_calls), 'Unconfirmed reinstall stopped the service'
+        (target / 'operator-note.txt').write_text('preserve this in the archive')
+        confirmed = subprocess.run(['bash', '/smoke/install.sh'], cwd=FIXTURE,
+                                   env=dict(env, WHITEPRIVATEDNS_FRESH='1'),
+                                   stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   text=True, timeout=45)
+        assert confirmed.returncode == 0, 'Confirmed reinstall failed: ' + '\n'.join(confirmed.stdout.splitlines()[-12:])
+        new_archives = set(Path('/root').glob('whiteprivatedns-preinstall-*.tar.gz')) - archives_before_cancel
+        assert len(new_archives) == 1, f'Expected one unique verified archive: {new_archives}'
+        with tarfile.open(next(iter(new_archives)), 'r:gz') as archive:
+            note = archive.extractfile('opt/whiteprivatedns/operator-note.txt')
+            assert note is not None and note.read() == b'preserve this in the archive'
+        assert not (target / 'operator-note.txt').exists(), 'Confirmed reinstall did not replace install tree'
+        assert (FIXTURE / 'started').exists(), 'Confirmed reinstall did not restart the service'
         assert sum('endpoint verified on port' in line for line in result.stdout.splitlines()
                    if not line.startswith('+')) == 3, 'Did not exercise all health probes'
         print('PASS: actual scripts/install.sh exit 0; all six artifact URLs share WHITEPRIVATEDNS_REF')

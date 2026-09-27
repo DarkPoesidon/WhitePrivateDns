@@ -123,8 +123,8 @@ Run as root on Debian or Ubuntu. The commands work from any directory, including
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.2/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.2 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.3/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.3 bash /tmp/whiteprivatedns-install.sh
 ```
 
 On AlmaLinux, Rocky Linux, RHEL or CentOS with working package repositories, replace the first line with `dnf install -y ca-certificates curl openssl`. The installer detects Linux amd64 or arm64, downloads the matching release binary, verifies its SHA-256 checksum, and configures the systemd service. Have a panel domain pointed at this server before running it.
@@ -132,7 +132,7 @@ On AlmaLinux, Rocky Linux, RHEL or CentOS with working package repositories, rep
 For **Windows and macOS**, use the platform-specific portable commands in [Installation on every supported platform](docs/INSTALL.md). The Linux systemd installer is not a desktop installer.
 
 > [!IMPORTANT]
-> **The installer never upgrades in place.** An existing install is archived to `/root/whiteprivatedns-preinstall-<date>.tar.gz` (its sha256 printed — the only copy of the old data), then **replaced**: fresh config, fresh credentials, fresh certificates. An interactive run types `FRESH` to confirm the wipe; a piped `curl | bash` run refuses unless `WHITEPRIVATEDNS_FRESH=1` is set. When migrating a legacy v1 installation, run `bash migrate-from-v1.sh` from the offline bundle first.
+> **The installer never upgrades in place.** On an existing install it first asks for `FRESH`, then stops the service, creates and verifies a unique archive under `/root/whiteprivatedns-preinstall-*.tar.gz`, and **replaces** the install with fresh config, credentials and certificates. Cancelling leaves the service and files untouched. A piped `curl | bash` run refuses unless `WHITEPRIVATEDNS_FRESH=1` is set. When migrating a legacy v1 installation, run `bash migrate-from-v1.sh` from the offline bundle first.
 >
 > **A panel domain is mandatory** — its A record must point at the server. The daemon issues the Let's Encrypt certificate **itself** over its own port-80 listener: no certbot, no acme.sh, nothing to stop the service for. Non-interactive: `WHITEPRIVATEDNS_DOMAIN=dns.example.com WHITEPRIVATEDNS_EMAIL=you@example.com bash install.sh`. If issuance fails the installer states the cause and exits rather than printing success. Renewal is daily and automatic.
 >
