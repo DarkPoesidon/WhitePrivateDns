@@ -1,5 +1,7 @@
 # 🎓 WhitePrivateDns — آموزش کامل و گام‌به‌گام
 
+برای معنی تک‌تک بخش‌های پنل و مقدارهایی که باید در «Network paths» وارد شوند، [راهنمای پنل و فیلدها](DASHBOARD_GUIDE.fa.md) را بخوانید.
+
 <p align="center">
   <a href="../README.md">README</a> •
   <a href="API.md">REST API</a> •
@@ -55,7 +57,7 @@
    | **۴۴۳** | TCP | پراکسی SNI برای HTTPS (ترافیک واقعی بازی) |
    | **۸۵۳** | TCP | DNS-over-TLS («Private DNS» اندروید، iOS) |
    | **۸۴۴۳** | TCP | DNS-over-HTTPS |
-   | **۸۰۸۰** | TCP | داشبورد مدیریت |
+   | **پورت اعلام‌شده در خروجی نصب** | TCP | داشبورد مدیریت؛ نصاب برای نصب تازه پورت آزاد انتخاب می‌کند، پس ۸۰۸۰ را فرض نکنید. |
 
    اگر ارائه‌دهندهٔ شما فایروال ابری جداگانه دارد (Hetzner / OVH / Vultr)، آن پورت‌ها را **آنجاهم** باز کنید — فایروال خود سرور کافی نیست.
 ۴. **دسترسی root.** نصاب در `/etc/systemd/system/`، `/etc/systemd/resolved.conf.d/` و `/opt/whiteprivatedns` می‌نویسد.

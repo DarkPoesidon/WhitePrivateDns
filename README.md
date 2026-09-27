@@ -43,6 +43,7 @@
 | **[docs/PRESET_CATALOG.md](docs/PRESET_CATALOG.md)** | The full 171+ preset catalog, by category. |
 | **[CHANGELOG.md](docs/CHANGELOG.md)** | Release history and the fix behind each one. |
 | **[README.fa.md](README.fa.md)** | راهنمای فارسی. |
+| **[docs/DASHBOARD_GUIDE.fa.md](docs/DASHBOARD_GUIDE.fa.md)** | Persian field-by-field dashboard guide, including relay IPv4 and public DoH URL setup. |
 
 ## 📖 Overview
 

@@ -45,6 +45,7 @@
 | **[docs/PRESET_CATALOG.md](docs/PRESET_CATALOG.md)** | کاتالوگ جامع بیش از ۱۷۱ بازی، پلتفرم و سرویس، تفکیک‌شده بر اساس دسته‌بندی. |
 | **[docs/CHANGELOG.md](docs/CHANGELOG.md)** | تاریخچهٔ کامل انتشار نسخه‌ها و باگ‌های رفع‌شده. |
 | **[docs/TUTORIAL.fa.md](docs/TUTORIAL.fa.md)** | آموزش گام‌به‌گام و کامل: از خرید سرور تا اضافه‌کردن کلاینت و دامنهٔ کاستوم برای پورتال مشترکین. **بهترین نقطهٔ شروع.** |
+| **[docs/DASHBOARD_GUIDE.fa.md](docs/DASHBOARD_GUIDE.fa.md)** | راهنمای تمام بخش‌های پنل، معنی فیلدها و مقادیر پیشنهادی؛ به‌ویژه Active relay IPv4 و Public DoH URL. |
 
 ---
 
