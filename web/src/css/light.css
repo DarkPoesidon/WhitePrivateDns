@@ -1,0 +1,199 @@
+/* Light theme. Same roles, inverted ramp — see the note above the dark block.
+ *
+ * The page is not pure white. #f7f9fc keeps a hint of the slate identity, and it stops
+ * the large white panels from disappearing into their own background, which is what
+ * happens when both the page and the cards are #fff and the only thing between them is
+ * a 1px border. */
+[data-theme="light"] {
+  --c-slate-950: 238 242 247;
+  --c-slate-900: 247 249 252;
+  --c-slate-800: 221 227 236;
+  --c-slate-700: 195 204 218;
+  --c-slate-600: 141 153 171;
+  /* 500 and 400 sit much closer together here than they do in the dark block, and that
+     is forced rather than sloppy. Both are text — 500 is the 9-10px metadata line under
+     every stat ("سیستم: 812 MB", "هسته: 8 · ترد 16"), 400 is the muted body tier — and
+     on a near-white page both have to clear 4.5:1. The floor leaves about 30 units of
+     room between "faint" and "muted" instead of the 48 the dark ramp enjoys, because
+     dark mode can go as bright as it likes above the page and light mode cannot go
+     lighter than the page. Tuned against the worst surface either one lands on, which is
+     the language-switch track (--c-slate-800, not a card): 500 measures 4.96:1 there and
+     6.3:1 on the page, 400 measures 6.5:1 and 7.9:1. The previous values put 500 at
+     4.17:1 on the sunken rows and 4.49:1 on the cards — a 9px failure repeated 18 times
+     across the dashboard, and the kind that is invisible in review because the text
+     looks deliberately quiet rather than broken. */
+  --c-slate-500: 84 95 112;
+  --c-slate-400: 74 84 100;
+  --c-slate-300: 60 70 84;
+  --c-slate-200: 42 51 64;
+  --c-slate-100: 27 36 50;
+  --c-slate-50: 17 24 35;
+  --c-white: 11 18 32;
+
+  /* Every shade here is a foreground on a near-white page EXCEPT 500, which is a fill
+     under a foreground that inverted with the page. So 500 goes deeper than 400, not
+     lighter: cyan-800 rather than cyan-600, which is what lifts the seven primary
+     buttons from 3.28:1 to 6.5:1.
+
+     The 300 tier follows one rule, and it is stated here rather than seven times below:
+     a 300 must clear 4.5:1 on a 20% wash of its OWN 500. That is the worst surface any of
+     them lands on, because the markup pairs them — `text-emerald-300` inside
+     `bg-emerald-500/20`, `text-purple-300` inside `bg-purple-500/10` — and a text shade
+     tinted with its own hue has no headroom left. Tuning them against a plain card
+     instead is what put emerald-300 at 2.69:1 on the API bind badge and the Safe DNS
+     label, purple-300 at 4.47:1 on the Telegram-card button, and amber-300 at 4.56:1 with
+     six hundredths of margin. cyan-300 is the one shade that was already tuned this way
+     (5.07:1 on its own 20% wash) and is therefore the only one left unchanged — the rule
+     is not new, it just was not applied to the other six.
+
+     Going this deep is safe because no 300 in this codebase is ever a fill, a border, a
+     gradient stop or a hover step: grep `-300` across web/*.{html,js} and every hit is
+     `text-` or an icon's `stroke`. Nothing can collapse into anything. Each value is its
+     hue's Tailwind 800 step, or the 800/900 midpoint where 500 already occupies 800
+     (emerald, purple, red), so the numbers stay traceable to the palette. */
+  --c-cyan-500: 21 94 117;
+  --c-cyan-400: 14 116 144;
+  --c-cyan-300: 11 97 120;
+  --c-cyan-200: 8 80 95;
+  --c-cyan-950: 224 245 250;
+
+  --c-emerald-500: 6 95 70;
+  /* 400 is both the hover step of the emerald-500 Save button and the text of the
+     "12.0 ms" health badge, which sits on a 10% emerald-500 wash. emerald-700 cleared
+     4.5:1 on a plain card but only 4.32:1 on that wash — the same one-step-short mistake
+     the amber ramp made. Half a step deeper fixes the badge (5.0:1) and keeps the hover
+     visibly lighter than the resting fill, which is the constraint that stops it going
+     all the way to 800. */
+  --c-emerald-400: 5 108 78;
+  --c-emerald-300: 6 86 64;
+  /* 600 mirrors 500 rather than going a step deeper, and that is the whole point of it: the
+     five text-onfill buttons moved from `-500` to `-600` to fix DARK mode, and light mode was
+     already passing at 8.31:1, so 600 answers here with exactly what those buttons painted
+     before. Same for purple below. The matching 700s inherit from :root for the same reason —
+     see the long note in the dark block. Net effect: light mode renders identically, the ramp
+     reads "600/700 = the on-fill pair" rather than "deeper", and nothing else moved. */
+  --c-red-600: 153 27 27;
+  --c-red-500: 153 27 27;
+  --c-red-400: 185 28 28;
+  --c-red-300: 140 28 28;
+  /* Inverted into tints, so the same two utilities that paint a deep maroon block in dark
+     mode paint the conventional light-mode destructive button: a pale wash behind a strong
+     red label and border. The alphas in the markup (/40 and /60) are what set the final
+     strength, which is why these are Tailwind's 200 and 300 rather than 50 and 100 — at 40%
+     over a white card anything lighter is indistinguishable from the card. */
+  --c-red-950: 254 202 202;
+  --c-red-900: 252 165 165;
+  /* The amber ramp carries both roles at once, which is why it is the one that pins the
+     rule down. 300 is inline text on a card. 400 is the download card's title and the
+     hover step of two solid buttons. 500 is the fill and the warning stripe. Read as a
+     fill ramp — deeper as the number rises — all three land: title 6.98:1, warning
+     heading 5.9:1 on its own tint, stripe 9.1:1, solid fill under near-white bold text
+     8.1:1, hover 6.3:1 and still visibly lighter than the resting fill. The earlier
+     values put the title at 4.9:1 with no headroom, so the same colour on the tinted
+     callout inside the card dropped to 4.2 and the hover state to 4.4.
+
+     300 and 400 hold the same value here, and that is the 300-tier rule landing on a ramp
+     whose 500 was already pushed to Tailwind's 900. The rule asks for the 800 step, 400 is
+     the 800 step, so they meet. Leaving 300 lighter would put the inline "Security
+     requirement:" text at 4.56:1 — six hundredths of margin; pushing it past 400 would
+     invert the ramp's own "deeper as the number rises" reading for no contrast gain. They
+     never appear in the same component, so the collision costs nothing. */
+  --c-amber-500: 120 53 15;
+  --c-amber-400: 146 64 14;
+  --c-amber-300: 146 64 14;
+  --c-purple-600: 107 33 168;
+  --c-purple-500: 107 33 168;
+  --c-purple-400: 126 34 206;
+  --c-purple-300: 98 31 152;
+  --c-orange-600: 154 52 18;
+  --c-orange-500: 194 65 12;
+  --c-orange-400: 194 65 12;
+  --c-orange-300: 154 52 18;
+  --c-blue-600: 30 64 175;
+  --c-blue-500: 29 78 216;
+  --c-blue-400: 29 78 216;
+  --c-blue-300: 30 64 175;
+  --c-blue-200: 30 64 175;
+  /* Yellow exists for exactly one thing: the "degraded latency" upstream badge, where 400
+     is the label and 500 is its 10% wash and 30% border. Nothing paints a solid yellow
+     fill, so both shades are free to go a step deeper than the other ramps — and they had
+     to: yellow is the hue that loses the most contrast per unit of lightness, and
+     yellow-700 on its own wash measured 3.91:1, the worst text failure left on the
+     dashboard after the fills were fixed. */
+  --c-yellow-500: 113 63 18;
+  --c-yellow-400: 133 77 14;
+  --c-indigo-600: 55 48 163;
+  --c-indigo-500: 67 56 202;
+  --c-rose-600: 159 18 57;
+  --c-rose-500: 190 18 60;
+  --c-teal-500: 17 94 89;
+
+  /* Cards are opaque here on purpose. The glass effect is a dark-theme device: a 72%
+     translucent white card over a white page shows nothing through it but costs the
+     same backdrop-filter repaint, and on a phone that repaint is the scroll jank. */
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --border-color: rgba(15, 23, 42, 0.1);
+  --border-glow: rgba(8, 145, 178, 0.45);
+  --accent-cyan: rgb(var(--c-cyan-400));
+  /* These four are the text colour of the five .badge-* chips in the live query stream, and
+     nothing else. They are spelled as hexes rather than token references only because the
+     dark block spells them that way; the values are the same 300-tier shades as above, so
+     they inherit the "clears 4.5:1 on a 15% wash of its own hue" property. They previously
+     held the pre-fix 300 values, which is why the stream badges were the one place the
+     light-mode sweep could not reach — a badge only renders once a query arrives. */
+  --accent-green: #065840;
+  --accent-purple: #621f98;
+  --accent-red: #8c1c1c;
+  --accent-amber: #92400e;
+
+  /* The three coloured glows survive, at a third of the strength: enough to keep the
+     page from being flat grey, not enough to tint the cards sitting on top of them. */
+  --page-glow-cyan: rgba(8, 145, 178, 0.1);
+  --page-glow-purple: rgba(147, 51, 234, 0.08);
+  --page-glow-green: rgba(5, 150, 105, 0.07);
+  --page-wash-from: rgba(247, 249, 252, 0.55);
+  --page-wash-to: rgba(237, 242, 249, 0.9);
+  /* The CRT scanline is off. It is a dark-panel affectation, and over light surfaces it
+     reads as a printing defect rather than a screen. */
+  --scanline-opacity: 0;
+  --card-shadow: 0 6px 20px 0 rgba(15, 23, 42, 0.08);
+  --card-shadow-hover: 0 10px 28px 0 rgba(8, 145, 178, 0.16);
+  --hover-veil: rgba(15, 23, 42, 0.05);
+  --knob-bg: #ffffff;
+  --track-bg: rgba(15, 23, 42, 0.12);
+  --track-border: rgba(15, 23, 42, 0.18);
+  --code-bg: #eef3fa;
+  --code-bg-hover: #e5edf8;
+  --scroll-thumb: rgba(15, 23, 42, 0.28);
+  --scroll-track: rgba(15, 23, 42, 0.06);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+body {
+  background-color: var(--bg-main);
+  background-image:
+    radial-gradient(circle at 10% 10%, var(--page-glow-cyan) 0px, transparent 35%),
+    radial-gradient(circle at 90% 15%, var(--page-glow-purple) 0px, transparent 40%),
+    radial-gradient(circle at 50% 90%, var(--page-glow-green) 0px, transparent 45%),
+    linear-gradient(to bottom, var(--page-wash-from), var(--page-wash-to));
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+}

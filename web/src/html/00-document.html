@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- lang, dir, class and data-theme are all rewritten by the inline script in <head>
+     before the first paint. The literals here are the no-JavaScript / private-mode
+     fallback, and they are the dark English panel this project shipped as 1.2. -->
+<html lang="en" dir="ltr" class="dark" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <!-- maximum-scale=1 and user-scalable=no used to be here. Both are removed on purpose:
+       together they disabled pinch-zoom on every Android and iOS browser, which is a WCAG
+       1.4.4 failure and, on this panel specifically, the thing that made 10px monospace
+       tokens and UUIDs unreadable on a phone with no way to enlarge them. Nothing here
+       needs zoom suppressed — the layout is responsive rather than fixed-width. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Tells the browser to render its own widgets (scrollbars, form controls, the
+       autofill dropdown) in the theme actually in force. Kept in sync with the
+       data-theme attribute below by app.js. -->
+  <meta name="color-scheme" content="dark light">
+  <title>WhitePrivateDns — Next-Gen Gaming & Anti-Sanction SmartDNS Controller</title>
+  <!-- A drawn mark rather than the ⚡ emoji this used to be. An emoji favicon is rendered
+       by the platform's emoji font, so the tab showed a different glyph on every OS — flat
+       yellow on Windows, a blue-grey bolt on macOS, nothing at all in some Linux builds —
+       and none of them were this panel's colours. The data: URI keeps it request-free.
+       %22 for the quotes and %23 for the # are required: both are URL-significant here. -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%23111713%22/><text x=%225%22 y=%2225%22 font-family=%22Arial%22 font-size=%2224%22 font-weight=%22bold%22 fill=%22%2353c887%22>W</text></svg>">
+  <!-- Theme and language are applied before the first paint, ahead of every other
+       script and the stylesheet, so the panel never renders one theme and then flips.
+       Inlined rather than imported for the same reason: an external module would be a
+       second round trip, and the flash it would cause is exactly what this prevents.
+       app.js owns the toggles afterwards; this only restores what was chosen last. -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('whiteprivatedns_theme');
+        if (t !== 'light' && t !== 'dark') {
+          t = 'dark';
+        }
+        var l = localStorage.getItem('whiteprivatedns_lang');
+        if (l !== 'fa' && l !== 'en') l = 'en';
+        var h = document.documentElement;
+        h.setAttribute('data-theme', t);
+        h.classList.toggle('dark', t === 'dark');
+        h.setAttribute('lang', l);
+        h.setAttribute('dir', l === 'fa' ? 'rtl' : 'ltr');
+      } catch (e) { /* private mode: the markup's own defaults stand */ }
+    })();
+  </script>
+  <!-- Purged, committed Tailwind stylesheet (v2.1): the Play CDN JIT engine and
+       its 397 KB + 'unsafe-eval' cost are gone. The utility set was compiled
+       ahead of time by tools/tailwind.config.js (dev machine only — the output
+       is committed, so no Node runs at build or deploy time). The compile scans
+       index.html, app.js and i18n.js, and safelists the state classes app.js
+       concatenates from variables at runtime. When markup or JS gains new
+       utility classes, re-run the compile and commit the result. -->
+  <link rel="stylesheet" href="/css/tailwind.purged.css">
+
+  <!-- Local Vendor Scripts & Styles -->
+  <script src="/js/feather.min.js"></script>
+  <script src="/js/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/modern.css">
+  <style>
+    .skip-link {
+      position: fixed;
+      inset-block-start: .75rem;
+      inset-inline-start: .75rem;
+      z-index: 100;
+      transform: translateY(-200%);
+      border: 2px solid #22d3ee;
+      border-radius: .5rem;
+      background: #020617;
+      color: #e2e8f0;
+      padding: .65rem 1rem;
+      font-weight: 700;
+    }
+    .skip-link:focus { transform: translateY(0); }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col md:flex-row selection:bg-cyan-500 selection:text-slate-950">
+  <a href="#main-content" class="skip-link">Skip to main content</a>

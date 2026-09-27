@@ -1,0 +1,79 @@
+  <!-- ================================================================= -->
+  <!-- MAIN APP CONTAINER (Full width with fluid padding) -->
+  <!-- ================================================================= -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden">
+
+    <!-- MOBILE TOP HEADER (< 768px) -->
+    <header class="md:hidden border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-xl sticky top-0 z-30 px-4 h-14 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-400">
+          <span class="console-mobile-mark" aria-hidden="true">W</span>
+        </div>
+        <!-- Stacked, not side by side, and the arithmetic is the reason. These two spans used
+             to be inline children of a plain div, which was invisible for as long as the badge
+             showed the markup's static "v1.5.0" and became a broken header the moment app.js
+             filled it in: the real string is "v1.5.0-beta [3585f9bf]", it does not fit beside
+             the wordmark at 9px mono, so it wrapped to a second line and then a third and
+             pushed a 68px stack through a 56px header — "WhitePrivateDns" clipped by its own top
+             border on every phone.
+             Simply forbidding the wrap moves the failure rather than fixing it. At 360px the
+             header has 328px of content width; a nowrap brand row is 32 (mark) + 10 + 69
+             (wordmark) + 6 + 69 (badge) = 186px and the control cluster on the right is 207px,
+             so the two would collide by 65px and overflow instead. Stacking spends the header's
+             spare *height* rather than its scarce width: the block is 69px wide either way,
+             because the version is narrower than the wordmark above it, and 32px tall inside
+             56px. Brand 111 + controls 207 = 318 ≤ 328, with the slack landing in the
+             justify-between gap.
+             The pill chrome is gone with it — a bordered badge exists to separate the version
+             from a wordmark sitting on the same line, and on its own line the caption reads
+             better without it. app.js gives this element the version without the commit hash
+             (the hash goes to its title), which is what keeps it inside the wordmark's width. -->
+        <div class="flex flex-col leading-none">
+          <span class="font-extrabold text-sm text-white font-heading">WhitePrivateDns</span>
+          <span class="text-[9px] text-cyan-300/90 font-mono font-bold mt-1 whitespace-nowrap" id="app-version-badge-mobile">v2.2.0-beta</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <!-- Touch targets in this cluster are as wide as they can be and as tall as they should
+             be, and those are two different limits.
+             Width is capped by arithmetic: at 360px the header has 328px of content, the brand
+             block takes 111px, and five control groups plus four 6px gaps have to live in the
+             rest. The four icon buttons at 30px wide (px-1.5 + a 16px glyph + 1px borders) plus
+             the 30px-wide language group come to 207px, and 111 + 207 = 318 ≤ 328. Growing the
+             icons to 36px would need 342px and overflow, so 30px is the ceiling — not a
+             preference. It clears WCAG 2.2 SC 2.5.8 outright (≥24×24), and it clears the
+             spacing clause too: centres sit 36px apart, and the 24px exception circles only
+             need 24px of separation.
+             Height was free and was being wasted. `p-1.5` made these 30×30 inside a 56px
+             header, so `py-2.5` takes them to 30×38 — a 33% larger target area, no extra
+             width, and the taller box is easier to hit with a thumb reaching the top edge of a
+             phone. The language pills get `min-h-[32px]` for the same reason and so the group's
+             38px outer height lines up with the buttons beside it.
+             `min-h/min-w 26px` on each pill and `inline-flex` to centre the label inside a box
+             the text no longer sizes: `text-[10px] leading-none` plus `py-1` produced a 20px
+             hit area, under the 24px floor, on the one surface that is only ever touched. The
+             width still comes from px-1.5 for "EN"; min-w only binds on the Persian glyph. -->
+        <div class="flex items-center gap-0.5 p-0.5 rounded-lg bg-slate-800 border border-slate-700" role="group" aria-label="Interface language">
+          <button type="button" data-lang-btn="en" aria-pressed="true" lang="en"
+            class="lang-btn inline-flex items-center justify-center min-h-[32px] min-w-[26px] px-1.5 rounded-md text-[10px] font-bold font-mono leading-none transition" data-no-i18n>EN</button>
+          <button type="button" data-lang-btn="fa" aria-pressed="false" lang="fa"
+            class="lang-btn inline-flex items-center justify-center min-h-[32px] min-w-[26px] px-1.5 rounded-md text-[10px] font-bold leading-none transition" data-no-i18n>فا</button>
+        </div>
+        <button type="button" data-theme-toggle aria-pressed="false" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700 transition" title="Switch to light theme" aria-label="Switch to light theme">
+          <i data-feather="moon" class="w-4 h-4"></i>
+        </button>
+        <button id="mobile-open-diag" class="px-1.5 py-2.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition" title="Run Diagnostics">
+          <i data-feather="activity" class="w-4 h-4"></i>
+        </button>
+        <button id="mobile-restart-btn" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-orange-400 border border-slate-700 transition" title="Restart Engine">
+          <i data-feather="power" class="w-4 h-4"></i>
+        </button>
+        <button id="mobile-logout-btn" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-red-400 border border-slate-700 transition" title="Sign Out">
+          <i data-feather="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT WRAPPER -->
+    <main id="main-content" tabindex="-1" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full pb-24 md:pb-8">

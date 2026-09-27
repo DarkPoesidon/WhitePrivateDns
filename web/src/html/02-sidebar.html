@@ -1,0 +1,116 @@
+  <!-- ================================================================= -->
+  <!-- VERTICAL LEFT SIDEBAR (Desktop - Sticky on Left) -->
+  <!-- ================================================================= -->
+  <aside class="w-full md:w-64 bg-slate-950/90 backdrop-blur-2xl border-b md:border-b-0 md:border-e border-slate-800/80 hidden md:flex flex-col justify-between p-4 flex-shrink-0 md:h-screen md:sticky md:top-0">
+
+    <!-- Sidebar Top: Brand & Live Pulse -->
+    <div class="space-y-6">
+      <div class="flex items-center gap-3 px-2 py-1">
+        <div class="console-brand-mark" aria-hidden="true">W</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold tracking-wider text-base text-white font-heading">WhitePrivateDns</span>
+            <span id="app-version-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono font-bold border border-cyan-500/30">v2.2.0-beta</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono mt-0.5">
+            <span class="pulse-dot"></span>
+            <span>ONLINE · SMARTDNS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Navigation Menu -->
+      <nav class="space-y-1" aria-label="Dashboard sections">
+        <span class="sidebar-section-label">Workspace</span>
+        <button class="sidebar-nav-item active" data-tab="dashboard" data-route="/home">
+          <i data-feather="grid" class="w-4 h-4"></i>
+          <span>Overview</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="clients" data-route="/clients">
+          <i data-feather="users" class="w-4 h-4"></i>
+          <span>Clients</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="policy" data-route="/rules">
+          <i data-feather="shield" class="w-4 h-4"></i>
+          <span>Policies</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="stream" data-route="/logs">
+          <i data-feather="activity" class="w-4 h-4"></i>
+          <span>Live queries</span>
+        </button>
+        <span class="sidebar-section-label sidebar-system-label">System</span>
+        <button class="sidebar-nav-item" data-tab="api" data-route="/api">
+          <i data-feather="code" class="w-4 h-4"></i>
+          <span>API gateway</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="rules" data-route="/settings">
+          <i data-feather="sliders" class="w-4 h-4"></i>
+          <span>Settings</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="connect" data-route="/guide">
+          <i data-feather="wifi" class="w-4 h-4"></i>
+          <span>Connect guide</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sidebar Bottom: Server IP Badge, Diagnostics & Actions -->
+    <div class="space-y-3 pt-4 border-t border-slate-800/80">
+
+      <!-- Public IP Box with Copy -->
+      <button type="button" id="copy-ip-btn" class="w-full text-start p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between cursor-pointer group hover:border-cyan-400/50 transition active:scale-95" title="Click to copy server IP" aria-label="Copy server public IP">
+        <div class="flex items-center gap-2">
+          <i data-feather="globe" class="w-4 h-4 text-cyan-400"></i>
+          <div>
+            <div class="text-[9px] font-mono uppercase text-slate-500">Server Public IP</div>
+            <div id="header-public-ip" class="text-xs font-mono font-bold text-slate-200 group-hover:text-cyan-300">127.0.0.1</div>
+          </div>
+        </div>
+        <i data-feather="copy" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400"></i>
+      </button>
+
+      <!-- Diagnostics Suite Button -->
+      <button id="open-diagnostics-btn" class="w-full py-2.5 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold font-heading flex items-center justify-center gap-2 transition">
+        <i data-feather="activity" class="w-4 h-4"></i>
+        <span>Run Diagnostics</span>
+      </button>
+
+      <!-- Action Icons Row -->
+      <div class="flex items-center justify-between gap-2">
+        <button id="restart-engine-btn" class="flex-1 py-2 px-2 rounded-lg bg-slate-900 hover:bg-orange-500/20 text-slate-400 hover:text-orange-400 border border-slate-800 flex items-center justify-center gap-1.5 text-[11px] font-semibold transition" title="Restart Core Engine & Reload Rules">
+          <i data-feather="power" class="w-3.5 h-3.5"></i>
+          <span>Restart</span>
+        </button>
+
+        <button id="flush-cache-btn" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 transition" title="Flush DNS Cache">
+          <i data-feather="refresh-cw" class="w-4 h-4"></i>
+        </button>
+
+        <button id="logout-btn" class="p-2 rounded-lg bg-slate-900 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-slate-800 transition" title="Sign Out">
+          <i data-feather="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Appearance & Language -->
+      <!-- Both controls are addressed by data- attribute rather than by id because the
+           mobile header carries a second copy of each, and only one copy is ever visible.
+           js/i18n.js wires every match, so the pair works from either viewport. The theme
+           button's icon name (moon/sun) and its label are written by syncSwitchLabels — the
+           literals here are what a browser with JavaScript disabled would show. -->
+      <div class="flex items-center gap-2">
+        <button type="button" data-theme-toggle aria-pressed="false"
+          class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-amber-300 border border-slate-800 transition shrink-0"
+          title="Switch to light theme" aria-label="Switch to light theme">
+          <i data-feather="moon" class="w-4 h-4"></i>
+        </button>
+        <div class="flex-1 flex items-center gap-1 p-1 rounded-lg bg-slate-900 border border-slate-800" role="group" aria-label="Interface language">
+          <button type="button" data-lang-btn="en" aria-pressed="true" lang="en"
+            class="lang-btn flex-1 py-1 rounded-md text-[11px] font-bold font-mono transition" data-no-i18n>EN</button>
+          <button type="button" data-lang-btn="fa" aria-pressed="false" lang="fa"
+            class="lang-btn flex-1 py-1 rounded-md text-[11px] font-bold transition" data-no-i18n>فارسی</button>
+        </div>
+      </div>
+
+    </div>
+
+  </aside>

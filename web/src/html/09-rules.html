@@ -1,0 +1,457 @@
+      <!-- ============================================== -->
+      <!-- TAB 4: CUSTOM RULES, SSL & ACCESS CONTROL -->
+      <!-- ============================================== -->
+      <section id="tab-rules" class="tab-content space-y-6 hidden">
+
+        <!-- v2.1 Phase 6: two-factor authentication. The secret is shown exactly
+             once, at enrollment; after that the server never returns it and the
+             page never asks for it. -->
+        <div class="glass-panel p-5 sm:p-6 border border-sky-500/30 space-y-4" id="twofa-card">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-sky-500/20 text-sky-400">
+              <i data-feather="smartphone" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-white font-heading">Two-Factor Authentication</h3>
+              <p class="text-[11px] text-slate-400">
+                Status: <span id="twofa-status" class="font-mono text-slate-300">checking…</span>
+                — a TOTP app (Google Authenticator, Aegis, …) generates the codes.
+              </p>
+            </div>
+          </div>
+
+          <div id="twofa-off-box" class="space-y-3">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="password" id="twofa-enable-password" aria-label="Current password, to enable two-factor" placeholder="Current password"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-sky-400">
+              <button id="twofa-begin-btn" type="button"
+                class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
+                Start Enrollment
+              </button>
+            </div>
+            <div id="twofa-enroll-box" class="hidden space-y-3 border border-sky-500/30 rounded-lg p-3">
+              <!-- The confirm step re-asks the password on purpose — a hijacked
+                   session must not be able to finish an enrollment with the code
+                   alone — so the box carries its own password field rather than
+                   relying on the begin step's, which the begin handler clears.
+                   Without a visible field here the operator entered only the
+                   code and the server answered "Invalid credentials" on the
+                   empty password, which reads exactly like a wrong code. -->
+              <p class="text-[11px] text-slate-300">Add this secret to your authenticator app, then re-enter your password and the code it shows:</p>
+              <p id="twofa-secret-display" class="px-3 py-2 rounded bg-slate-950 border border-slate-700 text-xs font-mono text-sky-300 break-all select-all"></p>
+              <p id="twofa-uri-display" class="text-[11px] text-slate-500 font-mono break-all"></p>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input type="password" id="twofa-confirm-password" aria-label="Current password, to confirm enrollment" placeholder="Current password" autocomplete="current-password"
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-sky-400">
+                <input type="text" id="twofa-enable-code" aria-label="Six-digit code, to enable two-factor" placeholder="6-digit code" inputmode="numeric" maxlength="6"
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-sky-400">
+                <button id="twofa-confirm-btn" type="button"
+                  class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
+                  Confirm & Enable
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="twofa-on-box" class="hidden space-y-3">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="password" id="twofa-disable-password" aria-label="Current password, to disable two-factor" placeholder="Current password"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-red-400">
+              <input type="text" id="twofa-disable-code" aria-label="Six-digit code, to disable two-factor" placeholder="6-digit code" inputmode="numeric" maxlength="6"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-red-400">
+              <button id="twofa-disable-btn" type="button"
+                class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
+                Disable 2FA
+              </button>
+            </div>
+            <p class="text-[11px] text-amber-300">Disabling removes the second factor and signs out every session.</p>
+          </div>
+        </div>
+
+        <!-- v2.1 Phase 6: LDAP directory login. The bind password never travels
+             back: the server stores it and the field stays write-only. -->
+        <div class="glass-panel p-5 sm:p-6 border border-indigo-500/30 space-y-4" id="ldap-card">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+              <i data-feather="database" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-white font-heading">LDAP Directory Login</h3>
+              <p class="text-[11px] text-slate-400">Authenticate operators against a directory (Active Directory, OpenLDAP)</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" id="ldap-enabled-input" class="accent-indigo-500 w-4 h-4">
+              LDAP enabled
+            </label>
+            <div>
+              <select id="ldap-mode-input" aria-label="LDAP login mode"
+                class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400">
+                <option value="local">Local login only</option>
+                <option value="ldap">LDAP only</option>
+                <option value="both">LDAP with local fallback</option>
+              </select>
+            </div>
+            <input type="text" id="ldap-url-input" aria-label="LDAP server URL" placeholder="ldaps://dc.corp.local:636"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400">
+            <input type="text" id="ldap-userattr-input" aria-label="LDAP user attribute" placeholder="User attribute (default uid)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400">
+            <input type="text" id="ldap-binddn-input" aria-label="LDAP bind DN" placeholder="Bind DN (e.g. cn=svc,dc=corp,dc=local)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400">
+            <input type="password" id="ldap-bindpw-input" aria-label="LDAP bind password" placeholder="Bind password (leave empty to keep)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400">
+            <input type="text" id="ldap-basedn-input" aria-label="LDAP base DN" placeholder="Base DN (e.g. ou=people,dc=corp,dc=local)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400 sm:col-span-2">
+          </div>
+          <p class="text-[11px] text-amber-300">Saving the directory settings signs out every session. ldaps:// is verified against the system certificate store.</p>
+
+          <!-- The directory IS the login path, so saving it re-authenticates the
+               operator: current password always, TOTP code when 2FA is on. -->
+          <div class="flex items-center gap-3 flex-wrap">
+            <input type="password" id="ldap-admin-password" aria-label="Current admin password" autocomplete="current-password"
+              placeholder="Current admin password"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400">
+            <input type="text" id="ldap-totp-code" aria-label="Two-factor code (when 2FA is enabled)" placeholder="2FA code (if enabled)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-indigo-400"
+              maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+          </div>
+
+          <div class="flex items-center gap-3 flex-wrap">
+            <button id="ldap-save-btn" type="button"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs font-heading transition">
+              Save LDAP Settings
+            </button>
+            <span id="ldap-save-status" class="text-[11px] text-slate-400"></span>
+          </div>
+        </div>
+
+        <!-- v2.1: hidden admin namespace. The path is a locator, not a credential,
+             but the operator must be able to see and (deliberately) rotate it —
+             regeneration kills every session and every bookmark at once. -->
+        <div class="glass-panel p-5 sm:p-6 border border-fuchsia-500/30">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+            <div class="flex items-center gap-3">
+              <div class="p-2 rounded-xl bg-fuchsia-500/20 text-fuchsia-400">
+                <i data-feather="eye-off" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-white font-heading">Hidden Admin Path</h3>
+                <p class="text-[11px] text-slate-400">
+                  The panel lives at
+                  <span id="admin-path-display" class="text-fuchsia-300 font-mono">/…</span>
+                  — bookmarks and API clients use this prefix.
+                </p>
+              </div>
+            </div>
+            <button id="regen-admin-path-btn" type="button"
+              class="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
+              Regenerate Path
+            </button>
+          </div>
+          <p id="admin-path-warn" class="hidden mt-3 text-[11px] text-amber-300">
+            Regenerating moves the panel immediately: every bookmark, integration and session under the old path stops working, and you will be signed out. Confirm to continue.
+          </p>
+        </div>
+
+        <!-- v2.1: subscription surface settings (3x-ui style, third tab group). -->
+        <div class="glass-panel p-5 sm:p-6 border border-emerald-500/30 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+              <i data-feather="share-2" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-white font-heading">Subscription Portal</h3>
+              <p class="text-[11px] text-slate-400">
+                The public pages your subscribers open. Links are built from
+                <span id="sub-origin-preview" class="text-emerald-300 font-mono">…</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" id="sub-enabled-input" class="accent-emerald-500 w-4 h-4">
+              Portal enabled
+            </label>
+            <input type="text" id="sub-domain-input" aria-label="Subscription domain" placeholder="Custom Subscription Domain (empty = panel domain)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
+            <input type="number" id="sub-port-input" aria-label="Subscription advertised port" min="0" max="65535" placeholder="Advertised port"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
+            <input type="text" id="sub-title-input" aria-label="Subscription portal title" placeholder="Portal title (default WhitePrivateDns)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
+          </div>
+
+          <!-- Automatic SSL for the subscription domain (v2.2.0). The
+               certificate comes from the daemon's built-in ACME client; the
+               domain is applied to the record, the links and the listener
+               only after the certificate exists, so the portal can never end
+               up serving a certificate for a name it no longer uses. -->
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+            <button id="sub-issue-ssl-btn" type="button"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs font-heading transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+              Let's Encrypt
+            </button>
+            <p class="text-[11px] text-slate-400 leading-relaxed flex-1">
+              Issue a certificate for the subscription domain above. Empty the domain field and click to go back to the panel's name.
+            </p>
+          </div>
+          <div id="sub-le-progress" class="hidden space-y-1.5">
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-label="Certificate issuance progress">
+              <div id="sub-le-progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="sub-le-progress-text" class="text-[11px] text-slate-400 font-mono"></p>
+          </div>
+
+          <!-- The port above opens a real listener the moment it is saved, but a
+               listener on a closed port is still an unreachable link: nothing in
+               this panel can open a host firewall, so the one thing the operator
+               has to do by hand is named here rather than left to be discovered
+               by a subscriber whose link times out. -->
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            A port other than the panel's opens a dedicated public listener for the subscriber
+            pages. Open it in the host firewall too — on Ubuntu that is
+            <code class="text-emerald-300 font-mono">ufw allow &lt;port&gt;/tcp</code> — or the links in this
+            card will time out from outside even though the daemon is serving them.
+          </p>
+
+          <div class="flex items-center gap-3 flex-wrap">
+            <button id="save-subscription-btn" type="button"
+              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-xs font-heading transition">
+              Save Subscription Settings
+            </button>
+            <span id="sub-save-status" class="text-[11px] text-slate-400"></span>
+          </div>
+        </div>
+
+        <!-- Administrator Credentials -->
+        <div class="glass-panel p-5 sm:p-6 border border-amber-500/30">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+            <div class="flex items-center gap-3">
+              <div class="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+                <i data-feather="user-check" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-white font-heading">Administrator Credentials</h3>
+                <p class="text-[11px] text-slate-400">
+                  Dashboard login for <span id="current-admin-name" class="text-amber-300 font-mono">admin</span>.
+                  Changing the password signs out every other session.
+                </p>
+              </div>
+            </div>
+            <button id="open-change-pwd-btn" type="button"
+              class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
+              Change Username / Password
+            </button>
+          </div>
+        </div>
+
+        <!-- SSL / TLS Manager for DoH, DoT (Android Private DNS) (v2.2.0 renamed).
+             Two domains live here, ordered to match the section's name: the
+             DoH/DoT domain comes FIRST (it is what the title promises — the
+             name subscribers type into Android's Private DNS field), and the
+             panel domain second, under its own explicit heading. The original
+             order put the panel field first inside a DoH/DoT-titled section,
+             and an operator typing their DoH/DoT name into it silently
+             re-domained the whole dashboard — the ERR_CERT_COMMON_NAME_INVALID
+             field report. The subheadings make each field's blast radius
+             readable at a glance instead of inferred from position. -->
+        <div class="glass-panel p-5 sm:p-6 border border-cyan-500/30">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="p-2 rounded-xl bg-cyan-500/20 text-cyan-400">
+              <i data-feather="lock" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-white font-heading">SSL / TLS Manager for DoH, DoT (Android Private DNS)</h3>
+              <p class="text-[11px] text-slate-400">Trusted certificates for the DoH / DoT endpoints clients connect to, and for the panel itself</p>
+            </div>
+          </div>
+
+          <!-- Custom DoH/DoT domain (empty = panel domain) — first, matching the title -->
+          <p class="text-[11px] font-bold text-cyan-300 mb-1.5">DNS TRANSPORTS (DoT :853 / DoH :8443)</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input type="text" id="dot-domain-input" aria-label="Custom DoH DoT domain" placeholder="Custom DoH, DoT domain (empty = panel domain)"
+              class="sm:col-span-2 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-cyan-400">
+            <button id="issue-dot-ssl-btn" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-lg text-xs font-heading transition disabled:opacity-50 disabled:cursor-not-allowed">
+              Let's Encrypt
+            </button>
+          </div>
+          <div id="dot-le-progress" class="hidden space-y-1.5">
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-label="DoH DoT certificate issuance progress">
+              <div id="dot-le-progress-bar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="dot-le-progress-text" class="text-[11px] text-slate-400 font-mono"></p>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-1">This is the hostname for DNS-over-TLS and DNS-over-HTTPS — what Android's Private DNS field expects. Leave empty to use the panel domain.</p>
+
+          <!-- Panel domain — second, under its own heading, so its wider
+               blast radius (the whole dashboard) is stated, not inferred -->
+          <p class="text-[11px] font-bold text-slate-300 mt-4 mb-1.5">ADMIN PANEL (the dashboard itself)</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input type="text" id="ssl-domain-input" aria-label="Panel domain name" placeholder="Panel domain — the dashboard's own name"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-cyan-400">
+            <input type="email" id="ssl-email-input" aria-label="Certificate contact email" placeholder="Admin Email (optional)"
+              class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-cyan-400">
+            <button id="issue-ssl-btn" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 text-slate-950 font-bold rounded-lg text-xs font-heading transition disabled:opacity-50 disabled:cursor-not-allowed">
+              Issue SSL Certificate
+            </button>
+          </div>
+          <div id="panel-le-progress" class="hidden space-y-1.5">
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-label="Panel certificate issuance progress">
+              <div id="panel-le-progress-bar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="panel-le-progress-text" class="text-[11px] text-slate-400 font-mono"></p>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-1">Changing this renames the dashboard itself — every panel link and the admin cert follow it. Not the field for your DoH/DoT hostname.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Custom Proxied Domains (SmartDNS Spoof) -->
+          <div class="glass-panel p-5 sm:p-6 space-y-4">
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold uppercase text-white flex items-center gap-2 font-heading">
+                <i data-feather="shield" class="w-4 h-4 text-cyan-400"></i> Custom Proxied Domains
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">Domains that will be spoofed to this server's SNI Proxy</p>
+            </div>
+
+            <!-- Each of these four rows is `flex-1 min-w-0` input + `shrink-0` button. Both
+                 halves of that pair matter: a flex item's default `min-width: auto` resolves
+                 to a form control's intrinsic width (~170px), so without `min-w-0` the input
+                 refuses to shrink and pushes the button out of the panel instead — which is
+                 exactly what the Save button below did at 768px, where a 256px sidebar leaves
+                 the grid cell 207px wide. `shrink-0` then keeps the button's label from being
+                 squashed once the input is the only thing giving way. -->
+            <div class="flex gap-2">
+              <input type="text" id="new-proxied-input" aria-label="New proxied domain" placeholder="e.g. *.newgame.com or api.target.com"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-cyan-400">
+              <button id="add-proxied-btn" class="shrink-0 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg text-xs transition font-heading">Add</button>
+            </div>
+
+            <!-- The line inside is the pre-config state. renderList overwrites the container
+                 outright, so it survives exactly until the settings fetch lands — and an empty
+                 rules list is not a neutral thing to show while that is in flight: on a
+                 blocklist it reads as "nothing is blocked". -->
+            <div id="custom-proxied-list" class="max-h-48 overflow-y-auto space-y-1.5 pe-1"><div class="text-slate-500 text-xs py-1">Loading rules…</div></div>
+          </div>
+
+          <!-- Custom Blocklist (Sinkhole / Adblock) -->
+          <div class="glass-panel p-5 sm:p-6 space-y-4">
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold uppercase text-white flex items-center gap-2 font-heading">
+                <i data-feather="slash" class="w-4 h-4 text-red-400"></i> Custom Blocklist (Sinkhole)
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">Domains that will be blocked (returning 0.0.0.0)</p>
+            </div>
+
+            <div class="flex gap-2">
+              <input type="text" id="new-blocked-input" aria-label="New blocked domain" placeholder="e.g. *.telemetry.com or ads.tracker.net"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-red-400">
+              <button id="add-blocked-btn" class="shrink-0 px-4 py-2 bg-red-600 hover:bg-red-700 text-onfill font-bold rounded-lg text-xs transition font-heading">Block</button>
+            </div>
+
+            <div id="custom-blocked-list" class="max-h-48 overflow-y-auto space-y-1.5 pe-1"><div class="text-slate-500 text-xs py-1">Loading rules…</div></div>
+          </div>
+
+          <!-- Access Control: DoH Tokens -->
+          <div class="glass-panel p-5 sm:p-6 space-y-4">
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold uppercase text-white flex items-center gap-2 font-heading">
+                <i data-feather="key" class="w-4 h-4 text-purple-400"></i> DoH Secret Tokens
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">If enabled, clients must pass <code>?token=XYZ</code> to use DoH</p>
+            </div>
+
+            <div class="flex gap-2">
+              <input type="text" id="new-token-input" aria-label="New DoH access token" placeholder="Enter secure token (e.g. mysecretkey)"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-purple-400">
+              <button id="add-token-btn" class="shrink-0 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-onfill font-bold rounded-lg text-xs transition font-heading">Add Token</button>
+            </div>
+
+            <div id="tokens-list" class="max-h-48 overflow-y-auto space-y-1.5 pe-1"><div class="text-slate-500 text-xs py-1">Loading tokens…</div></div>
+          </div>
+
+          <!-- Custom DNS A/AAAA Records -->
+          <div class="glass-panel p-5 sm:p-6 space-y-4">
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold uppercase text-white flex items-center gap-2 font-heading">
+                <i data-feather="map-pin" class="w-4 h-4 text-emerald-400"></i> Custom Static Records
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">Map any hostname directly to a custom IP address</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input type="text" id="custom-record-domain" aria-label="Static record hostname" placeholder="hostname.com"
+                class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
+              <div class="flex gap-2">
+                <input type="text" id="custom-record-ip" aria-label="Static record IP address" placeholder="1.2.3.4"
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
+                <button id="add-custom-record-btn" class="shrink-0 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-xs transition font-heading">Save</button>
+              </div>
+            </div>
+
+            <div id="custom-records-list" class="max-h-48 overflow-y-auto space-y-1.5 pe-1"><div class="text-slate-500 text-xs py-1">Loading records…</div></div>
+          </div>
+
+
+
+        </div>
+
+          <div class="glass-panel p-5 sm:p-6 space-y-3" id="relay-address-card">
+            <div class="flex items-center gap-3">
+              <i data-feather="server" class="w-4 h-4 text-emerald-400" aria-hidden="true"></i>
+              <div>
+                <h3 class="text-sm font-bold text-white font-heading">Active relay IPv4</h3>
+                <p class="text-[11px] text-slate-400">The address returned for proxied domains. Changes apply to new DNS answers immediately.</p>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" id="relay-public-ip" inputmode="decimal" autocomplete="off" spellcheck="false"
+                aria-label="Active relay IPv4 address" placeholder="203.0.113.10"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm font-mono text-white">
+              <button type="button" id="relay-public-ip-save" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Apply relay address</button>
+            </div>
+            <p class="text-[11px] text-slate-400">Use only an IPv4 address assigned to this server. Existing connections keep their current route; clients may cache older DNS answers for up to 60 seconds.</p>
+          </div>
+
+          <div class="glass-panel p-5 sm:p-6 space-y-3" id="public-doh-card">
+            <div class="flex items-center gap-3">
+              <i data-feather="cloud" class="w-4 h-4 text-emerald-400" aria-hidden="true"></i>
+              <div>
+                <h3 class="text-sm font-bold text-white font-heading">Public DoH URL</h3>
+                <p class="text-[11px] text-slate-400">Optional HTTPS address behind a CDN or tunnel, shown in connection guides.</p>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="url" id="public-doh-url" autocomplete="url" spellcheck="false"
+                aria-label="Public DoH URL" placeholder="https://doh.example.com/dns-query"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm font-mono text-white">
+              <button type="button" id="public-doh-url-save" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Save DoH URL</button>
+            </div>
+            <p class="text-[11px] text-slate-400">This changes the advertised URL only. Keep the local DoH listener running, bypass CDN caching and browser challenges for /dns-query, and test the new address from a subscriber network. Clear the field to restore the direct URL.</p>
+          </div>
+
+                <!-- Session idle window (Phase D): how long a dashboard session may sit
+               unused before the daemon revokes it. Applies live on save. -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div>
+              <div class="text-xs font-bold text-white font-heading flex items-center gap-2">
+                <span>Dashboard Session Idle Timeout</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1 leading-relaxed max-w-xl">
+                A dashboard session is revoked after this many minutes without use (absolute lifetime stays 24 h). Applies immediately on save; a shorter window means a tighter panel, but you can be logged out mid-task.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 flex-none">
+              <input type="number" id="session-idle-minutes" min="5" max="1440" step="1"
+                class="w-20 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-sm font-mono text-center"
+                aria-label="Session idle timeout in minutes">
+              <span class="text-[11px] text-slate-400">min</span>
+              <button type="button" id="session-idle-save"
+                class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-lg text-xs font-heading transition">Save</button>
+            </div>
+          </div>
+
+</section>

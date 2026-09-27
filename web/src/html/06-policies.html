@@ -1,0 +1,756 @@
+      <!-- ============================================== -->
+      <!-- TAB 2: CATEGORIZED POLICIES -->
+      <!-- ============================================== -->
+      <section id="tab-policy" class="tab-content space-y-6 hidden">
+
+        <!-- Quick Action Profiles -->
+        <div class="glass-panel p-5 border border-cyan-500/30">
+          <div class="mb-3">
+            <h3 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider font-heading flex items-center gap-1.5">
+              <i data-feather="command" class="text-cyan-400 w-4 h-4"></i> Quick Policy Profiles
+            </h3>
+            <p class="text-[11px] text-slate-400">1-Click activate targeted optimization bundles</p>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <button id="profile-gaming-btn" class="quick-mode-btn p-3 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/40 text-start hover:border-red-400">
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <i data-feather="award" class="w-3.5 h-3.5 text-red-300"></i>
+                <span class="text-xs font-bold text-white font-heading">Pro Gamer</span>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">All 18 game routes</p>
+            </button>
+
+            <button id="profile-streamer-btn" class="quick-mode-btn p-3 rounded-xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/40 text-start hover:border-purple-400">
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <i data-feather="video" class="w-3.5 h-3.5 text-purple-300"></i>
+                <span class="text-xs font-bold text-white font-heading">Streamer</span>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">Discord, Twitch, Kick</p>
+            </button>
+
+            <button id="profile-dev-btn" class="quick-mode-btn p-3 rounded-xl bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 border border-cyan-500/40 text-start hover:border-cyan-400">
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <i data-feather="terminal" class="w-3.5 h-3.5 text-cyan-300"></i>
+                <span class="text-xs font-bold text-white font-heading">Dev 403</span>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">Docker, AI, npm</p>
+            </button>
+
+            <button id="profile-privacy-btn" class="quick-mode-btn p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/40 text-start hover:border-emerald-400">
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <i data-feather="umbrella" class="w-3.5 h-3.5 text-emerald-300"></i>
+                <span class="text-xs font-bold text-emerald-300 font-heading">Safe DNS</span>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">AdBlock & Family</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 1: GAMING POLICIES -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+            <span class="policy-icon"><i data-feather="target" class="w-4 h-4"></i></span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-white tracking-wide font-heading">Gaming Policies</h3>
+              <p class="text-[11px] text-slate-400">Anti-sanction & low-latency routing for competitive PC, Console & Mobile games</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Policy: Riot Games -->
+            <div class="glass-panel policy-card card-valorant p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="aperture" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Riot Games</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Valorant · LoL · Vanguard</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-riot" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Bypasses 403 errors and optimizes Vanguard matchmaking route.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Epic Games -->
+            <div class="glass-panel policy-card card-epic p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="shopping-bag" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Epic Games</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Store · Fortnite · EAC</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-epic" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Unblocks Store, Unreal Engine, and Easy Anti-Cheat handshake servers.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Steam & Valve -->
+            <div class="glass-panel policy-card card-steam p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="package" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Steam & Valve</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Community · CS2 · Dota 2</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-steam" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Fixes Steam Community marketplace, friends chat, and Valve servers.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: PUBG Mobile & PC -->
+            <div class="glass-panel policy-card card-pubg p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="map" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-amber-400 font-heading">PUBG Mobile & PC</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Krafton · Level Infinite</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-pubg" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Fixes loading/handshake errors, optimizes matchmaking, and unblocks in-game events.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Call of Duty Mobile & Warzone -->
+            <div class="glass-panel policy-card card-codm p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="flag" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-emerald-400 font-heading">Call of Duty Mobile</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">CODM · Warzone Mobile</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-cod" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Unblocks Activision login, Demonware matchmaking, and token validation.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Supercell Games -->
+            <div class="glass-panel policy-card p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="star" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-cyan-400 font-heading">Supercell Games</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Brawl Stars · Clash Royale</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-supercell" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Fixes Brawl Stars, Clash of Clans, and Squad Busters connection lock.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Electronic Arts -->
+            <div class="glass-panel policy-card card-ea p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="zap" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">EA & Origin</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">EA App · Apex Legends</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-ea" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Fixes EA App authentication and Apex Legends token refresh.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Blizzard -->
+            <div class="glass-panel policy-card card-battlenet p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="hexagon" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Battle.net</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Blizzard · Overwatch · WoW</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-blizzard" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Ensures Battle.net launcher connectivity and Blizzard game servers access.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Ubisoft -->
+            <div class="glass-panel policy-card card-ubisoft p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="compass" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Ubisoft Connect</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Rainbow Six · AC</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-ubisoft" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Bypasses Ubisoft Connect login issues and sync errors.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Rockstar Games -->
+            <div class="glass-panel policy-card card-rockstar p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="navigation-2" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Rockstar Games</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">GTA Online · RDR2</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-rockstar" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Fixes Social Club offline mode and GTA Online cloud save sync.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Xbox & Microsoft -->
+            <div class="glass-panel policy-card card-xbox p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="grid" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Xbox & Microsoft</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Xbox Live · Minecraft</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-xbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Optimizes Xbox Live party chat and Microsoft gaming authentication.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: PlayStation -->
+            <div class="glass-panel policy-card card-playstation p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="play-circle" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">PlayStation Network</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">PSN · PS5 / PS4 Store</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-playstation" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Unblocks PlayStation Network login and store connection.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Roblox -->
+            <div class="glass-panel policy-card card-roblox p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="box" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Roblox</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Client · Assets CDN</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-roblox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Bypasses Roblox client connection blocks and asset download errors.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Tactical Shooters Extra -->
+            <div class="glass-panel policy-card card-valorant p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="crosshair" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-red-400 font-heading">Tactical Shooters Extra</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Tarkov · The Finals · R6 · HellDivers 2</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-shooters-extra" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Rainbow Six, Tarkov, The Finals, HellDivers 2, FragPunk, Marvel Rivals, Delta Force, Rust, Ready Or Not, Squad, DayZ.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Anime, Gacha & MMORPGs -->
+            <div class="glass-panel policy-card card-epic p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="feather" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-purple-400 font-heading">Anime & Modern MMOs</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Genshin · Wuthering Waves · ZZZ · PoE 2</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-anime-gacha" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Genshin Impact, Honkai Star Rail, Zenless Zone Zero, Wuthering Waves, Arknights, Lost Ark, Throne & Liberty, PoE 2, Warframe.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Sports, Fighting & Racing -->
+            <div class="glass-panel policy-card card-rockstar p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="dribbble" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-amber-400 font-heading">Sports, Fighting & Racing</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">FC 25 · eFootball · SF6 · MK1 · Tekken 8</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-sports-racing" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  EA FC 25, eFootball, UFL, Street Fighter 6, Mortal Kombat, Tekken 8, Assetto Corsa, Euro Truck 2, 2XKO.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Co-Op, Survival & Classics -->
+            <div class="glass-panel policy-card card-xbox p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="users" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-emerald-400 font-heading">Co-Op, Survival & Strategy</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Palworld · Among Us · Terraria · War Thunder</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-coop-survival" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Palworld, Among Us, Phasmophobia, Terraria, VRChat, Conan Exiles, Dune, ARK, Warhammer 40k, War Thunder, World of Tanks.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Gaming Platforms & Hardware -->
+            <div class="glass-panel policy-card p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="cpu" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-cyan-400 font-heading">Platforms & Hardware Tools</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">GeForce Now · AMD · GameLoop · RED</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-platforms-extra" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Nvidia GeForce Now cloud gaming, AMD Adrenaline, GameLoop emulator, GameRanger, CD Projekt REDlauncher.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION 2: STREAMING & MEDIA POLICIES -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+            <span class="policy-icon"><i data-feather="film" class="w-4 h-4"></i></span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-white tracking-wide font-heading">Streaming & Media Policies</h3>
+              <p class="text-[11px] text-slate-400">Bypass restrictions on live streaming, voice channels, and music</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <!-- Policy: Discord -->
+            <div class="glass-panel policy-card card-discord p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="message-circle" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Discord</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Updates · RTC Voice</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-discord" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Fixes updater downloading loop and RTC connecting voice lock.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Spotify & SoundCloud -->
+            <div class="glass-panel policy-card card-spotify p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="music" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Spotify & SoundCloud</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Music Streaming Anti-Sanction</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-spotify" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Bypasses 403 sanctions on Spotify music playback, login, and SoundCloud CDN streams.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Twitch -->
+            <div class="glass-panel policy-card card-twitch p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="twitch" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-purple-400 font-heading">Twitch</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Live Streams & Chat</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-twitch" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Ensures high-speed Twitch streaming and websocket chat connectivity.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Kick -->
+            <div class="glass-panel policy-card card-kick p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="radio" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-emerald-400 font-heading">Kick.com</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Live Streaming</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-kick" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Bypasses Kick live stream playback blocks and chat websocket blocks.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Google Services (v2.2.0). The card copy names what is
+                 NOT proxied as clearly as what is: googleapis/gstatic are the
+                 shared web's infrastructure, and routing them here would drag
+                 half the internet onto the proxy. -->
+            <div class="glass-panel policy-card p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="globe" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Google Services</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Search · Gmail · Drive · YouTube</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-google" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Proxies Google consumer apps and YouTube. Shared CDN zones (googleapis, gstatic) and update servers stay direct. YouTube video bytes count toward server bandwidth.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: AI Assistants (v2.2.0) -->
+            <div class="glass-panel policy-card p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="cpu" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-cyan-300 font-heading">AI Assistants</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Copilot · Gemini · Perplexity · Grok · DeepSeek</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-ai" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Unblocks AI chat platforms and their sign-in flows. OpenAI and Claude ride the Developer 403 policy.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Social & Messaging (v2.2.0) -->
+            <div class="glass-panel policy-card p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="message-circle" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-sky-300 font-heading">Social & Messaging</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">X · Instagram · Facebook · Telegram · Reddit</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-social" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Proxies social feeds, DMs and media CDNs. Discord is covered by its own policy.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION 3: DEVELOPER & SECURITY POLICIES -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+            <span class="policy-icon"><i data-feather="shield" class="w-4 h-4"></i></span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-white tracking-wide font-heading">Developer & Security Policies</h3>
+              <p class="text-[11px] text-slate-400">Developer 403 bypass, ad-blocking sinkhole, and parental controls</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+
+            <!-- Policy: Developer 403 -->
+            <div class="glass-panel policy-card p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="code" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Developer 403 Suite</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Docker · OpenAI · Claude · npm</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-dev403" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Bypasses 403 blocks on Docker, Android SDK, OpenAI, Claude, npm, and Gradle.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: AdBlock & Privacy Sinkhole -->
+            <div class="glass-panel policy-card card-xbox p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="slash" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-emerald-400 font-heading">AdBlock & Trackers</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Sinkhole · 0.0.0.0</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-adblock">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Pi-hole/AdGuard style blocking of telemetry, in-app trackers, and banner ads.
+                </p>
+              </div>
+            </div>
+
+            <!-- Policy: Family Safe Protection -->
+            <div class="glass-panel policy-card card-valorant p-4 flex flex-col justify-between col-span-1 sm:col-span-2 md:col-span-1">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span class="policy-icon"><i data-feather="eye-off" class="w-4 h-4"></i></span>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-bold text-red-400 font-heading">Family Safe Filter</h4>
+                      <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Adult Content Filter</span>
+                    </div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="preset-familysafe">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                  Sinkholes adult and pornographic domains for safe household browsing.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION 4: BANDWIDTH & TRAFFIC POLICY -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+            <span class="policy-icon"><i data-feather="download-cloud" class="w-4 h-4"></i></span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-white tracking-wide font-heading">Bandwidth &amp; Traffic Policy</h3>
+              <p class="text-[11px] text-slate-400">Whether bulk downloads travel through the proxy or the subscriber's own line</p>
+            </div>
+          </div>
+
+          <div class="glass-panel policy-card card-rockstar p-4">
+            <div class="flex items-start justify-between gap-3 mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="policy-icon"><i data-feather="download-cloud" class="w-4 h-4"></i></span>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-bold text-amber-400 font-heading">Game &amp; App Downloads via DNS</h4>
+                  <span class="text-[9px] sm:text-[10px] text-slate-400 font-mono">Steam · Epic · Xbox · PSN · Battle.net · Riot · EA · Ubisoft · Rockstar · Roblox · GOG</span>
+                </div>
+              </div>
+              <label class="switch shrink-0">
+                <input type="checkbox" id="preset-downloads">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              OFF, the default: store pages, sign-in, matchmaking and patch metadata still go through the proxy, but the depot and CDN hosts carrying the multi-gigabyte payload resolve to their real addresses, so installs and updates run on the subscriber's own connection. ON: that payload is relayed too.
+            </p>
+            <div class="mt-3 rounded-lg border-s-2 border-amber-500 bg-amber-500/10 p-3 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-[11px] font-bold text-amber-400">
+                <i data-feather="alert-triangle" class="w-3.5 h-3.5"></i>
+                <span>Read this before switching it on</span>
+              </div>
+              <ul class="text-[11px] text-slate-400 leading-relaxed space-y-1 list-none ps-0">
+                <li>A single 100 GB install crosses this server twice, in and out again. Most providers bill egress by the gigabyte.</li>
+                <li>Traffic quotas count those bytes and there is no per-domain accounting, so one subscriber can burn a monthly plan in an evening.</li>
+                <li>A relayed download is usually slower, not faster. The proxy adds a hop, and the CDN edge nearest the subscriber is closer than this server is.</li>
+                <li>Switch it on when a line cannot reach the CDN at all — a hard block, not a slow one. With it off those installs fail instead of crawling, and launchers retry forever without saying why.</li>
+                <li>Per-client scope: a plan has to select this category as well. The global switch is the ceiling, so off here overrides every plan.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </section>

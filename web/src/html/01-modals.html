@@ -1,0 +1,677 @@
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <!-- role/aria-live so a screen reader announces the toast. Every result the
+       dashboard reports for a mutation - including the reason a request was refused -
+       arrives only as a toast, so without this the outcome of an action is invisible
+       to anyone not watching the bottom-right corner. "polite" rather than
+       "assertive": a toast should not cut off whatever is being read. -->
+  <div id="toast-container" role="status" aria-live="polite" aria-atomic="false"
+    class="fixed bottom-20 md:bottom-6 end-4 sm:end-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- LOGIN OVERLAY. No data-modal-close: this is the authentication gate, so there is
+       nothing behind it to dismiss to. aria-modal is still honest here because app.js traps
+       Tab inside the panel — without that, tabbing out reaches the dashboard's own controls
+       while the operator is still unauthenticated. -->
+  <div id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4 hidden">
+    <!-- Capped like the rest. Short here means landscape more than small: a 568×320 phone gives
+         the panel less height than it needs, and this is the gate — an unreachable SIGN IN button
+         is the whole dashboard, not one form. -->
+    <div class="glass-panel p-6 sm:p-8 w-full max-w-md max-h-[90vh] overflow-y-auto border border-cyan-500/30">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 shrink-0">
+          <i data-feather="shield"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 id="login-title" class="text-xl font-bold text-white tracking-wider font-heading">WhitePrivateDns</h1>
+          <p class="text-xs text-cyan-400 font-mono">STANDALONE CONTROLLER</p>
+        </div>
+        <!-- The gate needs its own pair. Everything else on this screen is behind the
+             login, so an operator who cannot read the English form has no way to reach
+             the sidebar switch that would translate it. -->
+        <div class="flex items-center gap-1.5 shrink-0">
+          <div class="flex items-center gap-0.5 p-0.5 rounded-lg bg-slate-950/80 border border-slate-700" role="group" aria-label="Interface language">
+            <!-- Same 26px floor as the mobile header's pair, for the same reason: the login
+                 screen is the first thing a phone sees, and a 20px pill is the smallest thing
+                 on it. See the comment on that copy for the WCAG 2.5.8 arithmetic. -->
+            <button type="button" data-lang-btn="en" aria-pressed="true" lang="en"
+              class="lang-btn inline-flex items-center justify-center min-h-[26px] min-w-[26px] px-1.5 rounded-md text-[10px] font-bold font-mono leading-none transition" data-no-i18n>EN</button>
+            <button type="button" data-lang-btn="fa" aria-pressed="false" lang="fa"
+              class="lang-btn inline-flex items-center justify-center min-h-[26px] min-w-[26px] px-1.5 rounded-md text-[10px] font-bold leading-none transition" data-no-i18n>فا</button>
+          </div>
+          <button type="button" data-theme-toggle aria-pressed="false"
+            class="p-1.5 rounded-lg bg-slate-950/80 text-slate-400 hover:text-amber-300 border border-slate-700 transition"
+            title="Switch to light theme" aria-label="Switch to light theme">
+            <i data-feather="moon" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="login-username" class="block text-xs font-semibold text-slate-400 mb-1">ADMIN USERNAME</label>
+          <input type="text" id="login-username" value="admin" required autocomplete="username"
+            class="w-full px-4 py-2.5 rounded-lg bg-slate-950/80 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-sm font-mono">
+        </div>
+        <div>
+          <label for="login-password" class="block text-xs font-semibold text-slate-400 mb-1">PASSWORD</label>
+          <input type="password" id="login-password" required autocomplete="current-password"
+            placeholder="Enter your admin password"
+            class="w-full px-4 py-2.5 rounded-lg bg-slate-950/80 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-sm font-mono">
+        </div>
+        <!-- v2.1: the second factor. Hidden until the server says the account
+             carries one; typing a code when 2FA is off is harmless either way. -->
+        <div id="login-2fa-row" class="hidden">
+          <label for="login-code" class="block text-xs font-semibold text-slate-400 mb-1">TWO-FACTOR CODE</label>
+          <input type="text" id="login-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code"
+            placeholder="6-digit code"
+            class="w-full px-4 py-2.5 rounded-lg bg-slate-950/80 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-sm font-mono">
+        </div>
+        <div id="login-error" class="text-xs text-red-400 hidden">Invalid username or password.</div>
+        <button type="submit"
+          class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 text-slate-950 font-bold rounded-lg transition duration-200 shadow-lg shadow-cyan-500/20 text-sm font-heading">
+          AUTHENTICATE & ACCESS
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN CREDENTIAL CHANGE MODAL (forced when the password is weak, voluntary from Settings).
+       data-modal-close names the CANCEL button, which showChangePwdModal hides in forced mode —
+       so Escape and a backdrop click dismiss this modal exactly when the button is on screen,
+       and are a no-op when the weak password leaves nothing safe to cancel back to. -->
+  <div id="change-pwd-modal" role="dialog" aria-modal="true" aria-labelledby="change-pwd-title"
+    aria-describedby="change-pwd-intro" data-modal-close="change-pwd-cancel"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md px-4 hidden">
+    <!-- max-h/overflow-y is not cosmetic on this one. The panel is a form with five fields, two
+         hint blocks and two buttons, and the backdrop centres it — so on a short viewport it
+         overflowed off BOTH ends, putting SAVE out of reach with nothing to scroll. This is also
+         the modal that cannot be dismissed when it is forced, so an operator opening the
+         dashboard on a phone with a weak password had no way forward and no way out. -->
+    <div class="glass-panel p-6 sm:p-8 w-full max-w-md max-h-[90vh] overflow-y-auto border border-amber-500/40 shadow-2xl shadow-amber-500/10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 border border-amber-500/30">
+          <i data-feather="alert-triangle" id="change-pwd-icon"></i>
+        </div>
+        <div>
+          <h2 id="change-pwd-title" class="text-lg font-bold text-white tracking-wide font-heading">Security Setup</h2>
+          <p id="change-pwd-badge" class="text-xs text-amber-400 font-mono">WEAK ADMIN PASSWORD DETECTED</p>
+        </div>
+      </div>
+      <p id="change-pwd-intro" class="text-xs text-slate-300 leading-relaxed mb-6">
+        This account is still on a password that fails the current policy. Anyone who
+        can reach this dashboard may be able to log in with it. Set a new
+        administrator password now:
+      </p>
+      <form id="change-pwd-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1" for="current-admin-pass">CURRENT PASSWORD</label>
+          <input type="password" id="current-admin-pass" placeholder="Confirm with your current password" required
+            autocomplete="current-password"
+            class="w-full px-4 py-2.5 rounded-lg bg-slate-950/80 border border-slate-700 text-white focus:outline-none focus:border-amber-400 text-sm font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1" for="new-admin-user">NEW ADMIN USERNAME</label>
+          <input type="text" id="new-admin-user" value="admin" required autocomplete="username" maxlength="64"
+            class="w-full px-4 py-2.5 rounded-lg bg-slate-950/80 border border-slate-700 text-white focus:outline-none focus:border-amber-400 text-sm font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1" for="new-admin-pass">NEW PASSWORD</label>
+          <input type="password" id="new-admin-pass" placeholder="At least 10 characters" required minlength="10" maxlength="256"
+            autocomplete="new-password"
+            class="w-full px-4 py-2.5 rounded-lg bg-slate-950/80 border border-slate-700 text-white focus:outline-none focus:border-amber-400 text-sm font-mono">
+          <p class="mt-1.5 text-[11px] text-slate-500 leading-relaxed">
+            At least 10 characters, not a common password, and not the same as the username.
+            A short passphrase of unrelated words is both stronger and easier to type.
+          </p>
+        </div>
+        <!-- v2.1.0 (B-04 remediation): hidden until the server says 2FA is on. The
+             rotation endpoint requires a current code with the credentials, and the
+             modal used to have nowhere to put one — every save 401'd. -->
+        <div id="change-pwd-2fa-row" class="hidden">
+          <label class="block text-xs font-semibold text-slate-400 mb-1" for="change-pwd-code">TWO-FACTOR CODE</label>
+          <input type="text" id="change-pwd-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code"
+            placeholder="6-digit code"
+            class="w-full px-4 py-2.5 rounded-lg bg-slate-950/80 border border-slate-700 text-white focus:outline-none focus:border-amber-400 text-sm font-mono">
+        </div>
+        <div class="flex gap-3">
+          <!-- Hidden while the modal is forced by a weak password: there is nothing
+               safe to cancel back to. Shown when opened from Settings. -->
+          <button type="button" id="change-pwd-cancel"
+            class="hidden px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-lg transition duration-200 text-sm font-heading">
+            CANCEL
+          </button>
+          <button type="submit"
+            class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold rounded-lg transition duration-200 shadow-lg shadow-amber-500/20 text-sm font-heading">
+            SAVE NEW CREDENTIALS
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SERVER DIAGNOSTICS & POLICY TEST SUITE MODAL -->
+  <div id="diagnostics-modal" role="dialog" aria-modal="true" aria-labelledby="diagnostics-title"
+    data-modal-close="close-diagnostics-btn"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md px-3 sm:px-4 hidden">
+    <div class="glass-panel p-4 sm:p-6 w-full max-w-2xl border border-cyan-500/40 shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+            <i data-feather="check-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 id="diagnostics-title" class="text-sm sm:text-base font-bold text-white font-heading">Gaming Diagnostic Suite</h2>
+            <p class="text-[11px] text-slate-400">Verifying VPS route latency & handshake</p>
+          </div>
+        </div>
+        <button id="close-diagnostics-btn" aria-label="Close diagnostics" class="text-slate-400 hover:text-white p-1">
+          <i data-feather="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="py-3 sm:py-4 flex-1 overflow-y-auto space-y-4">
+        <!-- Diagnostic Score Banner -->
+        <div class="p-3 sm:p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-2">
+          <div>
+            <div class="text-[10px] text-slate-400 font-mono">GAMING SUITABILITY SCORE</div>
+            <div id="diag-score" class="text-2xl sm:text-3xl font-extrabold font-heading text-emerald-400 mt-0.5">--%</div>
+            <div id="diag-quality" class="text-[11px] font-semibold text-cyan-400 mt-0.5">Ready to test</div>
+          </div>
+          <button id="rerun-diagnostics-btn" class="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 text-slate-950 font-bold rounded-lg text-xs font-heading flex items-center gap-1.5 transition whitespace-nowrap">
+            <i data-feather="play" class="w-3.5 h-3.5"></i> Run Test
+          </button>
+        </div>
+
+        <!-- Diagnostic Items List. The eight names here are the targets handleDiagnosticsRun
+             actually dials; the copy used to list "PUBG, CoD, and EA" and omit Battle.net and
+             Spotify, which is a claim about what was measured rather than a label. -->
+        <div id="diag-items-list" class="space-y-1.5 max-h-72 overflow-y-auto pe-1">
+          <div class="text-xs text-slate-500 text-center py-6">Click "Run Test" to benchmark routes to Riot, Epic, Steam, Discord, EA, Battle.net, PUBG and Spotify.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- EDIT CLIENT / USER MODAL (Advanced Client Management Layout). data-modal-close names the
+       header × rather than the footer CANCEL: both only hide the modal, and the × is the one
+       that is always in view in a panel this tall. -->
+  <div id="edit-client-modal" role="dialog" aria-modal="true" aria-labelledby="edit-client-title"
+    data-modal-close="close-edit-client-btn"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md px-4 hidden">
+    <div class="glass-panel p-6 sm:p-7 w-full max-w-xl max-h-[90vh] overflow-y-auto border border-cyan-500/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+            <i data-feather="edit-2" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 id="edit-client-title" class="text-base font-bold text-white font-heading">Edit Client</h2>
+            <p class="text-[11px] text-slate-400">Manage account properties, traffic limits & policy exceptions</p>
+          </div>
+        </div>
+        <button id="close-edit-client-btn" aria-label="Close subscriber editor" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+          <i data-feather="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="edit-client-form" class="space-y-4">
+        <input type="hidden" id="edit-client-id">
+
+        <!-- Row 1: Email/Name & the traffic plan — the limit and how often it returns.
+             The cycle sits beside the limit because the two are one decision: a
+             quota with no cycle has to be cleared by hand every period, which is
+             what "50 GB monthly" quietly meant before v1.5.0. -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="edit-client-name" class="block text-[11px] font-semibold text-slate-400 mb-1"><span class="text-red-400 font-bold">*</span> Email / Client Name</label>
+            <input type="text" id="edit-client-name" required placeholder="e.g. gamer-reza"
+              class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs">
+          </div>
+          <div class="grid grid-cols-2 gap-3.5">
+            <div>
+              <label for="edit-client-traffic" class="block text-[11px] font-semibold text-slate-400 mb-1">Traffic Limit (GB)</label>
+              <input type="number" step="0.5" min="0" id="edit-client-traffic" placeholder="0 (0 = Unlimited)"
+                class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs font-mono">
+            </div>
+            <div>
+              <label for="edit-client-traffic-cycle" class="block text-[11px] font-semibold text-slate-400 mb-1">Auto Reset</label>
+              <select id="edit-client-traffic-cycle"
+                class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs">
+                <option value="">Never (manual)</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Gregorian Expiry (with Interactive Calendar Popup) & Manual IP -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 relative">
+          <div class="relative">
+            <div class="flex items-center justify-between mb-1">
+              <label for="edit-client-expiry" class="block text-[11px] font-semibold text-slate-400">Expiry (Gregorian)</label>
+              <button type="button" id="edit-client-clear-expiry-btn" class="text-[10px] text-slate-500 hover:text-cyan-400 transition">Clear (Lifetime)</button>
+            </div>
+            <div class="relative flex items-center">
+              <input type="text" id="edit-client-expiry" placeholder="YYYY-MM-DD HH:mm:ss" readonly
+                class="w-full ps-3 pe-9 py-2 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 focus:outline-none focus:border-cyan-400 text-xs font-mono cursor-pointer">
+              <button type="button" id="open-datepicker-btn" aria-label="Open expiry date picker" class="absolute end-2.5 text-slate-400 hover:text-cyan-400 transition">
+                <i data-feather="calendar" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- Modern Ant-Design Style DateTime Picker Popup -->
+            <!-- 288px below the sm breakpoint, not 320: this popup is absolutely positioned
+                 inside a modal whose backdrop has px-4, so on a 320px viewport the panel is
+                 288px wide and a 320px popup hung its trailing column — the last four days of
+                 every month — off the edge of the screen with nothing to scroll to reach it.
+
+                 start-0 rather than left-0 so the popup is anchored to the same edge as the
+                 field that opens it in both directions. With left-0 under dir="rtl" it
+                 detached from its own input and grew towards the far side of the panel. -->
+            <div id="datepicker-popup" data-modal-popover class="hidden absolute start-0 top-full mt-1.5 z-50 p-3.5 rounded-xl bg-slate-900 border border-cyan-500/30 shadow-2xl w-[288px] sm:w-[340px] text-xs">
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-800">
+                <div class="flex items-center gap-1.5">
+                  <button type="button" id="dp-prev-year" aria-label="Previous year" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&laquo;</button>
+                  <button type="button" id="dp-prev-month" aria-label="Previous month" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&lsaquo;</button>
+                </div>
+                <div id="dp-month-year-label" class="font-bold text-slate-200 font-mono text-xs">Sep 2026</div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" id="dp-next-month" aria-label="Next month" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&rsaquo;</button>
+                  <button type="button" id="dp-next-year" aria-label="Next year" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&raquo;</button>
+                </div>
+              </div>
+
+              <!-- Calendar Grid & Time Column -->
+              <div class="grid grid-cols-7 gap-1 text-center font-mono mb-3">
+                <div class="text-[10px] font-bold text-slate-500">Su</div>
+                <div class="text-[10px] font-bold text-slate-500">Mo</div>
+                <div class="text-[10px] font-bold text-slate-500">Tu</div>
+                <div class="text-[10px] font-bold text-slate-500">We</div>
+                <div class="text-[10px] font-bold text-slate-500">Th</div>
+                <div class="text-[10px] font-bold text-slate-500">Fr</div>
+                <div class="text-[10px] font-bold text-slate-500">Sa</div>
+              </div>
+              <div id="dp-days-grid" class="grid grid-cols-7 gap-1 text-center font-mono text-xs mb-3">
+                <!-- Days populated dynamically -->
+              </div>
+
+              <!-- Time Selector & Quick Presets -->
+              <div class="flex items-center justify-between pt-2.5 border-t border-slate-800 text-[11px]">
+                <div class="flex items-center gap-1.5 font-mono">
+                  <span class="text-slate-500">Time:</span>
+                  <select id="dp-hour-select" aria-label="Expiry hour" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-cyan-300 text-xs"></select>
+                  <span class="text-slate-500">:</span>
+                  <select id="dp-minute-select" aria-label="Expiry minute" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-cyan-300 text-xs"></select>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" id="dp-set-now-btn" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] transition">Now (+30d)</button>
+                  <button type="button" id="dp-confirm-btn" class="px-2.5 py-0.5 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-[10px] transition">OK</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="edit-client-ip" class="block text-[11px] font-semibold text-slate-400 mb-1">Manual IP Address (Optional)</label>
+            <input type="text" id="edit-client-ip" placeholder="e.g. 5.200.10.42"
+              class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs font-mono">
+          </div>
+        </div>
+
+        <!-- Row 3: UUID with Regenerate -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label for="edit-client-uuid" class="block text-[11px] font-semibold text-slate-400">UUID (RFC 4122 v4)</label>
+            <button type="button" id="edit-client-regen-uuid" class="text-[10px] text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1">
+              <i data-feather="refresh-cw" class="w-2.5 h-2.5"></i> Regenerate
+            </button>
+          </div>
+          <input type="text" id="edit-client-uuid"
+            class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 focus:outline-none focus:border-cyan-400 text-xs font-mono">
+        </div>
+
+        <!-- Row 3b: Registration Secret (Phase B) — the out-of-band credential the
+             subscriber pastes on their /sub/ page to move their binding. Give it to
+             the subscriber through a DIFFERENT channel than the portal link: the
+             link alone must stay read-only (Mantis C-03). -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label for="edit-client-secret" class="block text-[11px] font-semibold text-slate-400">Registration Secret (IP register)</label>
+            <button type="button" id="edit-client-regen-secret" class="text-[10px] text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1">
+              <i data-feather="refresh-cw" class="w-2.5 h-2.5"></i> Regenerate
+            </button>
+          </div>
+          <input type="text" id="edit-client-secret" readonly
+            class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-amber-300 focus:outline-none focus:border-cyan-400 text-xs font-mono">
+          <p class="text-[10px] text-slate-500 mt-1">Deliver this secret to the subscriber separately from their /sub/ link. Regenerating invalidates the old one immediately.</p>
+        </div>
+
+        <!-- Row 4: Comment / Note -->
+        <div>
+          <label for="edit-client-note" class="block text-[11px] font-semibold text-slate-400 mb-1">Comment / Note</label>
+          <input type="text" id="edit-client-note" placeholder="e.g. customer-a / VIP Gamer Plan"
+            class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs">
+        </div>
+
+        <!-- Row 5: Attached Inbounds equivalent -> Attached DNS Policies (Ant Design Multi-Select) -->
+        <div class="space-y-2 p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 relative">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="block text-xs font-bold text-cyan-300 font-heading">Attached DNS Policies</span>
+              <span class="text-[10px] text-slate-400">Leave empty to inherit all global policies, or select specific games.</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="edit-client-policies-select-all" class="px-2 py-0.5 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-semibold transition">
+                Select all
+              </button>
+              <button type="button" id="edit-client-policies-clear-all" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold transition">
+                Clear all (Inherit)
+              </button>
+            </div>
+          </div>
+
+          <!-- Multi-Select Input Box (Ant Design / 3x-ui Style) -->
+          <div id="policies-multiselect-box" class="relative min-h-[38px] p-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-500/60 focus-within:border-cyan-400 focus-within:ring-1 focus-within:ring-cyan-400/40 transition cursor-pointer flex flex-wrap items-center gap-1.5">
+            <div id="edit-client-policies-tags" class="flex flex-wrap items-center gap-1.5">
+              <!-- Dynamically populated chips with remove buttons -->
+            </div>
+            <input type="text" id="policies-search-input" aria-label="Search policies" placeholder="Click or search policies..."
+              class="flex-1 min-w-[140px] bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none cursor-pointer">
+            <div class="pe-1.5 text-slate-500 pointer-events-none">
+              <i data-feather="chevron-down" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Multi-Select Dropdown List with Highlighted Selected Options & Checkmarks -->
+          <div id="policies-dropdown-list" class="hidden absolute inset-x-3.5 top-full mt-1 z-50 max-h-56 overflow-y-auto rounded-xl bg-slate-900 border border-slate-700 shadow-2xl divide-y divide-slate-800/60">
+            <!-- Dynamically populated options list with highlighted active states and checkmarks -->
+          </div>
+        </div>
+
+        <!-- Row 6: Enabled Toggle Switch -->
+        <fieldset class="contents">
+          <legend class="sr-only">Account status</legend>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xs font-semibold text-slate-300">Account Status</span>
+            <span id="edit-client-status-label" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">ACTIVE</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="edit-client-enabled" class="sr-only peer" checked>
+            <!-- after:left-[2px] stays physical on purpose, and it is the one exception to
+                 the logical-property sweep. The knob is moved by translate-x-full, and a
+                 transform is not mirrored by dir="rtl" — so pairing start-[2px] with a
+                 positive translate under RTL would resolve to "2px from the right edge,
+                 then 20px further right", which slides the knob clean off its own track.
+                 Making it correct needs a second rtl: rule whose cascade order against the
+                 first is not something to gamble a control on. The track is symmetric, so
+                 as it stands the switch works identically in both directions; only the
+                 direction of travel reads as latin, which no user can misread. -->
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+          </label>
+        </div>
+        </fieldset>
+
+        <!-- Modal Footer: Reset Traffic on left, Cancel & Save on right -->
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+          <button type="button" id="edit-client-reset-traffic-btn"
+            class="px-3.5 py-2 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-semibold font-heading flex items-center gap-1.5 transition">
+            <i data-feather="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Reset Traffic</span>
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button type="button" id="cancel-edit-client-btn"
+              class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold font-heading transition">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 text-slate-950 font-bold rounded-lg text-xs font-heading transition shadow-lg shadow-cyan-500/20">
+              Save
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD CLIENT / USER MODAL -->
+  <div id="add-client-modal" role="dialog" aria-modal="true" aria-labelledby="add-client-title"
+    data-modal-close="close-add-client-btn"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md px-4 hidden">
+    <!-- Same reason as the credential modal above: a centred panel with no height cap overflows
+         off both ends of a short viewport, and the CREATE button is the part that goes missing. -->
+    <!-- Same max-w-xl and row shape as the edit modal: the two forms carry the same
+         fields now, and a create form that is narrower than the editor it feeds
+         re-wraps every row the operator already learned in the other one. -->
+    <div class="glass-panel p-6 sm:p-7 w-full max-w-xl max-h-[90vh] overflow-y-auto border border-cyan-500/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+            <i data-feather="user-plus" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 id="add-client-title" class="text-sm sm:text-base font-bold text-white font-heading">Add New Client Account</h2>
+            <p class="text-[11px] text-slate-400">Generate IP whitelist registration slug</p>
+          </div>
+        </div>
+        <button id="close-add-client-btn" aria-label="Close new subscriber form" class="text-slate-400 hover:text-white p-1">
+          <i data-feather="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="add-client-form" class="space-y-4">
+        <!-- Row 1: the name and the traffic plan, the same pairing as the edit modal.
+             The cycle sits beside the limit because the two are one decision: a quota
+             with no cycle has to be cleared by hand every period. -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="client-name-input" class="block text-[11px] font-semibold text-slate-400 mb-1"><span class="text-red-400 font-bold">*</span> CLIENT NAME / LABEL</label>
+            <input type="text" id="client-name-input" placeholder="e.g. Reza (PS5 &amp; Phone)" required
+              class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs">
+          </div>
+          <div class="grid grid-cols-2 gap-3.5">
+            <div>
+              <label for="client-traffic-input" class="block text-[11px] font-semibold text-slate-400 mb-1">Traffic Limit (GB)</label>
+              <input type="number" step="0.5" min="0" id="client-traffic-input" placeholder="0 = Unlimited"
+                class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs font-mono">
+            </div>
+            <div>
+              <label for="client-traffic-cycle" class="block text-[11px] font-semibold text-slate-400 mb-1">Auto Reset</label>
+              <select id="client-traffic-cycle" class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs">
+                <option value="">Never (manual)</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: the exact expiry the plan ends on, and the optional first IP — the
+             same pairing as the edit modal, so an operator who has learned one form
+             already knows where both fields are in the other. The picker replaces the
+             old duration preset select: a preset could only speak in whole days, so a
+             plan meant to end at a specific moment could not be sold as such at
+             creation and had to be corrected in the editor afterwards. -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 relative">
+          <div class="relative">
+            <div class="flex items-center justify-between mb-1">
+              <label for="add-client-expiry" class="block text-[11px] font-semibold text-slate-400">Expiry (Gregorian)</label>
+              <button type="button" id="add-client-clear-expiry-btn" class="text-[10px] text-slate-500 hover:text-cyan-400 transition">Clear (Lifetime)</button>
+            </div>
+            <div class="relative flex items-center">
+              <input type="text" id="add-client-expiry" placeholder="YYYY-MM-DD HH:mm:ss" readonly
+                class="w-full ps-3 pe-9 py-2 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 focus:outline-none focus:border-cyan-400 text-xs font-mono cursor-pointer">
+              <button type="button" id="add-open-datepicker-btn" aria-label="Open expiry date picker" class="absolute end-2.5 text-slate-400 hover:text-cyan-400 transition">
+                <i data-feather="calendar" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- Same 288px-below-sm sizing and start-0 anchoring as the editor's picker,
+                 for the same reasons: the popup must not hang off a 320px viewport, and
+                 it must stay anchored to its own input in RTL. -->
+            <div id="add-datepicker-popup" data-modal-popover class="hidden absolute start-0 top-full mt-1.5 z-50 p-3.5 rounded-xl bg-slate-900 border border-cyan-500/30 shadow-2xl w-[288px] sm:w-[340px] text-xs">
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-800">
+                <div class="flex items-center gap-1.5">
+                  <button type="button" id="add-dp-prev-year" aria-label="Previous year" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&laquo;</button>
+                  <button type="button" id="add-dp-prev-month" aria-label="Previous month" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&lsaquo;</button>
+                </div>
+                <div id="add-dp-month-year-label" class="font-bold text-slate-200 font-mono text-xs"></div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" id="add-dp-next-month" aria-label="Next month" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&rsaquo;</button>
+                  <button type="button" id="add-dp-next-year" aria-label="Next year" class="p-1 text-slate-400 hover:text-cyan-300 text-xs font-bold">&raquo;</button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-7 gap-1 text-center font-mono mb-3">
+                <div class="text-[10px] font-bold text-slate-500">Su</div>
+                <div class="text-[10px] font-bold text-slate-500">Mo</div>
+                <div class="text-[10px] font-bold text-slate-500">Tu</div>
+                <div class="text-[10px] font-bold text-slate-500">We</div>
+                <div class="text-[10px] font-bold text-slate-500">Th</div>
+                <div class="text-[10px] font-bold text-slate-500">Fr</div>
+                <div class="text-[10px] font-bold text-slate-500">Sa</div>
+              </div>
+              <div id="add-dp-days-grid" class="grid grid-cols-7 gap-1 text-center font-mono text-xs mb-3">
+                <!-- Days populated dynamically -->
+              </div>
+
+              <div class="flex items-center justify-between pt-2.5 border-t border-slate-800 text-[11px]">
+                <div class="flex items-center gap-1.5 font-mono">
+                  <span class="text-slate-500">Time:</span>
+                  <select id="add-dp-hour-select" aria-label="Expiry hour" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-cyan-300 text-xs"></select>
+                  <span class="text-slate-500">:</span>
+                  <select id="add-dp-minute-select" aria-label="Expiry minute" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-cyan-300 text-xs"></select>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" id="add-dp-set-now-btn" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] transition">Now (+30d)</button>
+                  <button type="button" id="add-dp-confirm-btn" class="px-2.5 py-0.5 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-[10px] transition">OK</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="client-initial-ip" class="block text-[11px] font-semibold text-slate-400 mb-1">INITIAL IP ADDRESS (OPTIONAL)</label>
+            <input type="text" id="client-initial-ip" placeholder="e.g. 2.189.86.32 (or leave blank for auto-link)"
+              class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs font-mono">
+            <p class="text-[10px] text-slate-500 mt-1">If blank, client can self-register using their personal URL.</p>
+          </div>
+        </div>
+
+        <!-- The policies the plan carries, decided at creation for the same reason the
+             quota is: an account created inheriting everything and then corrected in
+             the editor is live with the wrong rules for the whole gap between the two
+             writes. -->
+        <div class="space-y-2 p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 relative">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="block text-xs font-bold text-cyan-300 font-heading">Attached DNS Policies</span>
+              <span class="text-[10px] text-slate-400">Leave empty to inherit all global policies, or select specific games.</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="add-client-policies-select-all" class="px-2 py-0.5 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-semibold transition">
+                Select all
+              </button>
+              <button type="button" id="add-client-policies-clear-all" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold transition">
+                Clear all (Inherit)
+              </button>
+            </div>
+          </div>
+
+          <div id="add-policies-multiselect-box" class="relative min-h-[38px] p-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-500/60 focus-within:border-cyan-400 focus-within:ring-1 focus-within:ring-cyan-400/40 transition cursor-pointer flex flex-wrap items-center gap-1.5">
+            <div id="add-client-policies-tags" class="flex flex-wrap items-center gap-1.5">
+              <!-- Dynamically populated chips with remove buttons -->
+            </div>
+            <input type="text" id="add-policies-search-input" aria-label="Search policies" placeholder="Click or search policies..."
+              class="flex-1 min-w-[140px] bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none cursor-pointer">
+            <div class="pe-1.5 text-slate-500 pointer-events-none">
+              <i data-feather="chevron-down" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <div id="add-policies-dropdown-list" class="hidden absolute inset-x-3.5 top-full mt-1 z-50 max-h-56 overflow-y-auto rounded-xl bg-slate-900 border border-slate-700 shadow-2xl divide-y divide-slate-800/60">
+            <!-- Dynamically populated options list with highlighted active states and checkmarks -->
+          </div>
+        </div>
+
+        <button type="submit"
+          class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 text-slate-950 font-bold rounded-lg text-xs font-heading transition shadow-lg shadow-cyan-500/20">
+          CREATE CLIENT &amp; GENERATE LINK
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CLIENT CREATED MODAL (v2.2.0). The create response carries the register
+       link id and the registration secret exactly once, at the moment they are
+       minted; this modal is where the operator sees and copies both. The
+       secret is the WRITE half of the subscriber credential (Phase B: the link
+       alone can display, the secret moves the IP binding) — it is never
+       persisted client-side, never placed in a URL, and never served by any
+       public endpoint. Losing it means regenerating, not recovering. -->
+  <div id="client-created-modal" role="dialog" aria-modal="true" aria-labelledby="client-created-title"
+    data-modal-close="close-client-created-btn"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md px-4 hidden">
+    <div class="glass-panel p-6 sm:p-7 w-full max-w-xl max-h-[90vh] overflow-y-auto border border-emerald-500/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
+            <i data-feather="check-circle" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 id="client-created-title" class="text-sm sm:text-base font-bold text-white font-heading">Client Account Created</h2>
+            <p class="text-[11px] text-slate-400">Copy the credentials now — the secret is not shown again</p>
+          </div>
+        </div>
+        <button id="close-client-created-btn" aria-label="Close created client credentials" class="text-slate-400 hover:text-white p-1">
+          <i data-feather="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label for="created-client-name" class="block text-[11px] font-semibold text-slate-400 mb-1">Account</label>
+          <div id="created-client-name" class="px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 text-white text-xs font-mono truncate"></div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="created-register-link" class="block text-[11px] font-semibold text-slate-400">Subscription Link (portal page)</label>
+            <button type="button" id="copy-created-link-btn"
+              class="inline-flex items-center gap-1 px-2 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-semibold transition">
+              <i data-feather="copy" class="w-3 h-3"></i> Copy
+            </button>
+          </div>
+          <input type="text" id="created-register-link" readonly
+            class="w-full px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 text-cyan-300 text-xs font-mono">
+          <p class="text-[10px] text-slate-500 mt-1">The subscriber's portal page — status, quota and IP registration. The registration password below is what they type there to bind their IP.</p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="created-register-secret" class="block text-[11px] font-semibold text-amber-300">Registration Secret</label>
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="toggle-created-secret-btn" aria-label="Show or hide the registration secret"
+                class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-semibold transition">Show</button>
+              <button type="button" id="copy-created-secret-btn"
+                class="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-semibold transition">
+                <i data-feather="copy" class="w-3 h-3"></i> Copy
+              </button>
+            </div>
+          </div>
+          <input type="password" id="created-register-secret" readonly
+            class="w-full px-3 py-2 rounded-lg bg-slate-950/60 border border-amber-500/30 text-amber-300 text-xs font-mono">
+          <p class="text-[10px] text-slate-500 mt-1">The subscriber types this on the portal to register their IP. Keep it out of the link — the link alone must never be enough.</p>
+        </div>
+
+        <button type="button" id="close-client-created-done-btn"
+          class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 text-slate-950 font-bold rounded-lg text-xs font-heading transition shadow-lg shadow-emerald-500/20">
+          DONE
+        </button>
+      </div>
+    </div>
+  </div>

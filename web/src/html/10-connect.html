@@ -1,0 +1,138 @@
+      <!-- ============================================== -->
+      <!-- TAB 5: CLIENT SETUP & CONNECT GUIDE -->
+      <!-- ============================================== -->
+      <section id="tab-connect" class="tab-content space-y-6 hidden">
+        <div class="glass-panel p-5 sm:p-6">
+          <div class="max-w-3xl mb-6">
+            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2 font-heading">
+              <i data-feather="wifi" class="w-5 h-5 text-cyan-400"></i> How to Connect Client Devices
+            </h2>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-1">
+              Connect your Gaming PC, PlayStation, Xbox, Android, iOS, or Router in seconds without installing any client software.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Guide 1: Windows 10/11 -->
+            <div class="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+              <div class="flex items-center gap-2.5">
+                <i data-feather="monitor" class="text-cyan-400 w-5 h-5"></i>
+                <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Windows 10 / 11 (Gaming PC)</h4>
+              </div>
+              <ol class="text-[11px] sm:text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+                <li>Open <strong>Settings</strong> &gt; <strong>Network & Internet</strong> &gt; <strong>Wi-Fi / Ethernet</strong>.</li>
+                <li>Click <strong>Edit DNS assignment</strong> &gt; Select <strong>Manual</strong>.</li>
+                <li>Turn on <strong>IPv4</strong> and enter your Server IP:</li>
+              </ol>
+              <div class="code-box cursor-pointer" data-copy-target="guide-win-ip" role="button" tabindex="0" aria-label="Copy server IP address">
+                <span id="guide-win-ip">Loading IP...</span>
+                <i data-feather="copy" class="w-3.5 h-3.5 text-slate-400 hover:text-cyan-400 flex-shrink-0 ms-2"></i>
+              </div>
+            </div>
+
+            <!-- Guide 2: PS5 / Xbox Console -->
+            <div class="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+              <div class="flex items-center gap-2.5">
+                <i data-feather="tv" class="text-purple-400 w-5 h-5"></i>
+                <h4 class="text-xs sm:text-sm font-bold text-white font-heading">PlayStation 5 / Xbox</h4>
+              </div>
+              <ol class="text-[11px] sm:text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+                <li>Go to <strong>Settings</strong> &gt; <strong>Network</strong> &gt; <strong>Set Up Internet Connection</strong>.</li>
+                <li>Select Wi-Fi/LAN &gt; <strong>Advanced Settings</strong> &gt; <strong>DNS</strong>: Manual.</li>
+                <li>Set <strong>Primary DNS</strong> to your Server IP:</li>
+              </ol>
+              <div class="code-box cursor-pointer" data-copy-target="guide-console-ip" role="button" tabindex="0" aria-label="Copy server IP address">
+                <span id="guide-console-ip">Loading IP...</span>
+                <i data-feather="copy" class="w-3.5 h-3.5 text-slate-400 hover:text-cyan-400 flex-shrink-0 ms-2"></i>
+              </div>
+            </div>
+
+            <!-- Guide 3: Android Private DNS (DoT) -->
+            <div class="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+              <div class="flex items-center gap-2.5">
+                <i data-feather="smartphone" class="text-emerald-400 w-5 h-5"></i>
+                <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Android Private DNS (DoT)</h4>
+              </div>
+              <ol class="text-[11px] sm:text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+                <li>Go to <strong>Settings</strong> &gt; <strong>Network & Internet</strong> &gt; <strong>Private DNS</strong>.</li>
+                <li>Select <strong>Private DNS provider hostname</strong> and enter:</li>
+              </ol>
+              <div class="code-box cursor-pointer" data-copy-target="guide-dot-hostname" role="button" tabindex="0" aria-label="Copy DNS-over-TLS hostname">
+                <span id="guide-dot-hostname">dns.yourdomain.com</span>
+                <i data-feather="copy" class="w-3.5 h-3.5 text-slate-400 hover:text-cyan-400 flex-shrink-0 ms-2"></i>
+              </div>
+            </div>
+
+            <!-- Guide 4: Browser DoH (Chrome/Brave/Firefox) -->
+            <div class="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+              <div class="flex items-center gap-2.5">
+                <i data-feather="globe" class="text-blue-400 w-5 h-5"></i>
+                <h4 class="text-xs sm:text-sm font-bold text-white font-heading">Browser Secure DNS (DoH)</h4>
+              </div>
+              <ol class="text-[11px] sm:text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+                <li>In Browser: <strong>Settings</strong> &gt; <strong>Privacy & Security</strong> &gt; <strong>Use secure DNS</strong>.</li>
+                <li>Choose <strong>Custom</strong> and paste your DoH URL:</li>
+              </ol>
+              <div class="code-box cursor-pointer" data-copy-target="guide-doh-url" role="button" tabindex="0" aria-label="Copy DNS-over-HTTPS URL">
+                <span id="guide-doh-url">https://your-server-domain:8443/dns-query</span>
+                <i data-feather="copy" class="w-3.5 h-3.5 text-slate-400 hover:text-cyan-400 flex-shrink-0 ms-2"></i>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    <!-- FOOTER (Clean desktop footer) -->
+    <footer class="hidden md:block border-t border-slate-800/60 bg-slate-950/40 py-4 text-center text-xs text-slate-500 font-mono">
+      <span>WhitePrivateDns Smart Controller — Low-Latency SmartDNS Engine · <span id="app-version-footer">v2.2.0-beta</span></span>
+    </footer>
+    </main>
+
+    <!-- MOBILE STICKY BOTTOM NAVIGATION BAR -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 px-1 py-1 flex items-stretch justify-around">
+      <button class="mobile-nav-item active flex flex-col items-center gap-1 text-[10px] font-semibold text-cyan-400 transition" data-tab="dashboard" data-route="/home">
+        <i data-feather="activity" class="w-4 h-4"></i>
+        <span>Dash</span>
+      </button>
+      <button class="mobile-nav-item flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-white transition" data-tab="clients" data-route="/clients">
+        <i data-feather="users" class="w-4 h-4"></i>
+        <span>Clients</span>
+      </button>
+      <button class="mobile-nav-item flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-white transition" data-tab="policy" data-route="/rules">
+        <i data-feather="layers" class="w-4 h-4"></i>
+        <span>Policy</span>
+      </button>
+      <button class="mobile-nav-item flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-white transition" data-tab="stream" data-route="/logs">
+        <i data-feather="terminal" class="w-4 h-4"></i>
+        <span>Logs</span>
+      </button>
+      <button class="mobile-nav-item flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-white transition" data-tab="api" data-route="/api">
+        <i data-feather="code" class="w-4 h-4"></i>
+        <span>API</span>
+      </button>
+      <button class="mobile-nav-item flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-white transition" data-tab="rules" data-route="/settings">
+        <i data-feather="sliders" class="w-4 h-4"></i>
+        <span>SSL</span>
+      </button>
+      <button class="mobile-nav-item flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-white transition" data-tab="connect" data-route="/guide">
+        <i data-feather="wifi" class="w-4 h-4"></i>
+        <span>Guide</span>
+      </button>
+    </nav>
+
+
+  </div>
+
+  <!-- Custom JavaScript -->
+  <script src="/js/app.js"></script>
+  <!-- Loaded after app.js on purpose: i18n.js redraws the icons it swaps through
+       window.safeFeatherReplace, which app.js defines, and its init() runs on
+       DOMContentLoaded — after both files have been evaluated either way. -->
+  <script src="/js/i18n.js"></script>
+  <!-- The v2.1 settings panels are ES modules: deferred, strict, and able to
+       read the app.js bridge (window.__wpdns) at call time. -->
+  <script type="module" src="/js/modules/twofa.js"></script>
+</body>
+</html>

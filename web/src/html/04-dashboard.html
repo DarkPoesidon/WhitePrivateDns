@@ -1,0 +1,117 @@
+      <!-- Operations overview: source for the embedded dashboard. -->
+      <section id="tab-dashboard" class="tab-content console-overview">
+        <div class="console-heading">
+          <div>
+            <p class="console-eyebrow">NETWORK OPERATIONS</p>
+            <h1>Network overview</h1>
+            <p class="console-description">DNS traffic, resolver health and system load in one place.</p>
+          </div>
+          <span id="live-engine-badge" class="console-status" title="Waiting for live telemetry">
+            <span class="pulse-dot is-stale" id="live-engine-dot" aria-hidden="true"></span>
+            <span id="live-engine-label" aria-live="polite">WAITING FOR TELEMETRY</span>
+          </span>
+        </div>
+
+        <div class="console-metrics" aria-label="Primary telemetry">
+          <div class="console-metric">
+            <div class="console-metric-label">Query Rate</div>
+            <div class="console-metric-value"><span id="stat-qps">0.0</span><span class="console-unit">QPS</span></div>
+            <div class="console-metric-detail">Total: <span id="stat-total-queries">0</span> · <span id="stat-ratelimit" title="Per-source query rate limit">Limit: —</span></div>
+          </div>
+          <div class="console-metric">
+            <div class="console-metric-label">RAM Cache</div>
+            <div class="console-metric-value"><span id="stat-cache-ratio">0.0%</span><span class="console-unit">hit</span></div>
+            <div class="console-metric-detail">Items: <span id="stat-cache-entries">0</span></div>
+          </div>
+          <div class="console-metric">
+            <div class="console-metric-label">SNI Proxy</div>
+            <div class="console-metric-value"><span id="stat-proxy-active">0</span><span class="console-unit">relays</span></div>
+            <div class="console-metric-detail">Total: <span id="stat-proxy-total">0</span> · <span id="stat-proxy-drops" title="Connections that reached the proxy and never became relays">no drops</span></div>
+          </div>
+          <div class="console-metric">
+            <div class="console-metric-label">Live Traffic</div>
+            <div class="console-metric-value console-traffic">
+              <i data-feather="arrow-down" aria-hidden="true"></i><span id="stat-speed-in">0.0</span>
+              <i data-feather="arrow-up" aria-hidden="true"></i><span id="stat-speed-out">0.0</span>
+              <span class="console-unit">KB/s</span>
+            </div>
+            <div class="console-metric-detail">Total: <span id="stat-traffic-total">0 MB</span></div>
+          </div>
+        </div>
+
+        <div class="console-work">
+          <section class="glass-panel console-chart" aria-labelledby="console-chart-title">
+            <div class="console-panel-heading">
+              <div>
+                <h2 id="console-chart-title">Live QPS &amp; Telemetry</h2>
+                <p>Rolling DNS query load · last 60 seconds · 1 Hz</p>
+              </div>
+              <span class="console-panel-meta">LIVE CHART</span>
+            </div>
+            <div class="console-chart-canvas"><canvas id="qpsChart" aria-label="Queries per second over the last 60 seconds"></canvas></div>
+          </section>
+
+          <section class="glass-panel console-upstreams" aria-labelledby="console-upstreams-title">
+            <div class="console-panel-heading">
+              <div>
+                <h2 id="console-upstreams-title">Upstream Racers</h2>
+                <p>Resolver health and routing</p>
+              </div>
+              <button id="run-benchmark-btn" type="button" class="console-text-button"><i data-feather="play" aria-hidden="true"></i>Benchmark</button>
+            </div>
+            <p class="console-panel-description">Parallel DNS queries across fastest global upstreams</p>
+            <div class="console-inline-form">
+              <input type="text" id="new-upstream-input" aria-label="New upstream resolver address" placeholder="e.g. 94.140.14.14:53">
+              <button id="add-upstream-btn" type="button">Add</button>
+            </div>
+            <div id="upstreams-list" class="console-upstreams-list">
+              <div class="console-loading"><span class="pulse-dot is-stale" aria-hidden="true"></span>Reading upstream health…</div>
+            </div>
+            <div class="console-upstreams-foot"><span>Racing Policy: <strong>Fastest Wins</strong></span></div>
+          </section>
+        </div>
+
+        <div class="console-secondary">
+          <section class="glass-panel console-latency" aria-labelledby="console-latency-title">
+            <div class="console-panel-heading">
+              <div>
+                <h2 id="console-latency-title">Resolver Latency</h2>
+                <p>Service time for queries the cache did not answer</p>
+              </div>
+              <span id="stat-lat-count" class="console-panel-meta">no data yet</span>
+            </div>
+            <div class="console-latency-grid">
+              <div><span>p50 median</span><strong><span id="stat-lat-p50">—</span><small>ms</small></strong></div>
+              <div><span>p95</span><strong><span id="stat-lat-p95">—</span><small>ms</small></strong></div>
+              <div><span>p99 worst 1%</span><strong><span id="stat-lat-p99">—</span><small>ms</small></strong></div>
+              <div><span>Peak</span><strong><span id="stat-lat-max">—</span><small>ms</small></strong></div>
+            </div>
+            <div class="console-latency-foot"><span>All queries: <span id="stat-lat-all">—</span></span><span id="stat-cache-health">Cache refresh: —</span></div>
+          </section>
+
+          <section class="glass-panel console-resources" aria-labelledby="console-resources-title">
+            <div class="console-panel-heading"><div><h2 id="console-resources-title">System resources</h2><p>Server load and memory</p></div></div>
+            <div class="console-resource-row">
+              <div><span>CPU Usage</span><strong id="stat-cpu-sys">—</strong></div>
+              <small>Server · Proc: <span id="stat-cpu-percent">—</span> · <span id="stat-cpu-cores">1</span> cores</small>
+            </div>
+            <div class="console-resource-row">
+              <div><span>RAM Usage</span><strong><span id="stat-mem-sys-used">—</span><small> / <span id="stat-mem-sys-total">—</span> MB</small></strong></div>
+              <small>Server · <span id="stat-mem-sys-pct">—</span>% · Proc: <span id="stat-memory">—</span> MB</small>
+            </div>
+          </section>
+        </div>
+
+        <section class="console-activity" aria-labelledby="console-activity-title">
+          <div class="console-activity-head">
+            <div><h2 id="console-activity-title">Recent queries</h2><p>The five latest DNS requests</p></div>
+            <button type="button" class="nav-tab console-text-button" data-tab="stream" data-route="/logs">Open live log <i data-feather="arrow-right" aria-hidden="true"></i></button>
+          </div>
+          <div class="console-table-scroll">
+            <table class="console-query-table">
+              <thead><tr><th>TIME</th><th>DOMAIN</th><th>CLIENT</th><th>DECISION</th><th>LATENCY</th></tr></thead>
+              <tbody id="overview-query-tbody"><tr><td colspan="5" class="console-empty">Waiting for the first query</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>

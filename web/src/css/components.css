@@ -1,0 +1,523 @@
+/* Ambient Animated Grid Scanline */
+body::before {
+  content: " ";
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
+  z-index: 999;
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+  /* 0 in the light theme, which also lets the browser skip compositing the layer. */
+  opacity: var(--scanline-opacity);
+}
+
+/* Glassmorphic Cyber Panels */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.glass-panel:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.glass-card-static {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+}
+
+/* Card Glow Overlays */
+.glass-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--c-cyan-400) / 0.4), transparent);
+  border-radius: 18px 18px 0 0;
+}
+
+/* Sidebar Nav Item Styling.
+ *
+ * Logical properties rather than left/right: this panel now runs in RTL when the
+ * language is Persian, and a hard `border-left` accent would sit on the wrong edge of
+ * every nav item there — on the side the text runs away from, not the side it starts
+ * from. border-inline-start and text-align: start follow the direction instead. */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-inline-start: 3px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: start;
+  background: transparent;
+  border-top: none;
+  border-inline-end: none;
+  border-bottom: none;
+}
+
+.sidebar-nav-item:hover {
+  color: var(--text-main);
+  background: var(--hover-veil);
+}
+
+.sidebar-nav-item.active {
+  color: var(--accent-cyan) !important;
+  background: linear-gradient(90deg, rgb(var(--c-cyan-400) / 0.15), rgb(var(--c-cyan-400) / 0.02)) !important;
+  border-inline-start-color: var(--accent-cyan) !important;
+  box-shadow: inset 0 0 15px rgb(var(--c-cyan-400) / 0.08);
+}
+
+/* linear-gradient has no logical keyword — `to inline-end` is not valid CSS and would
+   drop the whole declaration — so the one direction-dependent value gets an explicit
+   RTL twin. It has to fade away from the accent border, which is now on the right. */
+[dir="rtl"] .sidebar-nav-item.active {
+  background: linear-gradient(270deg, rgb(var(--c-cyan-400) / 0.15), rgb(var(--c-cyan-400) / 0.02)) !important;
+}
+
+.sidebar-nav-item.active svg,
+.sidebar-nav-item.active i {
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 0 8px rgb(var(--c-cyan-400) / 0.6));
+}
+
+/* Pulse Dot */
+.pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--accent-green);
+  box-shadow: 0 0 12px var(--accent-green);
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  display: inline-block;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 9px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* The "LIVE ENGINE" badge used to pulse green unconditionally, including while the
+   stats poll had been failing for ten minutes — a dead daemon and a healthy one looked
+   identical, and every number on the page was frozen at whatever it last read. This is
+   the state the badge wears once the poll has failed twice in a row: amber and still,
+   because a pulsing dot is the thing that says "this is live". */
+.pulse-dot.is-stale {
+  background-color: var(--accent-amber);
+  box-shadow: 0 0 12px var(--accent-amber);
+  animation: none;
+}
+
+/* prefers-reduced-motion: the dot still has to distinguish live from stale, and colour
+   alone does that — the badge text changes too, so it is not the only signal. */
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+}
+
+/* Cyber Badges */
+.badge {
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-proxy {
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.badge-direct {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.badge-block {
+  background: rgb(var(--c-red-400) / 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgb(var(--c-red-400) / 0.4);
+}
+
+.badge-custom {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--accent-purple);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.badge-cached {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-amber);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* .badge-proxy is the one chip whose text is not an --accent-* hex: it borrows
+   --accent-cyan, which is cyan-400 because that is the right cyan for a border or a glow.
+   On the light page cyan-400 is the hover step of the primary buttons, half a step
+   lighter than cyan-300, and on this chip's own cyan wash it measures 4.19:1. Overriding
+   the chip is the same move as .lang-btn.is-active above: the token is load-bearing
+   elsewhere, so the one component that needs a deeper value asks for it directly. */
+[data-theme="light"] .badge-proxy {
+  color: rgb(var(--c-cyan-300));
+}
+
+/* Fallback for an action string the frontend does not know. Neutral on purpose: an
+   unrecognized action must not borrow the colour of a decision the engine did not make. */
+.badge-unknown {
+  background: rgb(var(--c-slate-400) / 0.15);
+  color: var(--text-muted);
+  border: 1px solid rgb(var(--c-slate-400) / 0.4);
+}
+
+/* Animated Cyber Switches */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--track-bg);
+  border: 1px solid var(--track-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  /* inset-inline-start, not left: in RTL the knob has to rest against the right edge
+     and travel left, which is also why the checked transform is direction-dependent
+     below. A hard `left` put the knob under its own track in Persian. */
+  inset-inline-start: 3px;
+  bottom: 3px;
+  background-color: var(--knob-bg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: rgb(var(--c-cyan-400) / 0.25);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgb(var(--c-cyan-400) / 0.35);
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+  background-color: var(--accent-cyan);
+  box-shadow: 0 0 14px var(--accent-cyan);
+}
+
+/* translateX is a physical axis, so RTL needs the opposite sign — otherwise the knob
+   leaves the track entirely when the switch is turned on. */
+[dir="rtl"] input:checked + .slider:before {
+  transform: translateX(-22px);
+}
+
+/* Custom Scrollbar.
+ *
+ * The ::-webkit-scrollbar rules below are Chromium and Safari only, so every scrollable panel in
+ * the dashboard — the query stream, the rules lists, the tall modals — rendered with the platform
+ * default light scrollbar on Firefox: a pale bar down the side of a near-black glass panel. The
+ * two standard properties fix that in one place, for every scroller, rather than per element.
+ *
+ * scrollbar-width: thin is the only size the standard offers; it lands close enough to the 5px
+ * below that the two engines do not look like different products. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+/* Code Snippet Box */
+.code-box {
+  background: var(--code-bg);
+  border: 1px solid rgb(var(--c-cyan-400) / 0.22);
+  border-radius: 12px;
+  padding: 10px 14px;
+  /* var(), not a second hardcoded 'JetBrains Mono', monospace stack. A copy box holds
+     a token, an IP or a DoH URL, but the portal also puts Persian next to one, and the
+     literal stack that used to be here had no Persian family in it at all. */
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-cyan);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.25s ease;
+  word-break: break-all;
+}
+
+.code-box:hover {
+  border-color: var(--accent-cyan);
+  background: var(--code-bg-hover);
+  box-shadow: 0 0 20px rgb(var(--c-cyan-400) / 0.15);
+}
+
+/* The copyable boxes are exposed as buttons and are keyboard-reachable, so the focus
+ * ring has to be visible — a focusable control with no visible focus state is a
+ * control a keyboard user cannot find. :focus-visible rather than :focus so a mouse
+ * click does not leave a ring behind, and the outline is offset so it reads as a ring
+ * around the box instead of thickening its own border. */
+.code-box:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  border-color: var(--accent-cyan);
+}
+
+/* ── Policy cards: one accent variable per brand ───────────────────────────────
+ *
+ * Every policy card used to carry a 2xl emoji, and an emoji is drawn by whatever
+ * emoji font the platform ships: Segoe UI Emoji on Windows, Apple Color Emoji on
+ * macOS, Noto on most Android builds, and on a few Linux desktops nothing at all —
+ * a blank box where the game's mark belongs. They also cannot be recoloured, so the
+ * row never matched the panel it sat in.
+ *
+ * The replacement is a Feather glyph in a tinted tile. Feather is already in the
+ * binary and already redrawn by safeFeatherReplace(), so this costs zero extra
+ * bytes, and because Feather draws with stroke="currentColor" the icon simply takes
+ * the tile's colour — hence the single --accent declaration per brand below rather
+ * than a colour repeated in three properties.
+ *
+ * The eight hover rules that were here carried !important, which was working around
+ * .glass-panel's own border-color. It is not needed: .policy-card:hover is (0,2,0)
+ * against .glass-panel's (0,1,0), so it wins on specificity alone. Values are
+ * space-separated RGB channels because that is what rgb()'s slash form needs to
+ * derive the four alphas each accent is used at. */
+/* The default accent has to live on :root, not on .policy-icon, and the reason is the
+ * one asymmetry of custom properties: a declaration on the element itself beats an
+ * inherited one. Put `--accent: cyan` on .policy-icon and all sixteen brand tokens
+ * below stop working, because they are declared on the card — an ancestor — and the
+ * icon's own declaration would shadow every one of them. Declared here it is the
+ * furthest ancestor instead of the nearest, so any .card-* in between still wins.
+ *
+ * This is not hypothetical tidiness. Six .policy-icon tiles are used outside any
+ * .policy-card — the four Policy section headers (Game, Streaming, Dev & Security,
+ * Bandwidth) and the two API card headers — and with --accent undefined all three of
+ * the properties below were invalid at computed-value time: no fill, a border falling
+ * back to currentColor, and a glyph inheriting body text. They rendered as grey
+ * outlines among fifteen coloured tiles. Note why the light-mode override cannot
+ * repair that on its own: an invalid var() does not fall back to the earlier rule, it
+ * computes as unset, so the tile would stay transparent in light mode too. */
+:root { --accent: var(--c-cyan-400); }
+.policy-card { --accent: var(--c-cyan-400); }
+
+.policy-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 34px: the same optical weight the 2xl emoji had, minus its unpredictable
+   * line-height. flex:0 0 auto so a long game name cannot squeeze the tile. */
+  width: 2.125rem;
+  height: 2.125rem;
+  flex: 0 0 auto;
+  border-radius: 0.7rem;
+  background: rgb(var(--accent) / 0.12);
+  border: 1px solid rgb(var(--accent) / 0.28);
+  color: rgb(var(--accent));
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.policy-card:hover {
+  border-color: rgb(var(--accent) / 0.6);
+  box-shadow: 0 8px 30px rgb(var(--accent) / 0.2);
+}
+.policy-card:hover .policy-icon {
+  background: rgb(var(--accent) / 0.2);
+  border-color: rgb(var(--accent) / 0.5);
+}
+
+/* Brand colours are brand colours in either theme — Valorant's red does not become
+ * a different red on a white page. But a mid-tone hue that reads clearly against a
+ * dark card is thin against a light one, so light mode has to deepen the glyph.
+ *
+ * This used to be `filter: brightness(0.86)` on the tile, and that could never have
+ * worked: a filter applies to the element's own background as well as its content, so
+ * it scaled glyph and tile by the same factor and the gap between them barely moved.
+ * Kick's lime went from 1.26:1 to 1.66:1 against its own wash — still half of the 3:1
+ * that 1.4.11 asks of a meaningful glyph. Ten of the sixteen brands failed the same
+ * way: pubg 1.52, codm 1.70, steam 1.87, rockstar 1.88, xbox 2.16, battlenet 2.19,
+ * spotify 2.20, ubisoft 2.22, valorant 2.71, ea 2.94.
+ *
+ * So darken the colour instead of the pixels. color-mix toward black is what
+ * brightness() was reaching for, except it lands in `color`, where it only touches the
+ * glyph — the tile keeps its pale 16% wash and the gap opens from one side only. 58% is
+ * set by the worst brand: it puts Kick at 3.68:1 resting and 3.62:1 on the hover wash,
+ * and every other brand between 4.2 and 7.9. The four already-dark hues (cyan, discord,
+ * twitch, epic) go deeper than they strictly need — that is the price of one multiplier
+ * instead of sixteen hand-tuned light-mode tokens, and a deep glyph on a pale tint of
+ * its own hue is the conventional light-mode read anyway.
+ *
+ * The @supports arm is not decoration: color-mix is a 2023 baseline, and a browser
+ * without it would drop the declaration and inherit the bright accent unchanged. It
+ * gets the old filter back, which was not enough but was not nothing. */
+[data-theme='light'] .policy-icon {
+  background: rgb(var(--accent) / 0.16);
+  /* currentColor is the darkened glyph from the line below, so the border gets the
+   * deepening for free. At the raw accent it was invisible on the pale hues — Kick's
+   * border measured 1.18:1 against the card, Pubg's 1.24 — which read as a tile with
+   * no edge at all. Mixing the dark glyph colour with transparent instead of the
+   * bright accent puts every border between 1.7 and 2.4:1: still decorative, 1.4.11
+   * does not apply to it because the glyph inside is what carries the meaning, but
+   * now actually present on screen. */
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
+  color: color-mix(in srgb, rgb(var(--accent)) 58%, #000);
+}
+
+@supports not (color: color-mix(in srgb, red 50%, #000)) {
+  [data-theme='light'] .policy-icon { filter: brightness(0.86); }
+}
+
+/* A card whose <h4> is deliberately coloured takes that colour; one whose title is
+ * plain white takes the brand's own. That is the whole rule, and it is why several
+ * cards below carry no brand class at all — their titles are cyan-400, which is what
+ * .policy-card already defaults to. */
+.card-valorant    { --accent: 255 70 85; }
+.card-discord     { --accent: 88 101 242; }
+.card-epic        { --accent: 168 85 247; }
+.card-steam       { --accent: 56 189 248; }
+.card-rockstar    { --accent: 245 158 11; }
+.card-xbox        { --accent: 16 185 129; }
+.card-playstation { --accent: 59 130 246; }
+.card-spotify     { --accent: 29 185 84; }
+.card-pubg        { --accent: 251 191 36; }
+.card-codm        { --accent: 52 211 153; }
+.card-ea          { --accent: 244 63 94; }
+.card-battlenet   { --accent: 96 165 250; }
+.card-ubisoft     { --accent: 148 163 184; }
+.card-roblox      { --accent: 239 68 68; }
+.card-twitch      { --accent: 145 70 255; }
+.card-kick        { --accent: 83 252 24; }
+
+/* ── Language switch ───────────────────────────────────────────────────────────
+ * Two buttons in one track, so the pressed one has to be obvious at a glance: this
+ * is the only control on the panel whose whole job is to tell you which of two
+ * states you are in. is-active is written by js/i18n.js alongside aria-pressed —
+ * the attribute is what a screen reader reads, this is what everyone else sees. */
+.lang-btn {
+  color: rgb(var(--c-slate-400));
+  border: 1px solid transparent;
+}
+.lang-btn:hover { color: rgb(var(--c-slate-200)); }
+.lang-btn.is-active {
+  background: rgb(var(--c-cyan-400) / 0.14);
+  border-color: rgb(var(--c-cyan-400) / 0.35);
+  color: rgb(var(--c-cyan-400));
+}
+.lang-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 1px;
+}
+/* Light mode gets a different pressed treatment, not a re-tinted version of the same one.
+ * The wash above works in dark mode because the track is darker than the page and the
+ * chip is lighter than the track — the pressed item is the brightest thing in the group.
+ * Invert the page and that ordering collapses: the track (--c-slate-800) is now a grey
+ * band, a 14% cyan wash over it lands at rgb(192,212,223), and cyan-400 on that measured
+ * 3.49:1 — the worst contrast left anywhere in the panel, on the one control whose entire
+ * purpose is to show you which of two states you are in.
+ *
+ * Deepening --c-cyan-400 was the obvious fix and the wrong one: that token is also the
+ * hover step of the seven cyan-500 primary buttons, and taking it darker collapses it
+ * into the resting fill so the buttons stop reacting to the pointer. So the chip changes
+ * instead of the colour. A raised near-white chip on the grey track is what a light-mode
+ * segmented control actually looks like, it puts cyan-400 back on a near-white surface
+ * (5.15:1), and it reads as pressed from further away than the wash did. */
+[data-theme="light"] .lang-btn.is-active {
+  background: rgb(var(--c-slate-900));
+  border-color: rgb(var(--c-cyan-400) / 0.45);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
+}
+
+/* Quick Action Profile Buttons */
+.quick-mode-btn {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.quick-mode-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.2);
+}
+.quick-mode-btn:active {
+  transform: scale(0.97);
+}
+
+/* Mobile Bottom Navigation Glow */
+/* Sizing lives here rather than on seven class lists. Each item fills the bar's height
+   instead of floating inside it: the bar used to be `py-2` around a 32px column — 48px of
+   chrome carrying a 32px target — and is now `py-1` around a 40px item, the same 48px bar
+   with a 40px target. WCAG 2.2 SC 2.5.8 asks for 24, Material asks for 48, and 40 is what
+   fits once the bar keeps its height. `flex: 1` also makes the seven targets equal width and
+   gapless (360 / 7 ≈ 51px each, enough for the widest label, "Clients", at 10px), so a thumb
+   landing between two labels hits one of them rather than the bar itself. */
+.mobile-nav-item {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 40px;
+  justify-content: center;
+}
+.mobile-nav-item.active {
+  color: var(--accent-cyan);
+}
+.mobile-nav-item.active svg,
+.mobile-nav-item.active i {
+  filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.6));
+}

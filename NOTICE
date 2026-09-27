@@ -1,0 +1,7 @@
+WhitePrivateDns includes code derived from the project formerly named
+HyperDNS, distributed under the GNU Affero General Public License,
+version 3. WhitePrivateDns contains modifications made in 2026 and
+retains the AGPL-3.0 license in LICENSE.
+
+The former project's name remains in the legacy v1 migration script only
+where it identifies old service names, paths, and processes for migration.

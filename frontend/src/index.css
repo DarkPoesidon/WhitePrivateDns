@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-900 text-slate-100 min-h-screen selection:bg-cyan-500 selection:text-slate-950 font-sans;
+    background: radial-gradient(60rem 40rem at 85% -10%, rgba(99, 102, 241, .14), transparent 60%),
+                radial-gradient(50rem 35rem at -10% 110%, rgba(0, 240, 255, .10), transparent 60%),
+                #0b1220;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl;
+  }
+}

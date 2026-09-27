@@ -1,0 +1,69 @@
+      <!-- ============================================== -->
+      <!-- TAB: CLIENTS & IP WHITELIST (Shelter & Shecan Mode) -->
+      <!-- ============================================== -->
+      <section id="tab-clients" class="tab-content space-y-6 hidden">
+
+        <!-- Access Control Mode Banner -->
+        <div class="glass-panel p-5 sm:p-6 border border-cyan-500/30">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <div class="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex-shrink-0 mt-0.5">
+                <i data-feather="shield" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm sm:text-base font-bold text-white font-heading">Client Access Whitelist Mode</h3>
+                  <span id="access-mode-badge" class="badge badge-direct">PUBLIC ACCESS</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed max-w-2xl">
+                  <strong>When Enabled (Shelter / Shecan Style):</strong> Only whitelisted client IP addresses can resolve DNS and access gaming routes. Unregistered IPs are refused access.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 self-end sm:self-center">
+              <span class="text-xs font-mono text-slate-400 font-semibold" id="access-mode-status-text">Public Mode</span>
+              <label class="switch">
+                <input type="checkbox" id="access-mode-switch">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clients Header & Action Bar -->
+        <!-- `flex-wrap` + `shrink-0` + `sm:ms-auto` is the same safety net as the stream
+             controls bar. Here the row already fits every band by about 14px (288px search +
+             12px gap + the button), but 14px is thinner than the difference between one
+             translated button label and another, so the row is allowed to wrap rather than
+             clip if it ever stops fitting. -->
+        <div class="flex flex-col sm:flex-row flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="relative w-full sm:w-72 sm:max-w-full">
+              <input type="text" id="client-search-input" aria-label="Search subscriber accounts" placeholder="Search client name, ID, or IP..."
+                class="w-full ps-8 pe-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400 font-mono">
+              <i data-feather="search" class="w-3.5 h-3.5 text-slate-500 absolute start-2.5 top-2.5"></i>
+            </div>
+          </div>
+
+          <button id="open-add-client-btn" class="w-full sm:w-auto sm:ms-auto sm:shrink-0 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 text-slate-950 font-bold rounded-lg text-xs font-heading flex items-center justify-center gap-2 transition shadow-lg shadow-cyan-500/20 whitespace-nowrap">
+            <i data-feather="user-plus" class="w-4 h-4"></i>
+            <span>Add New Client</span>
+          </button>
+        </div>
+
+        <!-- Clients Cards Container. The notice below is the state before loadClients has
+             answered; it carries .clients-placeholder because that is how loadClients tells a
+             grid of notices apart from a grid of subscriber cards when it decides whether a
+             reload may repaint. An empty grid here used to read as "your subscribers are
+             gone" — the one conclusion an operator would act on, and the one that was never
+             true. -->
+        <div id="clients-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="clients-placeholder col-span-1 md:col-span-2 glass-panel p-8 text-center text-slate-400 border border-slate-800">
+            <i data-feather="loader" class="w-8 h-8 mx-auto text-slate-600 mb-2"></i>
+            <div class="font-bold text-slate-300 font-heading">Loading clients…</div>
+            <p class="text-xs text-slate-500 mt-1">Reading the subscriber list from the server.</p>
+          </div>
+        </div>
+
+      </section>

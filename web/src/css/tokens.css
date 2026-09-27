@@ -1,0 +1,290 @@
+/* Fonts are self-hosted, and there are exactly two of them.
+ *
+ * History, because it explains the shape of what follows. This file once opened with
+ * an @import of three Google Fonts families (Chakra Petch, Inter, JetBrains Mono).
+ * That request was refused by this project's own Content-Security-Policy on every
+ * single page load — style-src is 'self' 'unsafe-inline' and font-src is 'self'
+ * data:, neither of which permits fonts.googleapis.com — so none of the three had
+ * ever loaded, the panel had always rendered in whatever came next in each stack, and
+ * the console logged a violation every time the dashboard opened. The @import was
+ * removed and the real fallback stacks were written out in its place.
+ *
+ * That left a second, quieter problem: the panel is bilingual. Half its text is
+ * Persian and half is English, and a stack of Latin-only families means every Persian
+ * string fell through all of them to the browser's last resort — Tahoma on Windows,
+ * something else on Android, nothing predictable anywhere. Persian and English in the
+ * same row rendered at different apparent sizes with different baselines, which is
+ * precisely the kind of defect that reads as "cheap" without the reader being able to
+ * say why.
+ *
+ * So the fonts now ship in the binary:
+ *
+ *   Vazirmatn      — one variable file, weights 100-900, Persian *and* Latin in a
+ *                    single family. It carries both scripts, so a heading that mixes
+ *                    them has one set of metrics and one baseline, and no weight
+ *                    needs its own download.
+ *   JetBrains Mono — regular only, for the telemetry: IPs, tokens, UUIDs, latency
+ *                    figures. Its digits are the same width, which is why a number
+ *                    that repaints once a second stops shifting the cells beside it.
+ *                    Bold mono is synthesised by the browser from this one face;
+ *                    that is a deliberate trade of a small amount of fidelity for
+ *                    92 KB, in a role that is 12px monospace on a dark panel.
+ *
+ * Both are OFL, and both licences sit next to the files in web/fonts/.
+ *
+ * Chakra Petch — the old display family for headings — is gone rather than
+ * self-hosted. It has no Persian coverage at all, so every Persian heading would have
+ * fallen out of it into a different family with a different x-height, reintroducing
+ * the exact mismatch above in the most prominent text on the page. Vazirmatn at 700
+ * with tracking carries a heading perfectly well, and it carries it identically in
+ * both languages.
+ *
+ * url() is relative to this stylesheet rather than absolute, so the panel keeps
+ * working if it is ever served under a path prefix. font-src 'self' already permits
+ * these, so the CSP is unchanged — see csp_test.go, which pins that. */
+
+@font-face {
+  font-family: 'Vazirmatn';
+  /* Plain format('woff2') rather than the two-line 'woff2 supports variations' /
+     'woff2-variations' dance upstream ships. Every engine that understands variable
+     fonts also accepts this, and one that does not simply renders a single weight
+     from the same file instead of rejecting the whole src list. */
+  src: url('../fonts/vazirmatn-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  /* swap, not block: the panel's own markup arrives first, and an operator watching a
+     resolver should never see an empty page waiting on a typeface. Served from the
+     binary over the same connection, the swap is usually imperceptible. */
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../fonts/jetbrains-mono-var.woff2') format('woff2');
+  /* A variable face carrying the real weight axis, so the range here is the truth
+     rather than a claim. The static Regular that used to sit here forced the browser
+     to synthesise bold for roughly twenty elements — the nine font-extrabold stat
+     numerals among them — which smears a monospaced digit sideways and is exactly
+     the wrong thing to do to a figure someone reads at a glance. This file is also
+     40 KB against the static face's 92 KB, because the latin subset of one variable
+     face is smaller than one static weight of the full character set. */
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Two themes, one set of markup.
+ *
+ * Every colour the panel paints comes from a token below, and the tokens are declared
+ * twice: once here for [data-theme="dark"] and once in the [data-theme="light"] block
+ * that follows. Flipping the attribute on <html> repaints all of it — 396 slate
+ * utilities, 151 cyan, 87 text-white, plus every rule in this file — with no markup
+ * change and no second stylesheet.
+ *
+ * The --c-* tokens are space-separated RGB CHANNELS, not colours: `6 9 19`, not
+ * `#060913`. That form is what lets the Tailwind config wrap them as
+ * `rgb(var(--c-slate-900) / <alpha-value>)` and keep the opacity modifiers working —
+ * 47 utilities in this panel carry one (border-cyan-500/30, bg-slate-950/70), and they
+ * would all paint fully opaque against a plain var() colour. Rules in this file that
+ * want a solid colour write rgb(var(--c-x)); rules that want a tint write
+ * rgb(var(--c-x) / 0.16).
+ *
+ * Read the scale as a ROLE, not as a lightness. slate-900 means "the page" and
+ * slate-950 means "an inset inside the page" in both themes, so the ramp inverts in
+ * light mode: --c-slate-900 is near-white there and text-slate-400 is a dark grey.
+ * Inverting the ramp is what lets the existing markup carry a light theme at all; the
+ * alternative was renaming 116 utilities across 4,000 lines of markup to semantic
+ * names, at a much higher risk of missing one.
+ *
+ * The light values are not the dark ones inverted arithmetically. Each was chosen for
+ * contrast against the light page: every foreground token clears 4.5:1 on
+ * --c-slate-900, which is why cyan-400 becomes #0e7490 rather than a lightened #00f0ff
+ * (neon cyan on white measures 1.4:1 and is unreadable), and why the semantic 300/400
+ * shades — 90 text utilities between them — drop to their 600/700 equivalents. */
+:root,
+[data-theme="dark"] {
+  /* Surfaces and foregrounds. 950 = deepest inset, 900 = the page, 800/700 = raised
+     surfaces and borders, 600-500 = dividers and placeholders, 400-50 = text from
+     muted to strongest. */
+  --c-slate-950: 3 7 18;
+  --c-slate-900: 6 9 19;
+  --c-slate-800: 13 20 38;
+  --c-slate-700: 22 33 62;
+  --c-slate-600: 71 85 105;
+  /* Tailwind's own slate-500 (#64748b) sat here while the comment above described 500 as a
+     divider/placeholder tier — but the markup uses `text-slate-500` for the 9-12px metadata
+     line under every stat, the client-token monospace, "انقضای پلن", "Used: 0 B" and both
+     empty states. As text it measured 3.73:1 on the card, 4.06:1 on the panel and 4.11:1 on
+     the page: ten AA failures, all invisible in review because the text reads as
+     deliberately quiet rather than broken. This is the dark-mode twin of the light block's
+     500/400 note below, and the fix runs the other way — lighter, not darker.
+     Floor: 4.5:1 on the lightest surface any of them lands on, which is the panel
+     (11 25 41 composited); this value measures 5.38:1 there and 5.94:1 on the page. Kept
+     well short of 400 so the muted/faint tiers stay distinguishable — the gap is 1.2:1,
+     which is the cost of the AA floor on a ramp whose page is already near-black. */
+  --c-slate-500: 128 143 163;
+  --c-slate-400: 148 163 184;
+  --c-slate-300: 203 213 225;
+  --c-slate-200: 226 232 240;
+  --c-slate-100: 241 245 249;
+  --c-slate-50: 248 250 252;
+  --c-white: 255 255 255;
+
+  /* Accent. 500 is the fill (buttons, active track), 400 the text and icon accent,
+     300/200 quieter text, 950 a tinted background block. */
+  --c-cyan-500: 0 210 223;
+  --c-cyan-400: 0 240 255;
+  --c-cyan-300: 103 232 249;
+  --c-cyan-200: 165 243 252;
+  --c-cyan-950: 8 51 68;
+
+  /* Semantic. The 300 and 400 shades are the text shades; the 500/600 shades are the
+     fills. Both tiers are tokenised, and the two tiers invert in OPPOSITE directions.
+
+     A text shade has to get darker in light mode, because the surface behind it went
+     from near-black to near-white. A fill shade has to do the reverse — get darker
+     too, but for the opposite reason: it *is* the surface, and the foreground on top
+     of it is `text-slate-950` or `text-white`, both of which are tokenised and both of
+     which flip to near-white on the light page. Leaving the fills at Tailwind's own
+     mid-bright literals (the earlier design, and the reason this comment was rewritten)
+     produced near-white bold text on #10b981 at 2.26:1, on #0891b2 at 3.28:1, on
+     #ea580c at 3.17:1 and on #4f46e5 at 2.98:1 — every primary, danger and confirm
+     button in the panel failing WCAG 1.4.3 in light mode while the cards around them
+     passed. The same literals also made every translucent badge: `bg-emerald-500/10`
+     over a white card is a 10% wash of a bright green, which is no wash at all.
+
+     So in light mode a fill shade is the 700-900 step of its hue, and the ramp reads
+     "higher number = deeper fill" rather than "higher number = lighter colour".
+     Foregrounds that sit on a fill in BOTH themes use `text-onfill`, which is a literal
+     white that does not invert — see the note in index.html's colour config. */
+  --c-emerald-500: 16 185 129;
+  --c-emerald-400: 52 211 153;
+  --c-emerald-300: 110 231 183;
+  /* 700 and 600 exist for the five `text-onfill` buttons and nothing else. White bold 12px
+     on Tailwind's mid-bright fills fails AA in DARK mode — bg-red-500 measures 3.76:1,
+     bg-purple-500 3.96:1, and the `hover:bg-*-400` step they pair with drops to 2.68:1 and
+     2.32:1. That is the exact mirror of the light-mode failure the block below documents
+     (near-white on #10b981 at 2.26:1), and it went unnoticed for the opposite reason: the
+     light sweep fixed the fills by deepening them, which the dark theme never did.
+
+     The fix re-points those five call sites two steps deeper (500→600 resting, 400→700
+     hover) rather than darkening 500 itself, because 500 is also every translucent badge
+     wash, dot and glow in the panel — `bg-red-500/10`, `shadow-purple-500/20` — and those
+     are correct as they are. Two steps deeper lands white at 4.83:1 / 5.38:1 resting and
+     6.47:1 / 6.98:1 on hover, and makes hover DARKEN in dark mode, which is the only
+     direction with headroom left above a saturated fill.
+
+     The four 700s have no [data-theme="light"] twin on purpose: light mode's ramp is this
+     one shifted two steps deeper already, so the value that is a dark-mode 700 is exactly
+     what light mode was painting for the old `-400` hover. Inheriting from :root keeps the
+     light rendering of all five buttons byte-identical to before the re-point — the only
+     light overrides needed are 600, which has to answer the old light `-500`. */
+  --c-red-700: 185 28 28;
+  --c-red-600: 220 38 38;
+  --c-red-500: 239 68 68;
+  --c-red-400: 248 113 113;
+  --c-red-300: 252 165 165;
+  /* 900 and 950 are the only "deep" semantic shades that are tokenised, because they are
+     the only ones used as a surface: the Reset Traffic button is bg-red-950/40 with a
+     bg-red-900/60 hover. Left at Tailwind's near-black maroon those two turn into a dark
+     blob inside a white modal — the single loudest element on the light page, and the one
+     the operator is least meant to be drawn to. */
+  --c-red-950: 69 10 10;
+  --c-red-900: 127 29 29;
+  --c-amber-500: 245 158 11;
+  --c-amber-400: 251 191 36;
+  --c-amber-300: 252 211 77;
+  /* 700/600: the Add Token button and the API-docs gradient — see the red note above. */
+  --c-purple-700: 126 34 206;
+  --c-purple-600: 147 51 234;
+  --c-purple-500: 168 85 247;
+  --c-purple-400: 192 132 252;
+  --c-purple-300: 216 180 254;
+  --c-orange-600: 234 88 12;
+  --c-orange-500: 249 115 22;
+  --c-orange-400: 251 146 60;
+  --c-orange-300: 253 186 116;
+  /* 600 is a FILL-ONLY shade here: the datepicker's selected day (`bg-blue-600`, white
+     text, 5.17:1) and the policy multi-select's chosen option (`bg-blue-600/25`). It used to
+     be the dark end of the brand gradient too — `from-cyan-500 to-blue-600` under near-black
+     `text-slate-950` — and that measured 3.90:1 at 12px/700 across all seven primary buttons
+     (login, add-client, issue-SSL, re-run-diagnostics, the danger-modal confirm and two
+     more). The token could not simply be lightened to fix them: near-black text wants it
+     lighter while the datepicker's white text wants it darker, so one token cannot serve
+     both roles. Flipping the gradient's foreground to `text-onfill` was worse — white on the
+     cyan-500 end is 1.86:1.
+
+     So the seven call sites moved to `to-blue-500` (5.47:1 dark, 8.31:1 light) and dropped
+     their `hover:to-blue-500`, which is now the resting value. `hover:to-blue-400` would
+     have been the tidier two-ended hover, but light 400 and light 500 are the same ink
+     (29 78 216, one of this ramp's documented collisions) so the light hover would have gone
+     dead; separating them would have pushed the three `text-blue-400` icons down to 3.31:1
+     on their own `bg-blue-600/25` wash. Hover feedback survives through the cyan stop
+     (`hover:from-cyan-400`), which brightens in both themes. */
+  --c-blue-600: 37 99 235;
+  --c-blue-500: 59 130 246;
+  --c-blue-400: 96 165 250;
+  --c-blue-300: 147 197 253;
+  --c-blue-200: 191 219 254;
+  --c-yellow-500: 234 179 8;
+  --c-yellow-400: 250 204 21;
+  /* indigo, rose and teal appear only as fills, so they have no text shade — but a
+     fill is exactly what has to invert, so they are tokenised all the same. The two 700s
+     are the hover end of the two gradient buttons; 600 already clears white text at 6.29:1
+     (indigo) and 4.70:1 (rose), so only the hover step needed a new shade. */
+  --c-indigo-700: 67 56 202;
+  --c-indigo-600: 79 70 229;
+  --c-indigo-500: 99 102 241;
+  --c-rose-700: 190 18 60;
+  --c-rose-600: 225 29 72;
+  --c-rose-500: 244 63 94;
+  --c-teal-500: 20 184 166;
+
+  --bg-main: rgb(var(--c-slate-900));
+  --bg-card: rgba(13, 20, 38, 0.72);
+  --bg-card-hover: rgba(20, 30, 58, 0.9);
+  --border-color: rgba(56, 189, 248, 0.16);
+  --border-glow: rgba(0, 240, 255, 0.55);
+  --text-main: rgb(var(--c-slate-50));
+  --text-muted: rgb(var(--c-slate-400));
+  --accent-cyan: rgb(var(--c-cyan-400));
+  --accent-green: #10b981;
+  --accent-purple: #a855f7;
+  --accent-red: #ff4655;
+  /* Brand-fixed: Discord's blurple is Discord's in both themes. */
+  --accent-discord: #5865f2;
+  --accent-amber: #f59e0b;
+
+  /* Chrome the components below used to hardcode. Named here so the light block can
+     answer them rather than each rule needing a [data-theme] twin. */
+  --page-glow-cyan: rgba(0, 240, 255, 0.12);
+  --page-glow-purple: rgba(168, 85, 247, 0.14);
+  --page-glow-green: rgba(16, 185, 129, 0.08);
+  --page-wash-from: rgba(6, 9, 19, 0.6);
+  --page-wash-to: rgba(6, 9, 19, 0.95);
+  --scanline-opacity: 0.35;
+  --card-shadow: 0 10px 35px 0 rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 12px 40px 0 rgba(0, 240, 255, 0.18);
+  --hover-veil: rgba(255, 255, 255, 0.05);
+  --knob-bg: #cbd5e1;
+  --track-bg: rgba(255, 255, 255, 0.1);
+  --track-border: rgba(255, 255, 255, 0.15);
+  --code-bg: #030611;
+  --code-bg-hover: #050b1d;
+  --scroll-thumb: rgba(56, 189, 248, 0.3);
+  --scroll-track: rgba(6, 9, 19, 0.8);
+
+  /* One definition per role. Vazirmatn leads two of the three and appears in all
+     three: it is the only family here that covers Persian, so it has to be reachable
+     from every role — including the mono one, where the portal renders strings like
+     "۲.۵ GB باقیمانده" and would otherwise set the number in JetBrains Mono and the
+     Persian beside it in whatever the OS offered. The system names after it are the
+     no-webfont path (a 304-less first paint, a stripped build, an operator who blocks
+     fonts) and are ordered so that path still looks deliberate. */
+  --font-body: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, 'Noto Sans Arabic', 'Noto Sans', sans-serif;
+  --font-heading: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Noto Sans Arabic', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Vazirmatn', ui-monospace, 'Cascadia Mono',
+    'Segoe UI Mono', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
