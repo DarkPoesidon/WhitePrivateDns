@@ -67,6 +67,7 @@ class UpdateTests(unittest.TestCase):
         (self.install / "version.json").write_text(json.dumps({"version": "2.2.0", "channel": "beta.3"}))
         self.old_binary = self._binary("beta.3", "12345678")
         (self.install / "whiteprivatedns").write_bytes(self.old_binary)
+        (self.install / "whiteprivatedns").chmod(0o755)
         self.version_meta = {"version": "2.2.0", "channel": "beta.4", "codename": "WhitePrivateDns"}
         semantic = json.dumps({k: self.version_meta[k] for k in ("channel", "codename", "version")},
                               sort_keys=True, separators=(",", ":")).encode()
@@ -131,6 +132,8 @@ case "$*" in
     *) exit 97 ;;
 esac
 """)
+        curl.chmod(0o755)
+        ctl.chmod(0o755)
 
     def run_update(self, active=True):
         if active:
