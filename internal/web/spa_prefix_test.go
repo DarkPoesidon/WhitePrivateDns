@@ -8,6 +8,33 @@ import (
 	"testing"
 )
 
+func TestPersianGuideIsServedInsideAdminNamespace(t *testing.T) {
+	ws, _, cleanup := setupTestWebServer(t)
+	defer cleanup()
+	h := ws.BuildHandler()
+	guidePath := "/" + ws.AdminPath() + "/dash/guide-fa.html"
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, guidePath, nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("GET %s = %d, want 200", guidePath, w.Code)
+	}
+	if got := w.Header().Get("Content-Type"); !strings.HasPrefix(got, "text/html") {
+		t.Errorf("guide Content-Type = %q, want HTML", got)
+	}
+	for _, want := range []string{"Active relay IPv4", "Public DoH URL", "example.com"} {
+		if !strings.Contains(w.Body.String(), want) {
+			t.Errorf("offline guide is missing %q", want)
+		}
+	}
+
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/guide-fa.html", nil))
+	if w.Code != http.StatusNotFound {
+		t.Errorf("guide at host root = %d, want 404", w.Code)
+	}
+}
+
 // Since v2.1 the SPA is served at /<admin-path>/dash/, but index.html was
 // written when the panel lived at the host root: its stylesheet and script
 // tags name /css/... and /js/... absolutely, and a browser landing on

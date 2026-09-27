@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { renderGuide } from './render-guide.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const assets = {
@@ -30,5 +31,18 @@ for (const [target, parts] of Object.entries(assets)) {
     await writeFile(destination, contents);
     console.log(`Built ${target}`);
   }
+}
+const guideTarget = join(root, 'web/guide-fa.html');
+const guideSource = await readFile(join(root, 'docs/DASHBOARD_GUIDE.fa.md'), 'utf8');
+const guideContents = Buffer.from(renderGuide(guideSource));
+if (check) {
+  const current = await readFile(guideTarget);
+  if (!current.equals(guideContents)) {
+    console.error('web/guide-fa.html is out of date; run node tools/build-web-assets.mjs');
+    stale = true;
+  }
+} else {
+  await writeFile(guideTarget, guideContents);
+  console.log('Built web/guide-fa.html');
 }
 if (stale) process.exitCode = 1;

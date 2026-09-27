@@ -51,6 +51,7 @@ import "embed"
 
 //go:embed index.html
 //go:embed login.html
+//go:embed guide-fa.html
 //go:embed css/tailwind.purged.css
 //go:embed css/style.css
 //go:embed css/modern.css
