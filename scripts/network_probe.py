@@ -81,8 +81,8 @@ def dns_over_tcp(host, port, timeout, tls=False):
 
 def dns_over_https(url, timeout, token):
     parsed = parse.urlsplit(url)
-    if parsed.scheme != "https" or not parsed.hostname:
-        raise ValueError("DoH URL must use HTTPS")
+    if parsed.scheme != "https" or not parsed.hostname or parsed.username is not None:
+        raise ValueError("DoH URL must use HTTPS and must not contain userinfo")
     if token:
         params = parse.parse_qsl(parsed.query, keep_blank_values=True)
         params.append(("token", token))
@@ -108,16 +108,46 @@ def relay_path(host, port, timeout, sni):
             return "ok", f"TLS handshake through relay succeeded for {sni}"
 
 
-def run_probe(name, target, fn):
+def run_probe(name, target, fn, redact_error=False):
     start = time.monotonic()
     try:
         status, detail = fn()
     except error.HTTPError as exc:
         status, detail = "service_error", f"HTTP {exc.code} from endpoint"
     except (OSError, ssl.SSLError, EOFError, ValueError) as exc:
-        status, detail = "unreachable", f"{type(exc).__name__}: {exc}"
+        # urllib errors can include the full request URL. DoH URLs may carry a
+        # subscriber token, so never echo the exception text for this path.
+        detail = type(exc).__name__ if redact_error else f"{type(exc).__name__}: {exc}"
+        status = "unreachable"
     return {"path": name, "target": target, "status": status,
             "latency_ms": round((time.monotonic() - start) * 1000, 1), "detail": detail}
+
+
+def unique(values):
+    """Keep the first occurrence so duplicate candidate flags do not cause extra traffic."""
+    return list(dict.fromkeys(values or []))
+
+
+def safe_doh_target(url):
+    """Display a route without URL credentials, query tokens or fragments."""
+    try:
+        parsed = parse.urlsplit(url)
+        host, port = parsed.hostname, parsed.port
+    except ValueError:
+        return "<invalid DoH URL>"
+    if not host:
+        return "<invalid DoH URL>"
+    netloc = f"[{host}]" if ":" in host else host
+    if port is not None:
+        netloc += f":{port}"
+    return parse.urlunsplit((parsed.scheme, netloc, parsed.path, "", ""))
+
+
+def path_passed(results, path):
+    """An alternate path passes when at least one candidate answers the probe."""
+    candidates = [item for item in results if item["path"] == path]
+    return not candidates or any(item["status"] in ("ok", "tcp_reachable")
+                                 for item in candidates)
 
 
 def main(argv=None):
@@ -126,13 +156,15 @@ def main(argv=None):
     parser.add_argument("--dns-port", type=int, default=53)
     parser.add_argument("--dot-host", help="DoT hostname (certificate is verified)")
     parser.add_argument("--dot-port", type=int, default=853)
-    parser.add_argument("--doh-url", help="full HTTPS DoH URL, usually /dns-query")
-    parser.add_argument("--relay-ip", help="IPv4 address advertised for proxied domains")
+    parser.add_argument("--doh-url", action="append", help="HTTPS DoH URL; repeat to compare candidate routes")
+    parser.add_argument("--relay-ip", action="append", help="relay IPv4; repeat to compare candidate addresses")
     parser.add_argument("--relay-port", type=int, default=443)
     parser.add_argument("--relay-sni", help="optional proxied hostname for a complete TLS relay test")
     parser.add_argument("--timeout", type=float, default=3.0)
     parser.add_argument("--json", action="store_true", help="machine-readable output for support")
     args = parser.parse_args(argv)
+    args.doh_url = unique(args.doh_url)
+    args.relay_ip = unique(args.relay_ip)
     if not any((args.dns_ip, args.dot_host, args.doh_url, args.relay_ip)):
         parser.error("supply at least one endpoint")
     if not 0 < args.timeout <= 30:
@@ -151,24 +183,31 @@ def main(argv=None):
     if args.dot_host:
         results.append(run_probe("dot", f"{args.dot_host}:{args.dot_port}",
                                  lambda: dns_over_tcp(args.dot_host, args.dot_port, args.timeout, tls=True)))
-    if args.doh_url:
-        parsed = parse.urlsplit(args.doh_url)
-        display = parse.urlunsplit(parsed._replace(query="", fragment=""))
+    for doh_url in args.doh_url:
+        display = safe_doh_target(doh_url)
         results.append(run_probe("doh", display,
-                                 lambda: dns_over_https(args.doh_url, args.timeout,
-                                                        os.environ.get("WHITEPRIVATEDNS_DOH_TOKEN", ""))))
-    if args.relay_ip:
-        results.append(run_probe("relay", f"{args.relay_ip}:{args.relay_port}",
-                                 lambda: relay_path(args.relay_ip, args.relay_port,
+                                 lambda url=doh_url: dns_over_https(url, args.timeout,
+                                                       os.environ.get("WHITEPRIVATEDNS_DOH_TOKEN", "")),
+                                 redact_error=True))
+    for relay_ip in args.relay_ip:
+        results.append(run_probe("relay", f"{relay_ip}:{args.relay_port}",
+                                 lambda ip=relay_ip: relay_path(ip, args.relay_port,
                                                     args.timeout, args.relay_sni)))
 
     if args.json:
         print(json.dumps(results, ensure_ascii=False, indent=2))
     else:
         for item in results:
-            print(f"{item['path']:8} {item['status']:14} {item['latency_ms']:7.1f} ms  {item['detail']}")
+            print(f"{item['path']:8} {item['status']:14} {item['latency_ms']:7.1f} ms  "
+                  f"{item['target']}  {item['detail']}")
+        for path in ("doh", "relay"):
+            if len([item for item in results if item["path"] == path]) > 1:
+                passed = [item["target"] for item in results if item["path"] == path
+                          and item["status"] in ("ok", "tcp_reachable")]
+                print(f"{path.upper()} candidates that answered: {', '.join(passed) if passed else 'none'}")
         print("A failed path alone cannot identify filtering; compare results from several networks.")
-    return 0 if all(item["status"] in ("ok", "tcp_reachable") for item in results) else 1
+    return 0 if all(path_passed(results, path) for path in
+                    ("dns_udp", "dns_tcp", "dot", "doh", "relay")) else 1
 
 
 if __name__ == "__main__":

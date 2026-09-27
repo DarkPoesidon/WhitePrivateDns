@@ -35,12 +35,14 @@ jobs:
       - name: Dashboard chart regression tests
         run: node --test tests/web/*.test.cjs
 
-      - name: Restore script regression tests
+      - name: Maintenance script regression tests
         run: |
           for script in scripts/*.sh offline-bundle/install.sh offline-bundle/scripts/*.sh; do bash -n "$script"; done
           cmp scripts/restore.sh offline-bundle/scripts/restore.sh
           cmp scripts/uninstall.sh offline-bundle/scripts/uninstall.sh
           python3 tests/scripts/test_restore.py
+          python3 tests/scripts/test_network_probe.py
+          python3 tests/scripts/test_update.py
 
       - name: Online installer smoke test
         run: |
@@ -112,6 +114,7 @@ jobs:
           cp offline-bundle/version.json offline_temp/version.json
           cp scripts/uninstall.sh offline_temp/scripts/uninstall.sh
           cp scripts/restore.sh offline_temp/scripts/restore.sh
+          cp scripts/update.sh offline_temp/scripts/update.sh
           cp offline-bundle/README.txt offline_temp/README.txt
           cp LICENSE offline_temp/LICENSE
           cp offline-bundle/migrate-from-v1.sh offline_temp/migrate-from-v1.sh
@@ -119,6 +122,7 @@ jobs:
           
           tar -czvf dist/whiteprivatedns-offline-bundle.tar.gz -C offline_temp .
           (cd offline_temp && zip -r ../dist/whiteprivatedns-offline-bundle.zip .)
+          cp scripts/update.sh dist/whiteprivatedns-update.sh
           
           # Generate SHA256 Checksums
           cd dist

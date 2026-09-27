@@ -149,7 +149,11 @@ function renderClientsView(data) {
       <div class="clients-placeholder col-span-1 md:col-span-2 glass-panel p-8 text-center text-slate-400 border border-slate-800">
         <i data-feather="users" class="w-8 h-8 mx-auto text-slate-600 mb-2"></i>
         <div class="font-bold text-slate-300 font-heading">No Clients Yet</div>
-        <p class="text-xs text-slate-500 mt-1">Click "Add New Client" above to create client accounts &amp; registration links.</p>
+        <p class="text-xs text-slate-500 mt-1">Create a client account and its registration link.</p>
+        <button type="button" class="open-add-client-empty-btn mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-emerald-400">
+          <i data-feather="user-plus" class="h-4 w-4" aria-hidden="true"></i>
+          Add New Client
+        </button>
       </div>
     ` : `
       <div class="clients-placeholder col-span-1 md:col-span-2 glass-panel p-8 text-center text-slate-400 border border-slate-800">
@@ -629,6 +633,10 @@ function initClientEventListeners() {
   // after each render, because the container's innerHTML is replaced on every keystroke —
   // a listener attached to the button itself would be discarded by the next one.
   document.getElementById('clients-list')?.addEventListener('click', (e) => {
+    if (e.target.closest('.open-add-client-empty-btn')) {
+      openBtn?.click();
+      return;
+    }
     if (!e.target.closest('.clear-client-search-btn')) return;
     const input = document.getElementById('client-search-input');
     if (!input) return;

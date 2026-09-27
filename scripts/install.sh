@@ -184,7 +184,7 @@ echo -e "  ${GREEN}✓ Architecture detected: ${ARCH} (${BIN_ARCH})${NC}"
 # beta installer pulling from it silently fetches the older stable binary and
 # the install fails deep in the v2.2.0 flow. Both URLs derive from the single
 # ref so the binary and the auxiliary files can never disagree.
-WHITEPRIVATEDNS_REF="${WHITEPRIVATEDNS_REF:-v2.2.0-beta.3}"
+WHITEPRIVATEDNS_REF="${WHITEPRIVATEDNS_REF:-v2.2.0-beta.4}"
 ONLINE_CONFIG_EXAMPLE="$(mktemp /tmp/whiteprivatedns-cfg.XXXXXX)"
 ONLINE_RESTORE="$(mktemp /tmp/whiteprivatedns-restore.XXXXXX)"
 ONLINE_UNINSTALL="$(mktemp /tmp/whiteprivatedns-uninstall.XXXXXX)"

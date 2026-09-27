@@ -147,5 +147,5 @@ TROUBLESHOOTING
      journalctl -u whiteprivatedns | grep "admin panel path"
 
 ========================================================================
-   WhitePrivateDns v2.2.0-beta.3 · AGPL-3.0 · single Go binary · no dependencies
+   WhitePrivateDns v2.2.0-beta.4 · AGPL-3.0 · single Go binary · no dependencies
 ========================================================================

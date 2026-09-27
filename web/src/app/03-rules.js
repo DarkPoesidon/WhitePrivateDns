@@ -1,8 +1,8 @@
 // =======================================================
 // SAVE RULES API
 // =======================================================
-async function saveRules() {
-  if (!currentConfig) return;
+async function saveRules(successMessage = 'Policies updated & active!') {
+  if (!currentConfig) return false;
 
   const payload = {
     enable_riot: getSwitch('preset-riot'),
@@ -51,11 +51,19 @@ async function saveRules() {
       body: JSON.stringify(payload)
     });
 
-    if (res.ok) {
-      currentConfig.rules = payload;
-      showToast('Policies updated & active!', 'success');
+    if (!res.ok) {
+      showToast(await errorMessage(res, 'Failed to save policies'), 'error');
+      // Rule lists are edited locally before the request. Re-read the server's
+      // version so a rejected change is not left looking active in the UI.
+      await loadConfig();
+      return false;
     }
+    currentConfig.rules = payload;
+    showToast(successMessage, 'success');
+    return true;
   } catch (e) {
     showToast('Failed to save policies', 'error');
+    await loadConfig();
+    return false;
   }
 }

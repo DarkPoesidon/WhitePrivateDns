@@ -103,6 +103,8 @@ python3 scripts/network_probe.py --dns-ip 203.0.113.10 \
 
 ## 🚀 نصب سریع و راه‌اندازی
 
+اگر WhitePrivateDns از قبل روی سرور لینوکسی نصب است، از [راهنمای به‌روزرسانی بدون حذف داده](docs/UPDATE.fa.md) استفاده کنید. دستورهای نصاب زیر برای نصب تازه‌اند.
+
 ### روش ۱: نصب سرویس لینوکس از نسخهٔ آماده، بدون Go یا کلون کردن پروژه
 
 دستورهای زیر را با کاربر `root` روی Debian یا Ubuntu اجرا کنید. از هر پوشه‌ای، حتی `/root`، کار می‌کنند:
@@ -111,8 +113,8 @@ python3 scripts/network_probe.py --dns-ip 203.0.113.10 \
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.3/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.3 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.4/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>

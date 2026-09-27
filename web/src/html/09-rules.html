@@ -3,12 +3,55 @@
       <!-- ============================================== -->
       <section id="tab-rules" class="tab-content space-y-6 hidden">
 
+        <div id="network-reliability" class="space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-white font-heading">Network paths</h2>
+            <p class="mt-1 text-xs text-slate-400">Use these controls when the current address is unreachable from a subscriber network. Test each path before sharing it with clients.</p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="glass-panel p-5 sm:p-6 space-y-3" id="relay-address-card">
+              <div class="flex items-center gap-3">
+                <i data-feather="server" class="w-4 h-4 text-emerald-400" aria-hidden="true"></i>
+                <div>
+                  <h3 class="text-sm font-bold text-white font-heading">Active relay IPv4</h3>
+                  <p class="text-[11px] text-slate-400">The address returned for proxied domains. Changes apply to new DNS answers immediately.</p>
+                </div>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="relay-public-ip" inputmode="decimal" autocomplete="off" spellcheck="false"
+                  aria-label="Active relay IPv4 address" placeholder="203.0.113.10"
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm font-mono text-white">
+                <button type="button" id="relay-public-ip-save" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Apply relay address</button>
+              </div>
+              <p class="text-[11px] text-slate-400">Use only an IPv4 address assigned to this server. Existing connections keep their current route; clients may cache older DNS answers for up to 60 seconds.</p>
+            </div>
+
+            <div class="glass-panel p-5 sm:p-6 space-y-3" id="public-doh-card">
+              <div class="flex items-center gap-3">
+                <i data-feather="cloud" class="w-4 h-4 text-emerald-400" aria-hidden="true"></i>
+                <div>
+                  <h3 class="text-sm font-bold text-white font-heading">Public DoH URL</h3>
+                  <p class="text-[11px] text-slate-400">Optional HTTPS address behind a CDN or tunnel, shown in connection guides.</p>
+                </div>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input type="url" id="public-doh-url" autocomplete="url" spellcheck="false"
+                  aria-label="Public DoH URL" placeholder="https://doh.example.com/dns-query"
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm font-mono text-white">
+                <button type="button" id="public-doh-url-save" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Save DoH URL</button>
+              </div>
+              <p class="text-[11px] text-slate-400">This only changes the address shown to clients. Set up the CDN or tunnel first, keep local DoH running, bypass caching and browser challenges for /dns-query, and test from a subscriber network. Clear the field to restore the direct URL.</p>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400">Automatic Cloudflare or WARP setup and multi-server failover are not available in this release.</p>
+        </div>
+
         <!-- v2.1 Phase 6: two-factor authentication. The secret is shown exactly
              once, at enrollment; after that the server never returns it and the
              page never asks for it. -->
-        <div class="glass-panel p-5 sm:p-6 border border-sky-500/30 space-y-4" id="twofa-card">
+        <div class="glass-panel p-5 sm:p-6 border border-emerald-500/30 space-y-4" id="twofa-card">
           <div class="flex items-center gap-3">
-            <div class="p-2 rounded-xl bg-sky-500/20 text-sky-400">
+            <div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
               <i data-feather="smartphone" class="w-5 h-5"></i>
             </div>
             <div>
@@ -23,13 +66,13 @@
           <div id="twofa-off-box" class="space-y-3">
             <div class="flex flex-col sm:flex-row gap-2">
               <input type="password" id="twofa-enable-password" aria-label="Current password, to enable two-factor" placeholder="Current password"
-                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-sky-400">
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
               <button id="twofa-begin-btn" type="button"
-                class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
                 Start Enrollment
               </button>
             </div>
-            <div id="twofa-enroll-box" class="hidden space-y-3 border border-sky-500/30 rounded-lg p-3">
+            <div id="twofa-enroll-box" class="hidden space-y-3 border border-emerald-500/30 rounded-lg p-3">
               <!-- The confirm step re-asks the password on purpose — a hijacked
                    session must not be able to finish an enrollment with the code
                    alone — so the box carries its own password field rather than
@@ -38,13 +81,13 @@
                    code and the server answered "Invalid credentials" on the
                    empty password, which reads exactly like a wrong code. -->
               <p class="text-[11px] text-slate-300">Add this secret to your authenticator app, then re-enter your password and the code it shows:</p>
-              <p id="twofa-secret-display" class="px-3 py-2 rounded bg-slate-950 border border-slate-700 text-xs font-mono text-sky-300 break-all select-all"></p>
+              <p id="twofa-secret-display" class="px-3 py-2 rounded bg-slate-950 border border-slate-700 text-xs font-mono text-emerald-300 break-all select-all"></p>
               <p id="twofa-uri-display" class="text-[11px] text-slate-500 font-mono break-all"></p>
               <div class="flex flex-col sm:flex-row gap-2">
                 <input type="password" id="twofa-confirm-password" aria-label="Current password, to confirm enrollment" placeholder="Current password" autocomplete="current-password"
-                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-sky-400">
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
                 <input type="text" id="twofa-enable-code" aria-label="Six-digit code, to enable two-factor" placeholder="6-digit code" inputmode="numeric" maxlength="6"
-                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-sky-400">
+                  class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-emerald-400">
                 <button id="twofa-confirm-btn" type="button"
                   class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs font-heading transition whitespace-nowrap">
                   Confirm & Enable
@@ -398,40 +441,6 @@
 
 
         </div>
-
-          <div class="glass-panel p-5 sm:p-6 space-y-3" id="relay-address-card">
-            <div class="flex items-center gap-3">
-              <i data-feather="server" class="w-4 h-4 text-emerald-400" aria-hidden="true"></i>
-              <div>
-                <h3 class="text-sm font-bold text-white font-heading">Active relay IPv4</h3>
-                <p class="text-[11px] text-slate-400">The address returned for proxied domains. Changes apply to new DNS answers immediately.</p>
-              </div>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input type="text" id="relay-public-ip" inputmode="decimal" autocomplete="off" spellcheck="false"
-                aria-label="Active relay IPv4 address" placeholder="203.0.113.10"
-                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm font-mono text-white">
-              <button type="button" id="relay-public-ip-save" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Apply relay address</button>
-            </div>
-            <p class="text-[11px] text-slate-400">Use only an IPv4 address assigned to this server. Existing connections keep their current route; clients may cache older DNS answers for up to 60 seconds.</p>
-          </div>
-
-          <div class="glass-panel p-5 sm:p-6 space-y-3" id="public-doh-card">
-            <div class="flex items-center gap-3">
-              <i data-feather="cloud" class="w-4 h-4 text-emerald-400" aria-hidden="true"></i>
-              <div>
-                <h3 class="text-sm font-bold text-white font-heading">Public DoH URL</h3>
-                <p class="text-[11px] text-slate-400">Optional HTTPS address behind a CDN or tunnel, shown in connection guides.</p>
-              </div>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input type="url" id="public-doh-url" autocomplete="url" spellcheck="false"
-                aria-label="Public DoH URL" placeholder="https://doh.example.com/dns-query"
-                class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm font-mono text-white">
-              <button type="button" id="public-doh-url-save" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Save DoH URL</button>
-            </div>
-            <p class="text-[11px] text-slate-400">This changes the advertised URL only. Keep the local DoH listener running, bypass CDN caching and browser challenges for /dns-query, and test the new address from a subscriber network. Clear the field to restore the direct URL.</p>
-          </div>
 
                 <!-- Session idle window (Phase D): how long a dashboard session may sit
                unused before the daemon revokes it. Applies live on save. -->

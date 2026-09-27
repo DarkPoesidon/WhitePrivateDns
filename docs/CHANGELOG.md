@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v2.2.0-beta.4] — Visible client actions and safe updates
+
+- Restored the green backgrounds of dashboard primary actions, including **Add New Client**, and added a second Add New Client button in the empty client list. Verified both buttons open the form on desktop and mobile.
+- Moved **Active relay IPv4** and **Public DoH URL** to the top of Settings under **Network paths**. The panel now states clearly that the DoH URL advertises an already working external route; Cloudflare/WARP setup and multi-server failover are not automatic.
+- Changed policy, upstream, cache, and DoH token controls to report success only after the server accepts the request. A rejected policy save reloads the server's saved state; a rejected token edit leaves the displayed token list unchanged.
+- Added `scripts/update.sh` for existing Linux systemd installs. It verifies the exact tagged release and SHA-256, backs up the stopped installation, preserves accounts and configuration, and restores the previous version if the new service fails to start.
+- Extended the subscriber-side network probe to compare multiple DoH URLs and relay IPs. Probe output hides DoH URL credentials; this is manual route diagnosis, not automatic failover.
+
 ## [v2.2.0-beta.3] — Safer reinstall confirmation
 
 - The installer asks for `FRESH` before stopping the existing service or creating an archive. Cancelling leaves the installation running.

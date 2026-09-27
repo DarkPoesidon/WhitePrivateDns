@@ -56,12 +56,14 @@ jobs:
       - name: Dashboard chart regression tests
         run: node --test tests/web/*.test.cjs
 
-      - name: Restore script regression tests
+      - name: Maintenance script regression tests
         run: |
           for script in scripts/*.sh offline-bundle/install.sh offline-bundle/scripts/*.sh; do bash -n "$script"; done
           cmp scripts/restore.sh offline-bundle/scripts/restore.sh
           cmp scripts/uninstall.sh offline-bundle/scripts/uninstall.sh
           python3 tests/scripts/test_restore.py
+          python3 tests/scripts/test_network_probe.py
+          python3 tests/scripts/test_update.py
 
       # The suite above only covers --data-dir (offline/disposable) mode. The one
       # below covers production mode, which stops the whiteprivatedns service and replaces

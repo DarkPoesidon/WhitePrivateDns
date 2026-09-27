@@ -57,6 +57,29 @@ function initAdminPathControls() {
   });
 }
 
+// Keep access-token edits out of the rendered config until the server accepts
+// them. A rejected save must never leave a token visible as though it is active.
+async function saveAccessConfig(nextAccess, successMessage) {
+  try {
+    const res = await fetch(api('/api/config/access'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify(nextAccess)
+    });
+    if (!res.ok) {
+      showToast(await errorMessage(res, 'Failed to update DoH access tokens'), 'error');
+      return false;
+    }
+    currentConfig.access = nextAccess;
+    renderConfig(currentConfig);
+    showToast(successMessage, 'success');
+    return true;
+  } catch (e) {
+    showToast('Failed to update DoH access tokens', 'error');
+    return false;
+  }
+}
+
 function initEventListeners() {
   // Tabs Navigation (Sidebar & Mobile Bottom Bar)
   document.querySelectorAll('.sidebar-nav-item, .nav-tab, .mobile-nav-item').forEach(tab => {
@@ -147,21 +170,30 @@ function initEventListeners() {
     addUpstreamBtn.onclick = async () => {
       const input = document.getElementById('new-upstream-input');
       const addr = input ? input.value.trim() : '';
-      if (!addr) return;
+      if (!addr) {
+        showToast('Enter an upstream resolver address', 'error');
+        input?.focus();
+        return;
+      }
 
+      addUpstreamBtn.disabled = true;
       try {
         const res = await fetch(api('/api/upstreams/add'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
           body: JSON.stringify({ address: addr })
         });
-        if (res.ok) {
-          if (input) input.value = '';
-          showToast('Upstream resolver added & tested!', 'success');
-          updateStats();
+        if (!res.ok) {
+          showToast(await errorMessage(res, 'Failed to add upstream'), 'error');
+          return;
         }
+        if (input) input.value = '';
+        showToast('Upstream resolver added & tested!', 'success');
+        updateStats();
       } catch (e) {
         showToast('Failed to add upstream', 'error');
+      } finally {
+        addUpstreamBtn.disabled = false;
       }
     };
   }
@@ -267,35 +299,31 @@ function initEventListeners() {
   if (dotDomainInput && currentConfig && currentConfig.tls) dotDomainInput.value = currentConfig.tls.dot_domain || '';
 
   // Quick Action Profiles
-  document.getElementById('profile-gaming-btn')?.addEventListener('click', () => {
+  document.getElementById('profile-gaming-btn')?.addEventListener('click', async () => {
     ['preset-riot', 'preset-epic', 'preset-steam', 'preset-pubg', 'preset-cod', 'preset-supercell',
      'preset-ea', 'preset-blizzard', 'preset-ubisoft', 'preset-rockstar', 'preset-xbox', 'preset-playstation', 'preset-roblox',
      'preset-shooters-extra', 'preset-anime-gacha', 'preset-sports-racing', 'preset-coop-survival', 'preset-platforms-extra'].forEach(id => {
       setSwitch(id, true);
     });
-    saveRules();
-    showToast('Pro Gamer Profile (All 171 Games) Activated!', 'success');
+    await saveRules('Pro Gamer Profile (All 171 Games) Activated!');
   });
 
-  document.getElementById('profile-streamer-btn')?.addEventListener('click', () => {
+  document.getElementById('profile-streamer-btn')?.addEventListener('click', async () => {
     ['preset-discord', 'preset-twitch', 'preset-kick', 'preset-spotify'].forEach(id => {
       setSwitch(id, true);
     });
-    saveRules();
-    showToast('Streamer & Media Profile Activated!', 'success');
+    await saveRules('Streamer & Media Profile Activated!');
   });
 
-  document.getElementById('profile-dev-btn')?.addEventListener('click', () => {
+  document.getElementById('profile-dev-btn')?.addEventListener('click', async () => {
     setSwitch('preset-dev403', true);
-    saveRules();
-    showToast('Developer 403 Profile Activated!', 'success');
+    await saveRules('Developer 403 Profile Activated!');
   });
 
-  document.getElementById('profile-privacy-btn')?.addEventListener('click', () => {
+  document.getElementById('profile-privacy-btn')?.addEventListener('click', async () => {
     setSwitch('preset-adblock', true);
     setSwitch('preset-familysafe', true);
-    saveRules();
-    showToast('AdBlock & Safe Profile Activated!', 'success');
+    await saveRules('AdBlock & Safe Profile Activated!');
   });
 
   // Preset switches
@@ -322,10 +350,14 @@ function initEventListeners() {
   if (flushBtn) {
     flushBtn.onclick = async () => {
       try {
-        await fetch(api('/api/cache/flush'), {
+        const res = await fetch(api('/api/cache/flush'), {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
+        if (!res.ok) {
+          showToast(await errorMessage(res, 'Failed to flush cache'), 'error');
+          return;
+        }
         showToast('DNS cache flushed successfully!', 'success');
         updateStats();
       } catch (e) {
@@ -398,15 +430,8 @@ function initEventListeners() {
     const val = input ? input.value.trim() : '';
     if (!val || !currentConfig) return;
     if (!currentConfig.access.doh_tokens.includes(val)) {
-      currentConfig.access.doh_tokens.push(val);
-      if (input) input.value = '';
-      await fetch(api('/api/config/access'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-        body: JSON.stringify(currentConfig.access)
-      });
-      showToast('DoH Token added!', 'success');
-      renderConfig(currentConfig);
+      const nextAccess = { ...currentConfig.access, doh_tokens: [...currentConfig.access.doh_tokens, val] };
+      if (await saveAccessConfig(nextAccess, 'DoH Token added!') && input) input.value = '';
     }
   });
 
@@ -447,14 +472,20 @@ function initEventListeners() {
       });
       if (!ok) return;
       try {
-        await fetch(api('/api/upstreams/delete'), {
+        const res = await fetch(api('/api/upstreams/delete'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
           body: JSON.stringify({ address: addr })
         });
+        if (!res.ok) {
+          showToast(await errorMessage(res, 'Failed to remove upstream'), 'error');
+          return;
+        }
         showToast('Upstream removed', 'info');
         updateStats();
-      } catch (err) {}
+      } catch (err) {
+        showToast('Failed to remove upstream', 'error');
+      }
     } else if (btn.classList.contains('remove-proxied')) {
       const val = btn.dataset.val;
       if (currentConfig) {
@@ -472,14 +503,8 @@ function initEventListeners() {
     } else if (btn.classList.contains('remove-token')) {
       const val = btn.dataset.val;
       if (currentConfig) {
-        currentConfig.access.doh_tokens = currentConfig.access.doh_tokens.filter(x => x !== val);
-        await fetch(api('/api/config/access'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-          body: JSON.stringify(currentConfig.access)
-        });
-        showToast('DoH Token removed', 'info');
-        renderConfig(currentConfig);
+        const nextAccess = { ...currentConfig.access, doh_tokens: currentConfig.access.doh_tokens.filter(x => x !== val) };
+        await saveAccessConfig(nextAccess, 'DoH Token removed');
       }
     } else if (btn.classList.contains('remove-record')) {
       const dom = btn.dataset.dom;

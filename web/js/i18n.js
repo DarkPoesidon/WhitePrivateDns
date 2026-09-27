@@ -119,6 +119,9 @@
     'Open live log': 'باز کردن لاگ زنده',
     'Waiting for the first query': 'در انتظار نخستین پرس‌وجو',
     'Active relay IPv4': 'آی‌پی فعال رله',
+    'Network paths': 'مسیرهای شبکه',
+    'Use these controls when the current address is unreachable from a subscriber network. Test each path before sharing it with clients.':
+      'وقتی آدرس فعلی از شبکهٔ کاربر در دسترس نیست از این تنظیمات استفاده کنید. هر مسیر را پیش از اعلام به کاربران آزمایش کنید.',
     'Active relay IPv4 address': 'آدرس IPv4 فعال رله',
     'The address returned for proxied domains. Changes apply to new DNS answers immediately.':
       'آدرسی که برای دامنه‌های پراکسی‌شده برگردانده می‌شود. تغییر برای پاسخ‌های تازهٔ DNS فوراً اعمال می‌شود.',
@@ -133,6 +136,10 @@
     'Save DoH URL': 'ذخیرهٔ نشانی DoH',
     'This changes the advertised URL only. Keep the local DoH listener running, bypass CDN caching and browser challenges for /dns-query, and test the new address from a subscriber network. Clear the field to restore the direct URL.':
       'این گزینه فقط نشانی اعلام‌شده را عوض می‌کند. سرویس DoH محلی باید روشن بماند؛ کش CDN و چالش مرورگر را برای /dns-query غیرفعال و نشانی تازه را از شبکهٔ کاربر آزمایش کنید. برای بازگشت به نشانی مستقیم، فیلد را خالی کنید.',
+    'This only changes the address shown to clients. Set up the CDN or tunnel first, keep local DoH running, bypass caching and browser challenges for /dns-query, and test from a subscriber network. Clear the field to restore the direct URL.':
+      'این گزینه فقط نشانی نمایش‌داده‌شده به کاربران را عوض می‌کند. ابتدا CDN یا تونل را راه‌اندازی کنید، DoH محلی را روشن نگه دارید، کش و چالش مرورگر را برای /dns-query غیرفعال کنید و از شبکهٔ کاربر آزمایش کنید. برای بازگشت به نشانی مستقیم، فیلد را خالی کنید.',
+    'Automatic Cloudflare or WARP setup and multi-server failover are not available in this release.':
+      'راه‌اندازی خودکار Cloudflare یا WARP و جابه‌جایی بین چند سرور در این نسخه وجود ندارد.',
     'Public DoH URL saved': 'نشانی عمومی DoH ذخیره شد',
     'Could not save the DoH URL': 'نشانی DoH ذخیره نشد',
     'TIME': 'زمان',
@@ -312,6 +319,7 @@
     'Search client name, ID, or IP...': 'جست‌وجوی نام، شناسه یا IP کلاینت…',
     'Clear search': 'پاک کردن جست‌وجو',
     'No Clients Yet': 'هنوز کلاینتی نیست',
+    'Create a client account and its registration link.': 'حساب کلاینت و لینک ثبت آن را بسازید.',
     'Generate IP whitelist registration slug': 'ساخت لینک ثبت IP در لیست سفید',
     'Lifetime (No Expiry)': 'همیشگی (بدون انقضا)',
     '(Expired)': '(منقضی)',

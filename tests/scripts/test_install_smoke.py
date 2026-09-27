@@ -24,7 +24,7 @@ import uuid
 
 
 FIXTURE = Path('/smoke')
-REF = 'v2.2.0-beta.3-smoke-pinned'
+REF = 'v2.2.0-beta.4-smoke-pinned'
 DOMAIN = 'installer-smoke.invalid'
 ADMIN_PATH = '0123456789abcdef'
 
