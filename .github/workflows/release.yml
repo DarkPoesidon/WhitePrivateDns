@@ -44,6 +44,7 @@ jobs:
 
       - name: Online installer smoke test
         run: |
+          go mod download
           docker pull golang:1.26-bookworm
           python3 tests/scripts/test_install_smoke.py
 
