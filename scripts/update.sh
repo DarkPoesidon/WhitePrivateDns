@@ -37,7 +37,7 @@ HEALTH_WAIT="${WHITEPRIVATEDNS_HEALTH_WAIT_SECONDS:-5}"
 
 [[ "$INSTALL_DIR" == /* && "$INSTALL_DIR" != '/' && "$INSTALL_DIR" != *'/../'* && "$INSTALL_DIR" != */.. && "$INSTALL_DIR" != *'/./'* ]] || die 'Install directory must be an absolute, non-root path without parent traversal.'
 [[ "$BACKUP_DIR" == /* && -d "$BACKUP_DIR" && ! -L "$BACKUP_DIR" ]] || die 'Backup directory must be an existing, real absolute directory.'
-[[ "$REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9][A-Za-z0-9.-]*)?$ ]] || die 'Set WHITEPRIVATEDNS_REF to an exact release tag, such as v2.2.0-beta.4.'
+[[ "$REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9][A-Za-z0-9.-]*)?$ ]] || die 'Set WHITEPRIVATEDNS_REF to an exact release tag, such as v2.2.0-beta.5.'
 [[ "$REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || die 'WHITEPRIVATEDNS_REPOSITORY must be owner/repository.'
 [[ "$HEALTH_WAIT" =~ ^[0-9]+$ ]] || die 'WHITEPRIVATEDNS_HEALTH_WAIT_SECONDS must be an integer.'
 [[ -d "$INSTALL_DIR" && ! -L "$INSTALL_DIR" && -x "$INSTALL_DIR/whiteprivatedns" && ! -L "$INSTALL_DIR/whiteprivatedns" && -f "$INSTALL_DIR/config.json" ]] || die "No complete WhitePrivateDns installation at $INSTALL_DIR."

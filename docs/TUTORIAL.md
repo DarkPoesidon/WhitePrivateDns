@@ -79,8 +79,8 @@ Run as `root` on Debian or Ubuntu. These commands work from any directory:
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.4/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.5/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 bash /tmp/whiteprivatedns-install.sh
 ```
 
 On RHEL, AlmaLinux, Rocky Linux or CentOS with working package repositories, use `dnf install -y ca-certificates curl openssl` for the first line. See [all platform install paths](INSTALL.md) for Windows, macOS, offline bundles and source builds.
@@ -89,7 +89,7 @@ The installer is interactive when a TTY is present. To pass a domain and ACME em
 
 ```bash
 # Required: the panel domain, and an email for the certificate authority
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 \
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 \
   WHITEPRIVATEDNS_DOMAIN=dns.example.com \
   WHITEPRIVATEDNS_EMAIL=you@example.com \
   bash /tmp/whiteprivatedns-install.sh
@@ -537,7 +537,7 @@ print(client["registration_secret"]) # send this via a second channel
 wpdns status      # live service report: ports, listeners, DNS test, certs.
                    # needs no database — safe beside a busy daemon
 wpdns flush       # ask the running daemon to flush its DNS cache
-wpdns version     # what the binary reports (e.g. WhitePrivateDns v2.2.0-beta.4)
+wpdns version     # what the binary reports (e.g. WhitePrivateDns v2.2.0-beta.5)
 wpdns uninstall   # interactive uninstaller
 ```
 

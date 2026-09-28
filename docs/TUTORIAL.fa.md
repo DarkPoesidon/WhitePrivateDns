@@ -78,8 +78,8 @@
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.4/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.5/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>
@@ -92,7 +92,7 @@ env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=
 
 ```bash
 # ضروری: دامنهٔ پنل، و یک ایمیل برای مرجع گواهی
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 \
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 \
   WHITEPRIVATEDNS_DOMAIN=dns.example.com \
   WHITEPRIVATEDNS_EMAIL=you@example.com \
   bash /tmp/whiteprivatedns-install.sh
@@ -435,7 +435,7 @@ print(client["registration_secret"]) # این را از یک کانال دوم
 wpdns status      # گزارش زندهٔ سرویس: پورت‌ها، لیسنرها، تست دی‌ان‌اس، گواهی‌ها.
                    # نیازی به دیتابیس ندارد — کنار یک دیمن شلوغ امن است
 wpdns flush       # درخواست از دیمن در حال اجرا برای پاک‌سازی کش دی‌ان‌اس
-wpdns version     # چیزی که باینری چاپ می‌کند (مثلاً WhitePrivateDns v2.2.0-beta.4)
+wpdns version     # چیزی که باینری چاپ می‌کند (مثلاً WhitePrivateDns v2.2.0-beta.5)
 wpdns uninstall   # حذف تعاملی
 ```
 

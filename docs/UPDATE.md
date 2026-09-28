@@ -18,7 +18,7 @@ these commands at the `root@my-vps` prompt. They need no Go toolchain
 or repository checkout:
 
 ```bash
-TAG='v2.2.0-beta.4'
+TAG='v2.2.0-beta.5'
 curl -fsSLo /tmp/whiteprivatedns-update.sh \
   "https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/${TAG}/scripts/update.sh"
 env WHITEPRIVATEDNS_REF="$TAG" \

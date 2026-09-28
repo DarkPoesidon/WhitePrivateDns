@@ -5,7 +5,7 @@
 دستورهای زیر را با کاربر `root` روی سرور اجرا کنید؛ به Go یا نسخهٔ کلون‌شدهٔ پروژه نیاز ندارند و از هر پوشه‌ای کار می‌کنند:
 
 ```bash
-TAG='v2.2.0-beta.4'
+TAG='v2.2.0-beta.5'
 curl -fsSLo /tmp/whiteprivatedns-update.sh \
   "https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/${TAG}/scripts/update.sh"
 env WHITEPRIVATEDNS_REF="$TAG" \
