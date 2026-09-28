@@ -12,19 +12,20 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h3 class="text-sm sm:text-base font-bold text-white font-heading">Client Access Whitelist Mode</h3>
+                  <h3 class="text-sm sm:text-base font-bold text-white font-heading">DNS access mode</h3>
                   <span id="access-mode-badge" class="badge badge-direct">PUBLIC ACCESS</span>
                 </div>
                 <p class="text-xs text-slate-300 mt-1 leading-relaxed max-w-2xl">
-                  <strong>When Enabled (Shelter / Shecan Style):</strong> Only whitelisted client IP addresses can resolve DNS and access gaming routes. Unregistered IPs are refused access.
+                  Private: only registered IPs can use DNS and the relay. Public: any IP can use DNS; anonymous relay traffic is limited to active proxied domains. Anonymous traffic has no per-client quota.
                 </p>
+				<p class="text-xs text-slate-400 mt-1" title="Queries seen by this server and refused because their source IP was not registered"><span>Private-mode DNS refusals since restart:</span> <strong id="stat-access-denied" class="text-amber-300">—</strong>. <span>If this stays at zero while a client fails, check whether its DNS packets reach this server.</span></p>
               </div>
             </div>
 
             <div class="flex items-center gap-3 self-end sm:self-center">
               <span class="text-xs font-mono text-slate-400 font-semibold" id="access-mode-status-text">Public Mode</span>
               <label class="switch">
-                <input type="checkbox" id="access-mode-switch">
+                <input type="checkbox" id="access-mode-switch" aria-label="Require registered IPs">
                 <span class="slider"></span>
               </label>
             </div>

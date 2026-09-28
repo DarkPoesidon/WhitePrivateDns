@@ -42,6 +42,7 @@ type Handler struct {
 	telemetry    TelemetrySink
 	publicIP     atomic.Value // string; read on every proxied query, changed by an operator save
 	totalQueries atomic.Uint64
+	accessDenied atomic.Uint64
 
 	quota QuotaEnforcer
 
@@ -107,6 +108,12 @@ func (h *Handler) SetRateLimit(qps int) {
 // source's query rate since start.
 func (h *Handler) RateLimited() uint64 {
 	return h.limited.Load()
+}
+
+// AccessDenied counts queries that reached this resolver but were refused
+// because their source address was not registered in private mode.
+func (h *Handler) AccessDenied() uint64 {
+	return h.accessDenied.Load()
 }
 
 // RateLimitQPS is the per-source limit in effect, or 0 when limiting is off.
@@ -389,6 +396,7 @@ func (h *Handler) ProcessQuery(r *dns.Msg, clientIP string, protocol ...string) 
 			activeClient = client
 			accountName = client.Name
 		} else if !h.access.IsAllowAll() {
+			denied := h.accessDenied.Add(1)
 			m := new(dns.Msg)
 			m.SetRcode(r, dns.RcodeRefused)
 			// RFC 8914 Extended DNS Error, so a client that sent OPT learns WHY the
@@ -398,6 +406,12 @@ func (h *Handler) ProcessQuery(r *dns.Msg, clientIP string, protocol ...string) 
 			// not), and only here — every other REFUSED below has a different cause
 			// a "Prohibited" label would misstate.
 			attachProhibitedEDE(m, r)
+			// Record the first refusal and sample thereafter. Operators need the
+			// source address to compare with a registered client, but logging every
+			// packet from a forged-source flood would amplify work into the SSE log.
+			if denied%rateLimitLogSample == 1 {
+				h.logQuery(start, clientIP, "Unregistered", proto, questionName(r), "Source IP not registered", "REFUSED", false)
+			}
 			return m
 		}
 	}

@@ -78,8 +78,8 @@
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.4/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.5/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>
@@ -92,7 +92,7 @@ env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=
 
 ```bash
 # ضروری: دامنهٔ پنل، و یک ایمیل برای مرجع گواهی
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 \
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 \
   WHITEPRIVATEDNS_DOMAIN=dns.example.com \
   WHITEPRIVATEDNS_EMAIL=you@example.com \
   bash /tmp/whiteprivatedns-install.sh
@@ -276,7 +276,7 @@ sub.yourbrand.com.   A   <server-IP>     TTL 300
 
 ### ۷-پ. چرا آی‌پی ناشناس رد می‌شود
 
-**لیست سفید (Whitelist) دسترسی کلاینت‌ها به‌صورت پیش‌فرض فعال است.** یک آی‌پی مبدا که به هیچ حسابی متصل نیست، یک رد دی‌ان‌اس همراه با **خطای RFC 8914 Extended DNS Error** می‌گیرد، تا کلاینتِ خوش‌رفتار دلیل مسدودی را بفهمد نه اینکه بی‌صدا شکست بخورد. یعنی یک سرور باز هرگز به زیرساخت رایگان عمومی برای غریبه‌ها تبدیل نمی‌شود. می‌توانید با **Settings → Client Access Whitelist Mode** خاموشش کنید، اما اول [SECURITY.md](SECURITY.md) را بخوانید — `allow_all` سرور را به یک ریسالور عمومی تبدیل می‌کند و پهنای باند آن را شما می‌پردازید.
+**لیست سفید (Whitelist) دسترسی کلاینت‌ها به‌صورت پیش‌فرض فعال است.** یک آی‌پی مبدا که به هیچ حسابی متصل نیست، یک رد دی‌ان‌اس همراه با **خطای RFC 8914 Extended DNS Error** می‌گیرد، تا کلاینتِ خوش‌رفتار دلیل مسدودی را بفهمد نه اینکه بی‌صدا شکست بخورد. حالت دسترسی در **Clients → DNS access mode** تنظیم می‌شود. عمومی‌کردن آن، DNS را برای همه باز می‌کند؛ رلهٔ ناشناس فقط نام‌های دارای قانون `PROXY` فعال را می‌پذیرد، اما سهمیهٔ هر مشترک و لغو دسترسی حساب در حالت عمومی اعمال نمی‌شود. پیش از فعال‌کردن، [SECURITY.md](SECURITY.md) را بخوانید.
 
 ---
 
@@ -311,6 +311,19 @@ kdig -d @dns.example.com +853 api.steampowered.com
 </div>
 
 اگر رکورد `A` جواب **آی‌پی خودِ سرور شما** باشد، یعنی پراکسی SNI آن اتصال را به دست می‌گیرد؛ اگر جواب آی‌پی واقعی CDN باشد، یعنی مستقیم می‌رود.
+
+### ۸-آ. استفاده همراه WhiteAestherMobile
+
+**WhitePrivateDns دسترسی را با آی‌پی مبدأِ واقعی هر درخواست DNS و اتصال پراکسی کنترل می‌کند.** ثبت آی‌پی گوشی هنگام خاموش بودن VPN، خروجیِ همان شبکه را به حساب وصل می‌کند. اگر بعداً DNS را از داخل تونل بفرستید، سرور آی‌پی خروجی تونل را می‌بیند؛ این آدرس معمولاً با آی‌پی ثبت‌شده فرق دارد و در حالت لیست سفید، پاسخ `REFUSED` می‌شود. اتصال به دامنه‌های پراکسی‌شده هم از همین کنترل عبور می‌کند.
+
+برای آزمون با WhiteAestherMobile:
+
+1. VPN را خاموش کنید؛ لینک اشتراک را روی **همان گوشی و همان شبکه** باز کنید، رمز ثبت جداگانه را وارد کنید و دکمهٔ «ثبت آی‌پی من» را بزنید. در **Clients** پنل مطمئن شوید دست‌کم یک آی‌پی در `Allowed IPs` همان حساب دیده می‌شود. باز کردن لینک به‌تنهایی آی‌پی را ثبت نمی‌کند.
+2. نسخهٔ **۱٫۹٫۴ یا جدیدتر** WhiteAestherMobile را نصب کنید؛ در نسخه‌های قبلی فیلد *DNS inside the tunnel* در حالت کل دستگاه به رابط VPN اعمال نمی‌شد. نسخهٔ ۱٫۹٫۴ پیش‌انتشار است و به‌روزرسانی خودکار داخل برنامه آن را پیشنهاد نمی‌کند. [یادداشت رسمی نسخهٔ ۱٫۹٫۴](https://github.com/WhiteDNS/WhiteAestherMobile/releases/tag/v1.9.4)
+3. در حالت معمول **Whole device**، آی‌پی سرور WhitePrivateDns را در *DNS inside the tunnel* وارد کنید. این فیلد در **Exit Chain** اعمال نمی‌شود.
+4. در **Routes → Routing rules → Skip the tunnel**، آی‌پی سرور را به‌صورت یک مسیر دقیق، مانند `<server-IP>/32`، وارد کنید و دوباره وصل شوید. در این حالت درخواست‌های DNS و اتصال‌های مقصد همان سرور با آی‌پی واقعی شبکهٔ گوشی خارج می‌شوند و می‌توانند با آی‌پی ثبت‌شده تطبیق پیدا کنند.
+
+این مسیر مستقیم فقط وقتی جواب می‌دهد که شبکهٔ گوشی دسترسی مستقیم به آی‌پی سرور و UDP/53 را باز گذاشته باشد. درخواست DNS در این روش **رمزنگاری‌شده نیست**. اگر دسترسی مستقیم مسدود است، گذاشتن همین آی‌پی در فیلد داخل تونل با لیست سفیدِ مبتنی بر آی‌پی راه‌حل قابل اتکایی نیست؛ از یک DNS عمومی داخل تونل استفاده کنید و برای ادغام امن، کلاینت و سرور باید از احراز هویت مستقل از آی‌پی (مثلاً DoH توکن‌دار) پشتیبانی کنند. آی‌پی خروجی مشترک یا متغیرِ تونل را به‌طور دائمی به لیست مجاز اضافه نکنید.
 
 ---
 
@@ -422,7 +435,7 @@ print(client["registration_secret"]) # این را از یک کانال دوم
 wpdns status      # گزارش زندهٔ سرویس: پورت‌ها، لیسنرها، تست دی‌ان‌اس، گواهی‌ها.
                    # نیازی به دیتابیس ندارد — کنار یک دیمن شلوغ امن است
 wpdns flush       # درخواست از دیمن در حال اجرا برای پاک‌سازی کش دی‌ان‌اس
-wpdns version     # چیزی که باینری چاپ می‌کند (مثلاً WhitePrivateDns v2.2.0-beta.4)
+wpdns version     # چیزی که باینری چاپ می‌کند (مثلاً WhitePrivateDns v2.2.0-beta.5)
 wpdns uninstall   # حذف تعاملی
 ```
 

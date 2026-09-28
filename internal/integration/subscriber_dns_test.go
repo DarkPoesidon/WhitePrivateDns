@@ -209,20 +209,25 @@ func TestProvisionedSubscriberIsRecognisedByTheResolver(t *testing.T) {
 func TestUnknownAddressIsRefusedWhenAllowAllIsOff(t *testing.T) {
 	f := newFixture(t, false)
 	f.provision(t, service.CreateClientRequest{Name: "Reseller Customer", Days: 30, IP: subscriberIP})
+	// Disable the independent rate limiter so this test can exercise the refusal
+	// logger's sampling boundary rather than its rate-limit path.
+	f.dns.SetRateLimit(0)
 
-	wantRefused(t, f.resolve(t, strangerIP))
-
-	// The refusal is deliberately silent: an open resolver being scanned would otherwise
-	// fill the query log, and fan every packet of the scan out to every dashboard
-	// watching the live stream. It is still counted, so the traffic remains visible.
-	counted, logged := f.log.counts()
-	if counted != 1 {
-		t.Errorf("a refused query was counted %d times, want 1", counted)
+	for i := 0; i < 129; i++ {
+		wantRefused(t, f.resolve(t, strangerIP))
 	}
-	if logged != 0 {
-		t.Errorf("a refused stranger produced %d log entries, want 0: every unauthorised "+
-			"packet becoming a log write and an SSE broadcast is the amplification the silent "+
-			"refusal exists to avoid", logged)
+
+	// One sampled entry reveals the observed source IP for access diagnosis;
+	// every refused packet is counted, but only 1 in 128 enters the SSE log.
+	counted, logged := f.log.counts()
+	if counted != 129 {
+		t.Errorf("refused queries were counted %d times, want 129", counted)
+	}
+	if logged != 2 {
+		t.Errorf("129 refused queries produced %d log entries, want 2 sampled entries", logged)
+	}
+	if last := f.log.last(t); last.ClientIP != strangerIP || last.Action != "REFUSED" {
+		t.Errorf("sampled refusal = %+v, want observed source IP and REFUSED", last)
 	}
 }
 

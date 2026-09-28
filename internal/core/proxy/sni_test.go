@@ -5,12 +5,51 @@ import (
 	"context"
 	"errors"
 	"net"
+	"net/netip"
 	"sync"
 	"testing"
 	"time"
 
 	"whiteprivatedns/internal/database"
 )
+
+type anonymousPublicAccess struct{}
+
+func (anonymousPublicAccess) IsIPAllowed(string) (*database.Client, bool) { return nil, true }
+func (anonymousPublicAccess) IsAllowAll() bool                            { return true }
+
+func TestPublicRelayRequiresAnActiveProxyRule(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		policy     func(string) bool
+		wantLookup bool
+	}{
+		{name: "no policy fails closed"},
+		{name: "direct name is refused", policy: func(string) bool { return false }},
+		{name: "proxied name reaches target guard", policy: func(host string) bool { return host == "example.com" }, wantLookup: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := NewServer(database.SNIProxySettings{}, "127.0.0.1", "", anonymousPublicAccess{})
+			s.SetPublicDomainPolicy(tc.policy)
+			lookedUp := false
+			s.guard.lookupIP = func(context.Context, string) ([]netip.Addr, error) {
+				lookedUp = true
+				return nil, errors.New("test stops before a dial")
+			}
+			client, server := net.Pipe()
+			defer client.Close()
+			defer server.Close()
+			go func() { _, _ = client.Write([]byte("GET / HTTP/1.1\r\nHost: example.com\r\n\r\n")) }()
+			s.handleConnection(context.Background(), server, false, 80)
+			if lookedUp != tc.wantLookup {
+				t.Fatalf("target guard lookup = %v, want %v", lookedUp, tc.wantLookup)
+			}
+			if refused, _ := s.GuardStats(); refused != 1 {
+				t.Fatalf("refused = %d, want 1", refused)
+			}
+		})
+	}
+}
 
 // recorder is a net.Conn that records the size of every Write, so a test can
 // assert how a payload was split without opening a socket. Only Write is ever

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v2.2.0-beta.5] — Public-mode guard and DNS access diagnosis
+
+- Restricted anonymous SNI/HTTP relay connections in public mode to active `PROXY` domains. Private mode remains the default.
+- Added a private-mode DNS refusal counter and sampled `REFUSED` entries with the observed source IP, so operators can distinguish packets that never reached the daemon from IP access failures.
+- Made access-mode and custom-policy saves report persistence failures. Custom domains and records are validated, and all rule changes commit in one database transaction before going live.
+- Updated the dashboard and guides to explain public/private access, the limits of SmartDNS, and how to diagnose a VPN client's DNS path.
+- The service-profile editor, anonymous traffic budget, and full VPN tunnel remain future work; this release does not claim to provide them.
+
 ## [v2.2.0-beta.4] — Visible client actions and safe updates
 
 - Restored the green backgrounds of dashboard primary actions, including **Add New Client**, and added a second Add New Client button in the empty client list. Verified both buttons open the form on desktop and mobile.

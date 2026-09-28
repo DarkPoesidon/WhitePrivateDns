@@ -1,7 +1,7 @@
 # ⚡ WhitePrivateDns — SmartDNS & Gaming Gateway
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release-v2.2.0-00f0ff?style=for-the-badge&logo=rocket" alt="Version">
+  <img src="https://img.shields.io/badge/Release-v2.2.0--beta.5-00f0ff?style=for-the-badge&logo=rocket" alt="Version">
   <img src="https://img.shields.io/badge/Status-Production--Ready%20Beta-amber?style=for-the-badge" alt="Status">
   <img src="https://img.shields.io/badge/Language-Go%201.26-00ADD8?style=for-the-badge&logo=go" alt="Go">
   <img src="https://img.shields.io/badge/Architecture-Single%20Binary%20(Zero%20CGO)-a855f7?style=for-the-badge" alt="Single Binary">
@@ -141,8 +141,8 @@ Run as root on Debian or Ubuntu. The commands work from any directory, including
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.4/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.5/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 bash /tmp/whiteprivatedns-install.sh
 ```
 
 On AlmaLinux, Rocky Linux, RHEL or CentOS with working package repositories, replace the first line with `dnf install -y ca-certificates curl openssl`. The installer detects Linux amd64 or arm64, downloads the matching release binary, verifies its SHA-256 checksum, and configures the systemd service. Have a panel domain pointed at this server before running it.

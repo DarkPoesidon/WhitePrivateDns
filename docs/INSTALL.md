@@ -1,6 +1,6 @@
 # Install WhitePrivateDns
 
-The `v2.2.0-beta.4` release includes Linux amd64/arm64, Windows amd64, and macOS amd64/arm64 binaries. None of the release paths below require Go or an existing source checkout. The [Persian guide](INSTALL.fa.md) has the same commands.
+The `v2.2.0-beta.5` release includes Linux amd64/arm64, Windows amd64, and macOS amd64/arm64 binaries. None of the release paths below require Go or an existing source checkout. The [Persian guide](INSTALL.fa.md) has the same commands.
 
 For an existing Linux systemd installation, use the [non-destructive update guide](UPDATE.md) instead of the fresh installer below.
 
@@ -23,13 +23,13 @@ dnf install -y ca-certificates curl openssl
 Then run these commands from **any directory**:
 
 ```bash
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.4/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.5/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 bash /tmp/whiteprivatedns-install.sh
 ```
 
 The installer detects amd64 or arm64, downloads the matching binary, checks its SHA-256 against the release manifest and installs the companion restore and uninstall scripts. It asks for the panel domain and ACME email. Keep the printed admin password and private panel path. **Rerunning the installer replaces an existing installation.** It asks for `FRESH` before stopping the service or creating an archive; cancelling leaves the existing install untouched.
 
-If GitHub downloads are inaccessible from the server, download `whiteprivatedns-offline-bundle.tar.gz` from the [release](https://github.com/DarkPoesidon/WhitePrivateDns/releases/tag/v2.2.0-beta.4) on another machine, transfer it to the server, and run:
+If GitHub downloads are inaccessible from the server, download `whiteprivatedns-offline-bundle.tar.gz` from the [release](https://github.com/DarkPoesidon/WhitePrivateDns/releases/tag/v2.2.0-beta.5) on another machine, transfer it to the server, and run:
 
 ```bash
 mkdir -p /root/whiteprivatedns-bundle
@@ -47,7 +47,7 @@ Open PowerShell. This is a **local evaluation** using DNS port 15353 and a dashb
 ```powershell
 $folder = Join-Path $HOME 'WhitePrivateDns'
 New-Item -ItemType Directory -Force -Path $folder | Out-Null
-$base = 'https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.4'
+$base = 'https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.5'
 $binary = Join-Path $folder 'whiteprivatedns-windows-amd64.exe'
 Invoke-WebRequest -UseBasicParsing "$base/whiteprivatedns-windows-amd64.exe" -OutFile $binary
 $manifest = (Invoke-WebRequest -UseBasicParsing "$base/checksums.txt").Content
@@ -77,7 +77,7 @@ esac
 mkdir -p "$HOME/WhitePrivateDns"
 cd "$HOME/WhitePrivateDns"
 asset="whiteprivatedns-darwin-$arch"
-base='https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.4'
+base='https://github.com/DarkPoesidon/WhitePrivateDns/releases/download/v2.2.0-beta.5'
 curl -fL --retry 3 "$base/$asset" -o "$asset"
 curl -fL --retry 3 "$base/checksums.txt" -o checksums.txt
 grep " $asset\$" checksums.txt | shasum -a 256 -c -

@@ -182,3 +182,21 @@ func TestConfigRulesGuards(t *testing.T) {
 		t.Errorf("truncated JSON = %d, want 400", w.Code)
 	}
 }
+
+func TestConfigRulesRejectsInvalidDomainWithoutChangingLiveOrSavedRules(t *testing.T) {
+	ws, h, tok, cleanup := authedServer(t)
+	defer cleanup()
+	if w := postJSON(t, h, "/api/config/rules", `{"custom_proxied":["good.example.com"]}`, tok); w.Code != http.StatusOK {
+		t.Fatalf("initial save = %d — %s", w.Code, w.Body.String())
+	}
+	w := postJSON(t, h, "/api/config/rules", `{"enable_riot":false,"custom_proxied":["good.example.com","*.bad*.example.com"]}`, tok)
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("invalid domain save = %d, want 400", w.Code)
+	}
+	if got := domainsAt(t, rulesFromConfig(t, h, tok), "custom_proxied"); !slices.Equal(got, []string{"good.example.com"}) {
+		t.Errorf("saved domains after rejection = %v", got)
+	}
+	if !ws.matcher.IsRuleEnabled("enable_riot") {
+		t.Error("rejected save changed live preset")
+	}
+}

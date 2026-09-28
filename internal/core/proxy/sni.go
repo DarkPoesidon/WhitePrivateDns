@@ -101,17 +101,20 @@ type ChallengeResponder interface {
 const acmeChallengePrefix = "/.well-known/acme-challenge/"
 
 type Server struct {
-	settings     database.SNIProxySettings
-	bindHost     string
-	domain       string
-	access       AccessValidator
-	meter        TrafficMeter
-	acme         ChallengeResponder
-	acmeAnswered atomic.Uint64
-	activeRelays atomic.Int64
-	totalRelays  atomic.Uint64
-	bytesSent    atomic.Uint64
-	bytesRecv    atomic.Uint64
+	settings database.SNIProxySettings
+	bindHost string
+	domain   string
+	access   AccessValidator
+	// Set before Start: anonymous connections in public mode may relay only
+	// destinations the active DNS policy actually points at this server.
+	publicDomainAllowed func(string) bool
+	meter               TrafficMeter
+	acme                ChallengeResponder
+	acmeAnswered        atomic.Uint64
+	activeRelays        atomic.Int64
+	totalRelays         atomic.Uint64
+	bytesSent           atomic.Uint64
+	bytesRecv           atomic.Uint64
 	// refused and unreadable are disjoint drop counters, so their sum is every
 	// connection that was accepted and never relayed. refused covers the decisions
 	// this proxy makes about a destination it managed to read (quota spent, relay
@@ -133,6 +136,13 @@ type Server struct {
 // wiring time, before listeners accept.
 func (s *Server) SetChallengeResponder(r ChallengeResponder) {
 	s.acme = r
+}
+
+// SetPublicDomainPolicy restricts anonymous public-mode relays to published
+// DNS proxy rules. A nil policy fails closed for anonymous connections.
+// Wire it before Start; the matcher behind the callback may update live.
+func (s *Server) SetPublicDomainPolicy(allowed func(string) bool) {
+	s.publicDomainAllowed = allowed
 }
 
 func NewServer(
@@ -407,6 +417,14 @@ func (s *Server) handleConnection(ctx context.Context, clientConn net.Conn, isTL
 		}
 		return
 	}
+	// DNS makes the routing decision for normal clients, but an anonymous user
+	// can connect to the relay IP directly and supply any public SNI/Host. With
+	// allow_all enabled, the old source-IP gate admitted that as an unrestricted
+	// public TCP relay. Accept only names which the current DNS policy proxies.
+	if s.access != nil && client == nil && !s.publicRelayAllowed(hostname) {
+		s.refused.Add(1)
+		return
+	}
 
 	// Resolve and vet before dialling, then dial the vetted address rather than
 	// the name. The old code string-matched the hostname and handed the name to
@@ -475,6 +493,10 @@ func (s *Server) handleConnection(ctx context.Context, clientConn net.Conn, isTL
 	}
 
 	s.relay(clientConn, targetConn, idle, report)
+}
+
+func (s *Server) publicRelayAllowed(hostname string) bool {
+	return s.publicDomainAllowed != nil && s.publicDomainAllowed(hostname)
 }
 
 // dialVetted connects to the first reachable vetted address. Passing an address

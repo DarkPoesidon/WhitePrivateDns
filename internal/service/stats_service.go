@@ -56,6 +56,7 @@ type StatsService struct {
 	// keep NewStatsService's signature stable; the proxy does exist by then.
 	guardMu            sync.RWMutex
 	getGuardStats      func() (uint64, int)
+	getAccessDenied    func() uint64
 	getPrefetchStats   func() (uint64, uint64, uint64, uint64)
 	getProxyGuardStats func() (uint64, uint64)
 
@@ -111,6 +112,13 @@ func (s *StatsService) RecordQuery() {
 func (s *StatsService) SetGuardStatsSource(fn func() (uint64, int)) {
 	s.guardMu.Lock()
 	s.getGuardStats = fn
+	s.guardMu.Unlock()
+}
+
+// SetAccessDeniedSource wires private-mode source refusals into telemetry.
+func (s *StatsService) SetAccessDeniedSource(fn func() uint64) {
+	s.guardMu.Lock()
+	s.getAccessDenied = fn
 	s.guardMu.Unlock()
 }
 
@@ -444,6 +452,7 @@ type LiveStatsResponse struct {
 	// that stops rising — indistinguishable from traffic simply going away.
 	RateLimited  uint64 `json:"rate_limited"`
 	RateLimitQPS int    `json:"rate_limit_qps"`
+	AccessDenied uint64 `json:"access_denied"`
 
 	// Machine-wide figures (internal/sysmetrics): the whole server's CPU and
 	// RAM, as opposed to the process-only numbers above — the operator reads
@@ -511,13 +520,18 @@ func (s *StatsService) GetLiveStats() LiveStatsResponse {
 
 	s.guardMu.RLock()
 	guard := s.getGuardStats
+	accessDeniedSource := s.getAccessDenied
 	prefetch := s.getPrefetchStats
 	proxyGuard := s.getProxyGuardStats
 	s.guardMu.RUnlock()
 	var rateLimited uint64
+	var accessDenied uint64
 	var rateLimitQPS int
 	if guard != nil {
 		rateLimited, rateLimitQPS = guard()
+	}
+	if accessDeniedSource != nil {
+		accessDenied = accessDeniedSource()
 	}
 	var staleServed, refreshStarted, refreshFailed, refreshDropped uint64
 	if prefetch != nil {
@@ -567,6 +581,7 @@ func (s *StatsService) GetLiveStats() LiveStatsResponse {
 		UptimeSec:    int64(time.Since(s.startedAt).Seconds()),
 		RateLimited:  rateLimited,
 		RateLimitQPS: rateLimitQPS,
+		AccessDenied: accessDenied,
 
 		StaleServed:    staleServed,
 		RefreshStarted: refreshStarted,

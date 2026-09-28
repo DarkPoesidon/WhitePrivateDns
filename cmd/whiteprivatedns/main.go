@@ -415,6 +415,10 @@ func main() {
 	log.Printf("[Main] Access mode: allow_all=%v", allowAll)
 
 	sniServer := proxy.NewServer(*sniSettings, serverSettings.BindHost, tlsSettings.Domain, clientService)
+	sniServer.SetPublicDomainPolicy(func(host string) bool {
+		action, _ := m.Match(host)
+		return action == matcher.ActionProxy
+	})
 
 	statsService := service.NewStatsService(db, sniServer.GetStats, c.GetStats)
 
@@ -502,6 +506,7 @@ func main() {
 	statsService.SetGuardStatsSource(func() (uint64, int) {
 		return dnsHandler.RateLimited(), dnsHandler.RateLimitQPS()
 	})
+	statsService.SetAccessDeniedSource(dnsHandler.AccessDenied)
 
 	// Serve-stale hides a dead upstream from clients on purpose, which also hides it
 	// from the operator. These counters are the only place that failure is visible

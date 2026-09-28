@@ -1395,6 +1395,46 @@ func toStringSlice(val any) []string {
 	}
 }
 
+// validPolicyDomain accepts hostnames and the one wildcard form the matcher
+// understands. Rejecting malformed entries at save time prevents the panel from
+// claiming a service is active when the matcher silently drops its pattern.
+func validPolicyDomain(raw string, wildcard bool) bool {
+	domain := strings.TrimSuffix(strings.ToLower(strings.TrimSpace(raw)), ".")
+	if wildcard && strings.HasPrefix(domain, "*.") {
+		domain = domain[2:]
+	}
+	if len(domain) == 0 || len(domain) > 253 || !strings.Contains(domain, ".") {
+		return false
+	}
+	for _, label := range strings.Split(domain, ".") {
+		if len(label) == 0 || len(label) > 63 || label[0] == '-' || label[len(label)-1] == '-' {
+			return false
+		}
+		for _, ch := range label {
+			if (ch < 'a' || ch > 'z') && (ch < '0' || ch > '9') && ch != '-' {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func requestDomainList(raw any) ([]string, bool) {
+	items, ok := raw.([]any)
+	if !ok {
+		return nil, false
+	}
+	result := make([]string, 0, len(items))
+	for _, item := range items {
+		domain, ok := item.(string)
+		if !ok || !validPolicyDomain(domain, true) {
+			return nil, false
+		}
+		result = append(result, strings.ToLower(strings.TrimSpace(domain)))
+	}
+	return result, true
+}
+
 // handleConfigRules persists dashboard rule toggles & custom domain lists to
 // the database and applies them to the live matcher immediately.
 func (ws *WebServer) handleConfigRules(w http.ResponseWriter, r *http.Request) {
@@ -1421,56 +1461,99 @@ func (ws *WebServer) handleConfigRules(w http.ResponseWriter, r *http.Request) {
 	if m, ok := persisted["custom_records"].(map[string]string); ok {
 		customRecords = m
 	}
+	policies := make([]database.Policy, 0, len(req)+4)
 
 	for key, val := range req {
 		if presetName, ok := matcher.PresetRuleKeys[key]; ok {
 			enabled, isBool := val.(bool)
 			if !isBool {
-				continue
+				httpx.WriteJSONError(w, http.StatusBadRequest, "Preset value must be true or false")
+				return
 			}
-			_ = ws.db.SavePolicy(database.Policy{Key: key, Name: presetName, Category: "preset", Enabled: enabled})
-			if ws.matcher != nil {
-				ws.matcher.SetRuleEnabled(presetName, enabled)
-			}
+			policies = append(policies, database.Policy{Key: key, Name: presetName, Category: "preset", Enabled: enabled})
 			continue
 		}
 		switch key {
 		case "custom_proxied":
-			customProxied = toStringSlice(val)
+			list, ok := requestDomainList(val)
+			if !ok {
+				httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid custom proxied domains")
+				return
+			}
+			customProxied = list
 		case "custom_blocked":
-			customBlocked = toStringSlice(val)
+			list, ok := requestDomainList(val)
+			if !ok {
+				httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid custom blocked domains")
+				return
+			}
+			customBlocked = list
 		case "custom_direct":
-			customDirect = toStringSlice(val)
+			list, ok := requestDomainList(val)
+			if !ok {
+				httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid custom direct domains")
+				return
+			}
+			customDirect = list
 		case "custom_records":
 			// Replace rather than merge. Merging into the persisted map meant a
 			// record could be added but never removed: the UI sends the full
 			// desired set, so a domain the operator deleted was simply absent
 			// from the payload and survived every save. The three list keys above
 			// already replace, so this also makes the four behave alike.
-			if m, ok := val.(map[string]any); ok {
-				customRecords = make(map[string]string, len(m))
-				for d, ip := range m {
-					// Normalized the same way the matcher keys its index, so the
-					// persisted state and the live rule set agree on "pin.example."
-					d = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(d)), ".")
-					ipStr := strings.TrimSpace(fmt.Sprint(ip))
-					if d != "" && ipStr != "" {
-						customRecords[d] = ipStr
-					}
-				}
+			m, ok := val.(map[string]any)
+			if !ok {
+				httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid custom DNS records")
+				return
 			}
+			customRecords = make(map[string]string, len(m))
+			for d, ip := range m {
+				ipStr, ok := ip.(string)
+				if !ok {
+					httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid custom DNS record: "+d)
+					return
+				}
+				// Normalized the same way the matcher keys its index, so the
+				// persisted state and the live rule set agree on "pin.example."
+				d = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(d)), ".")
+				customRecords[d] = strings.TrimSpace(ipStr)
+			}
+		}
+	}
+	for _, list := range [][]string{customProxied, customBlocked, customDirect} {
+		for _, domain := range list {
+			if !validPolicyDomain(domain, true) {
+				httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid custom domain: "+domain)
+				return
+			}
+		}
+	}
+	for domain, ip := range customRecords {
+		if !validPolicyDomain(domain, false) || net.ParseIP(ip) == nil {
+			httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid custom DNS record: "+domain)
+			return
 		}
 	}
 
 	// Persist custom lists (encoded inside Policy.CustomDomains)
-	_ = ws.db.SavePolicy(database.Policy{Key: "custom_proxied", Name: "Custom Proxied Domains", Category: "custom", Enabled: true, CustomDomains: customProxied})
-	_ = ws.db.SavePolicy(database.Policy{Key: "custom_blocked", Name: "Custom Blocked Domains", Category: "custom", Enabled: true, CustomDomains: customBlocked})
-	_ = ws.db.SavePolicy(database.Policy{Key: "custom_direct", Name: "Custom Direct Domains", Category: "custom", Enabled: true, CustomDomains: customDirect})
+	policies = append(policies,
+		database.Policy{Key: "custom_proxied", Name: "Custom Proxied Domains", Category: "custom", Enabled: true, CustomDomains: customProxied},
+		database.Policy{Key: "custom_blocked", Name: "Custom Blocked Domains", Category: "custom", Enabled: true, CustomDomains: customBlocked},
+		database.Policy{Key: "custom_direct", Name: "Custom Direct Domains", Category: "custom", Enabled: true, CustomDomains: customDirect})
 	recordEntries := make([]string, 0, len(customRecords))
 	for d, ip := range customRecords {
 		recordEntries = append(recordEntries, d+"="+ip)
 	}
-	_ = ws.db.SavePolicy(database.Policy{Key: "custom_records", Name: "Custom A Records", Category: "custom", Enabled: true, CustomDomains: recordEntries})
+	policies = append(policies, database.Policy{Key: "custom_records", Name: "Custom A Records", Category: "custom", Enabled: true, CustomDomains: recordEntries})
+	if err := ws.db.SavePolicies(policies); err != nil {
+		httpx.WriteJSONError(w, http.StatusInternalServerError, "Could not save policies")
+		return
+	}
+	for _, p := range policies {
+		if p.Category == "preset" && ws.matcher != nil {
+			ws.matcher.SetRuleEnabled(p.Name, p.Enabled)
+		}
+	}
 
 	// Apply custom lists to the live matcher and flush stale cache entries
 	if ws.matcher != nil {
@@ -1530,6 +1613,7 @@ func (ws *WebServer) handleStats(w http.ResponseWriter, r *http.Request) {
 		"uptime_sec":     st.UptimeSec,
 		"rate_limited":   st.RateLimited,
 		"rate_limit_qps": st.RateLimitQPS,
+		"access_denied":  st.AccessDenied,
 
 		// Machine-wide load (internal/sysmetrics): the whole server's CPU and
 		// RAM, as opposed to the daemon-process figures above. Negative values
@@ -1802,7 +1886,10 @@ func (ws *WebServer) handleAccessMode(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteJSONError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
-	ws.clients.SetAllowAll(req.AllowAll)
+	if err := ws.clients.SetAllowAll(req.AllowAll); err != nil {
+		httpx.WriteJSONError(w, http.StatusInternalServerError, "Could not save access mode")
+		return
+	}
 	_ = json.NewEncoder(w).Encode(map[string]bool{"allow_all": req.AllowAll})
 }
 

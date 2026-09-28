@@ -50,6 +50,18 @@ func TestGuardStatsAreForwarded(t *testing.T) {
 	}
 }
 
+func TestAccessDeniedIsForwarded(t *testing.T) {
+	s := NewStatsService(nil, nil, nil)
+	defer s.Close()
+	if got := s.GetLiveStats().AccessDenied; got != 0 {
+		t.Fatalf("unwired access denied = %d, want 0", got)
+	}
+	s.SetAccessDeniedSource(func() uint64 { return 7 })
+	if got := s.GetLiveStats().AccessDenied; got != 7 {
+		t.Errorf("access denied = %d, want 7", got)
+	}
+}
+
 // UptimeSec is declared in the response and rendered by the dashboard and the
 // TUI, and for several releases it was never assigned — the tile showed 0 for a
 // daemon that had been up for a week. A fresh service is younger than a second,

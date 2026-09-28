@@ -79,8 +79,8 @@ Run as `root` on Debian or Ubuntu. These commands work from any directory:
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.4/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.5/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 bash /tmp/whiteprivatedns-install.sh
 ```
 
 On RHEL, AlmaLinux, Rocky Linux or CentOS with working package repositories, use `dnf install -y ca-certificates curl openssl` for the first line. See [all platform install paths](INSTALL.md) for Windows, macOS, offline bundles and source builds.
@@ -89,7 +89,7 @@ The installer is interactive when a TTY is present. To pass a domain and ACME em
 
 ```bash
 # Required: the panel domain, and an email for the certificate authority
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.4 \
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.5 \
   WHITEPRIVATEDNS_DOMAIN=dns.example.com \
   WHITEPRIVATEDNS_EMAIL=you@example.com \
   bash /tmp/whiteprivatedns-install.sh
@@ -324,9 +324,10 @@ The **client access whitelist is on by default**. A source IP that is not bound
 to any account gets a DNS refusal carrying an **RFC 8914 Extended DNS Error**, so
 a well-behaved client learns *why* it was blocked rather than silently failing.
 This means an open server never becomes free public infrastructure for
-strangers. You can switch it off with **Settings → Client Access Whitelist
-Mode**, but read [SECURITY.md](SECURITY.md) first — `allow_all` makes the box a
-public resolver and you pay the bandwidth.
+strangers. You can change it under **Clients → DNS access mode**. Public mode
+answers DNS for any source; anonymous relay connections are limited to active
+`PROXY` domains, but anonymous sources have no per-client quota and account
+revocation does not work. Read [SECURITY.md](SECURITY.md) before enabling it.
 
 ---
 
@@ -361,6 +362,38 @@ kdig -d @dns.example.com +853 api.steampowered.com
 
 An answer whose `A` record is **your server's IP** means the SNI proxy is taking
 that connection; an answer with the real CDN IP means it is going direct.
+
+### 8a. Using WhiteAestherMobile
+
+**WhitePrivateDns checks the source IP of each DNS query and proxy connection.**
+Registering a phone while its VPN is off binds that network's public IP. A DNS
+query sent through a tunnel usually arrives from the tunnel exit instead; the
+whitelist then returns `REFUSED`. Proxied connections have the same source-IP
+check.
+
+To test with WhiteAestherMobile:
+
+1. Disconnect the VPN. On the same phone and network, open the subscription
+   portal, enter the separate registration secret, and press **Register my IP**.
+   Confirm the account shows at least one **Allowed IP** in the panel. Opening
+   the link alone does not register it.
+2. Install **v1.9.4 or newer**. Earlier versions did not apply **DNS inside the
+   tunnel** to the whole-device VPN interface. v1.9.4 is a prerelease that the
+   in-app updater does not offer automatically. See the [official v1.9.4 release
+   notes](https://github.com/WhiteDNS/WhiteAestherMobile/releases/tag/v1.9.4).
+3. In ordinary **Whole device** mode, enter the WhitePrivateDns server IP in
+   **DNS inside the tunnel**. **Exit Chain** ignores this field.
+4. Under **Routes → Routing rules → Skip the tunnel**, add the exact server IP
+   as `<server-IP>/32`, then reconnect. DNS queries and connections to that
+   server should now leave from the phone's real network address, matching its
+   registration.
+
+This direct route requires the phone's network to reach the server and UDP/53
+directly, and its DNS queries are **unencrypted**. If that path is blocked, an
+IP-based whitelist cannot reliably identify this phone behind a shared or
+changing tunnel exit. Use a public resolver inside the tunnel until the client
+and server support authentication independent of source IP, such as tokenized
+DoH. Do not permanently whitelist a shared tunnel exit IP.
 
 ---
 
@@ -504,7 +537,7 @@ print(client["registration_secret"]) # send this via a second channel
 wpdns status      # live service report: ports, listeners, DNS test, certs.
                    # needs no database — safe beside a busy daemon
 wpdns flush       # ask the running daemon to flush its DNS cache
-wpdns version     # what the binary reports (e.g. WhitePrivateDns v2.2.0-beta.4)
+wpdns version     # what the binary reports (e.g. WhitePrivateDns v2.2.0-beta.5)
 wpdns uninstall   # interactive uninstaller
 ```
 

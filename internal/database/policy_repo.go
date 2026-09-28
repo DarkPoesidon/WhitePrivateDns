@@ -23,13 +23,28 @@ import (
 
 // SavePolicy stores or updates a policy preset
 func (db *DB) SavePolicy(p Policy) error {
-	data, err := json.Marshal(p)
-	if err != nil {
-		return err
+	return db.SavePolicies([]Policy{p})
+}
+
+// SavePolicies commits a complete rules update in one Bolt transaction. A failed
+// write cannot leave half the preset toggles or domain lists on disk.
+func (db *DB) SavePolicies(policies []Policy) error {
+	encoded := make([][]byte, len(policies))
+	for i, p := range policies {
+		data, err := json.Marshal(p)
+		if err != nil {
+			return err
+		}
+		encoded[i] = data
 	}
 	return db.bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketPolicies)
-		return b.Put([]byte(p.Key), data)
+		for i, p := range policies {
+			if err := b.Put([]byte(p.Key), encoded[i]); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }
 
