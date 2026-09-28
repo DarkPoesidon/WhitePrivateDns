@@ -1145,6 +1145,7 @@ async function updateStats() {
 
     setTxt('stat-qps', num(data.qps, 1));
     setTxt('stat-total-queries', count(data.total_queries));
+	setTxt('stat-access-denied', count(data.access_denied));
     setTxt('stat-cache-ratio', typeof data.cache_hit_ratio === 'number' ? num(data.cache_hit_ratio, 1) + '%' : '—');
     setTxt('stat-cache-entries', count(data.cache_entries));
     setTxt('stat-proxy-active', count(data.active_proxy_conns));
@@ -3228,7 +3229,7 @@ function renderClientsView(data) {
       modeBadge.innerHTML = '<i data-feather="unlock" class="w-3 h-3"></i> PUBLIC ACCESS';
     }
     if (modeText) {
-      modeText.innerText = 'Public Mode (Anyone can connect)';
+      modeText.innerText = 'Public Mode (Active proxy rules only)';
       modeText.className = 'text-xs font-mono text-slate-400 font-semibold';
     }
   }
@@ -3724,6 +3725,8 @@ function initClientEventListeners() {
     const isEnforced = e.target.checked;
     const allowAll = !isEnforced;
 
+    e.target.disabled = true;
+
     try {
       const res = await fetch(api('/api/access/mode'), {
         method: 'POST',
@@ -3731,12 +3734,14 @@ function initClientEventListeners() {
         body: JSON.stringify({ allow_all: allowAll })
       });
 
-      if (res.ok) {
-        showToast(isEnforced ? 'Whitelist mode enforced (Only registered clients)' : 'Open public mode activated', 'info');
-        loadClients();
-      }
+      if (!res.ok) throw new Error(await errorMessage(res, 'Failed to update access mode'));
+      showToast(isEnforced ? 'Whitelist mode enforced (Only registered clients)' : 'Public DNS enabled; relay limited to active proxy rules', 'info');
+      loadClients();
     } catch (e) {
+      e.target.checked = !isEnforced;
       showToast('Failed to update access mode', 'error');
+    } finally {
+      e.target.disabled = false;
     }
   });
 

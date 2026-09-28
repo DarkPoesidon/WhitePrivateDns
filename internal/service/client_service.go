@@ -99,6 +99,7 @@ type ClientService struct {
 	bindMu sync.Mutex
 	bindWG map[string]*sync.Mutex
 	mu     sync.RWMutex
+	modeMu sync.Mutex // serializes durable access-mode changes without holding the query lock across disk I/O
 
 	// traffic accumulates metered bytes between database writes; flushMu
 	// serialises the read-modify-write that persists them against the reset that
@@ -309,11 +310,16 @@ func (s *ClientService) IsAllowAll() bool {
 	return s.allowAll
 }
 
-func (s *ClientService) SetAllowAll(allow bool) {
+func (s *ClientService) SetAllowAll(allow bool) error {
+	s.modeMu.Lock()
+	defer s.modeMu.Unlock()
+	if err := s.db.SetSetting("allow_all", allow); err != nil {
+		return err
+	}
 	s.mu.Lock()
 	s.allowAll = allow
 	s.mu.Unlock()
-	_ = s.db.SetSetting("allow_all", allow)
+	return nil
 }
 
 // CreateClientRequest is everything an operator can settle at the moment a

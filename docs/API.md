@@ -216,6 +216,7 @@ same payload the dashboard polls. Every field below is present on every response
     "uptime_sec": 3840,
     "rate_limited": 0,
     "rate_limit_qps": 200,
+    "access_denied": 0,
     "stale_served": 84,
     "refresh_started": 1902,
     "refresh_failed": 3,
@@ -246,7 +247,7 @@ same payload the dashboard polls. Every field below is present on every response
 
 | Field | Type | Meaning |
 |---|---|---|
-| `total_queries` | uint | DNS queries answered since start, all transports. |
+| `total_queries` | uint | DNS queries received by this process since start, including refusals and rate-limited requests. |
 | `qps` | float | Queries per second, averaged over a rolling 10-second window. |
 | `active_relays` | int | SNI proxy connections open right now. |
 | `total_relays` | uint | SNI proxy connections accepted since start. |
@@ -263,6 +264,7 @@ same payload the dashboard polls. Every field below is present on every response
 | `uptime_sec` | int | Seconds since the daemon started. |
 | `rate_limited` | uint | Queries **dropped or refused** by the per-source rate limiter since start. |
 | `rate_limit_qps` | int | The limit in force, per source. `0` means limiting is **disabled**. |
+| `access_denied` | uint | DNS requests refused in private mode because the source IP was not registered. Rising alongside `total_queries` identifies an access mismatch; neither counter rising points to a path that is not reaching this process. |
 | `stale_served` | uint | Answers served from an **expired** cache entry while a refresh ran in the background. |
 | `refresh_started` | uint | Background cache refreshes started since start. |
 | `refresh_failed` | uint | Background refreshes that could not reach an upstream. |
@@ -405,7 +407,7 @@ Omit it and the account behaves exactly as it did before v1.5.0: one quota, spen
 
 An account is answered as *itself* only when `enabled` is true, `expires_at` is in the future **and** `quota_exceeded` is false. All three are independent; a panel that shows only the first two will badge a spent account as active.
 
-⚠️ Those three fields decide whether the resolver serves **this account** — not whether it serves the request. With `access.allow_all` left at its default of `true` the daemon is an open resolver: disabling or expiring an account only stops it from being *recognised*, and the address behind it is then served as anonymous `Public`, which has no plan and no quota. So revocation does nothing until `allow_all` is off, and expiring an account that is already over its limit gives its service back. Set `access.allow_all` to `false` on any server you sell access to.
+⚠️ Those three fields decide whether the resolver serves **this account**. Since v2.2.0, new installations default to `access.allow_all: false`. If an operator switches to public mode (`true`), disabling or expiring an account only stops it from being *recognised*: its address can still use public DNS anonymously, without a per-client quota. Anonymous relay connections are restricted to active proxied domains, but account revocation still requires private mode. Keep `access.allow_all` false on any server where access must be limited to registered clients.
 
 ---
 

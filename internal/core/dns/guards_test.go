@@ -372,6 +372,9 @@ func TestHandlerRefusesAnUnrecognisedSourceWhenAllowAllIsOff(t *testing.T) {
 	if len(resp.Answer) != 0 {
 		t.Errorf("refusal carried %d answers", len(resp.Answer))
 	}
+	if got := h.AccessDenied(); got != 1 {
+		t.Errorf("access denied count = %d, want 1", got)
+	}
 }
 
 // TestRefusalCarriesProhibitedEDEForOptQueries: a client that sent OPT must

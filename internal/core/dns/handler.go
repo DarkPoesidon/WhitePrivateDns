@@ -42,6 +42,7 @@ type Handler struct {
 	telemetry    TelemetrySink
 	publicIP     atomic.Value // string; read on every proxied query, changed by an operator save
 	totalQueries atomic.Uint64
+	accessDenied atomic.Uint64
 
 	quota QuotaEnforcer
 
@@ -107,6 +108,12 @@ func (h *Handler) SetRateLimit(qps int) {
 // source's query rate since start.
 func (h *Handler) RateLimited() uint64 {
 	return h.limited.Load()
+}
+
+// AccessDenied counts queries that reached this resolver but were refused
+// because their source address was not registered in private mode.
+func (h *Handler) AccessDenied() uint64 {
+	return h.accessDenied.Load()
 }
 
 // RateLimitQPS is the per-source limit in effect, or 0 when limiting is off.
@@ -389,6 +396,7 @@ func (h *Handler) ProcessQuery(r *dns.Msg, clientIP string, protocol ...string) 
 			activeClient = client
 			accountName = client.Name
 		} else if !h.access.IsAllowAll() {
+			h.accessDenied.Add(1)
 			m := new(dns.Msg)
 			m.SetRcode(r, dns.RcodeRefused)
 			// RFC 8914 Extended DNS Error, so a client that sent OPT learns WHY the

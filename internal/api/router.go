@@ -740,6 +740,7 @@ func (a *API) handleStats(w http.ResponseWriter, r *http.Request) {
 		"total_bytes_transferred": st.BytesSent + st.BytesRecv,
 		"uptime_sec":              st.UptimeSec,
 		"rate_limited":            st.RateLimited,
+		"access_denied":           st.AccessDenied,
 		"rate_limit_qps":          st.RateLimitQPS,
 		"system_cpu_percent":      st.SystemCPUPercent,
 		"system_mem_used_mb":      st.SystemMemUsedMB,

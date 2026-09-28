@@ -266,7 +266,9 @@
     'The server reported no diagnostic targets.': 'سرور هیچ هدف عیب‌یابی‌ای اعلام نکرد.',
 
     /* --- access mode --- */
-    'Client Access Whitelist Mode': 'حالت لیست سفید دسترسی کلاینت',
+    'DNS access mode': 'حالت دسترسی DNS',
+	'Private-mode DNS refusals since restart:': 'درخواست‌های ردشدهٔ DNS در حالت خصوصی از زمان راه‌اندازی مجدد:',
+	'If this stays at zero while a client fails, check whether its DNS packets reach this server.': 'اگر هنگام خطای کلاینت این عدد صفر می‌ماند، بررسی کنید بسته‌های DNS او به سرور می‌رسند یا نه.',
     'PUBLIC ACCESS': 'دسترسی عمومی',
     'PUBLIC ACCESS': 'دسترسی عمومی',
     'WHITELIST ENFORCED': 'لیست سفید فعال',
@@ -276,6 +278,11 @@
     'Public Mode': 'حالت عمومی',
     'Whitelist Mode (Only Registered Clients)': 'حالت لیست سفید (فقط کلاینت‌های ثبت‌شده)',
     'Public Mode (Anyone can connect)': 'حالت عمومی (همه می‌توانند وصل شوند)',
+    'Public Mode (Active proxy rules only)': 'حالت عمومی (فقط قوانین پروکسی فعال)',
+    'Require registered IPs': 'نیاز به آی‌پی ثبت‌شده',
+    'Private: only registered IPs can use DNS and the relay. Public: any IP can use DNS; anonymous relay traffic is limited to active proxied domains. Anonymous traffic has no per-client quota.':
+      'خصوصی: فقط آی‌پی‌های ثبت‌شده می‌توانند از DNS و رله استفاده کنند. عمومی: همهٔ آی‌پی‌ها به DNS دسترسی دارند؛ رلهٔ ناشناس فقط برای دامنه‌های پروکسی فعال است. ترافیک ناشناس سهمیهٔ اختصاصی ندارد.',
+    'Public DNS enabled; relay limited to active proxy rules': 'DNS عمومی فعال شد؛ رله فقط برای قوانین پروکسی فعال است',
     /* --- client list + cards --- */
     'Add New Client': 'افزودن کلاینت جدید',
     'Add Client': 'افزودن کلاینت جدید',
