@@ -346,6 +346,11 @@ func TestHandlerDoesNotLeakTheRealHostOverAAAA(t *testing.T) {
 // an address matching no account has no business receiving an answer.
 type strictAccess struct{}
 
+type refusalSink struct{ logs []database.QueryLogItem }
+
+func (s *refusalSink) PushQueryLog(item database.QueryLogItem) { s.logs = append(s.logs, item) }
+func (s *refusalSink) RecordQuery()                            {}
+
 func (s *strictAccess) IsIPAllowed(string) (*database.Client, bool) { return nil, false }
 
 func (s *strictAccess) IsAllowAll() bool { return false }
@@ -374,6 +379,26 @@ func TestHandlerRefusesAnUnrecognisedSourceWhenAllowAllIsOff(t *testing.T) {
 	}
 	if got := h.AccessDenied(); got != 1 {
 		t.Errorf("access denied count = %d, want 1", got)
+	}
+}
+
+func TestUnknownSourceRefusalExposesObservedIPWithoutLoggingEveryPacket(t *testing.T) {
+	c := cache.NewCache(1000, 60, 3600)
+	defer c.Close()
+	sink := &refusalSink{}
+	h := NewHandler(&strictAccess{}, c, matcher.NewMatcher(), nil, sink, "198.51.100.1")
+	req := new(dns.Msg)
+	req.SetQuestion("example.com.", dns.TypeA)
+	for i := 0; i < 2; i++ {
+		if resp := h.ProcessQuery(req, "203.0.113.99", "UDP"); resp == nil || resp.Rcode != dns.RcodeRefused {
+			t.Fatalf("query %d: want REFUSED, got %v", i, resp)
+		}
+	}
+	if got := h.AccessDenied(); got != 2 {
+		t.Errorf("access denied count = %d, want 2", got)
+	}
+	if len(sink.logs) != 1 || sink.logs[0].ClientIP != "203.0.113.99" || sink.logs[0].Action != "REFUSED" {
+		t.Errorf("sampled refusal logs = %+v, want one observed source IP", sink.logs)
 	}
 }
 

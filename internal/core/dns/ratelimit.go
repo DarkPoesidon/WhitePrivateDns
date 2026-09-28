@@ -18,10 +18,10 @@ const rateLimitBuckets = 1 << 13
 
 // defaultRateLimitQPS applies when config.json says nothing about rate limiting.
 // An unmetered resolver answers a 60-byte question with a response many times
-// larger, so it amplifies whatever source address a flood claims to come from —
-// and allow_all defaults to true, so "known clients only" is not the shape most
-// installs run in. Real subscribers, including a whole office behind one NAT
-// address, sit far below this.
+// larger, so it amplifies whatever source address a flood claims to come from.
+// Operators can enable public mode even though fresh installs default to
+// private. Real subscribers, including a whole office behind one NAT address,
+// sit far below this limit.
 const defaultRateLimitQPS = 200
 
 // minRateLimitBurst keeps a low configured rate from clipping the burst a browser
