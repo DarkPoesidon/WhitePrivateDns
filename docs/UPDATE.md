@@ -68,3 +68,37 @@ HTTPS mirrors with the same release asset and source tree layout. Always set
 `WHITEPRIVATEDNS_REF` to the exact tag of the binary and version file. The
 updater rejects a checksum, binary version, or metadata version mismatch before
 stopping the service.
+
+## Updating from the dashboard
+
+The daemon checks GitHub Releases for a newer version at start-up and every six
+hours. When one exists, a banner appears at the top of the dashboard with the
+version change and a link to the release notes. A stable install is only offered
+stable releases; a beta install is offered betas too.
+
+Press **Update now**, enter your current password (and a 2FA code if 2FA is on)
+and the daemon:
+
+1. downloads `whiteprivatedns-update.sh` for that exact release and refuses it
+   unless its SHA-256 matches the release's `checksums.txt`;
+2. starts it as a separate systemd unit (`whiteprivatedns-update`), so it
+   survives the service restart;
+3. the script then backs up `/opt/whiteprivatedns`, replaces the binary, restarts
+   the service and rolls back automatically if the new version fails its health
+   check.
+
+The panel reloads to the login page when the service is back. If something goes
+wrong, read the updater's log with `journalctl -u whiteprivatedns-update`.
+
+Self-update works only for the standard install: Linux, systemd, running as root,
+binary at `/opt/whiteprivatedns/whiteprivatedns`. Docker and other layouts still
+get the notification, and the button explains why it cannot proceed.
+
+Environment variables for the service:
+
+| Variable | Effect |
+| :--- | :--- |
+| `WHITEPRIVATEDNS_UPDATE_CHECK=0` | Disable the GitHub check and the banner. |
+| `WHITEPRIVATEDNS_REPOSITORY=owner/repo` | Check a fork instead of the default repository. |
+
+The check sends one request to `api.github.com` and nothing about your install.

@@ -75,5 +75,21 @@
       </div>
     </header>
 
+    <!-- UPDATE BANNER. Hidden until /api/update/status reports a newer release.
+         Version numbers live in their own data-no-i18n span so the sentence around them
+         stays a fixed, translatable string. -->
+    <div id="update-banner" class="update-banner hidden" role="status" aria-live="polite">
+      <div class="update-banner-text">
+        <i data-feather="download-cloud" aria-hidden="true"></i>
+        <strong id="update-banner-title">Update available</strong>
+        <span id="update-versions" class="font-mono" dir="ltr" data-no-i18n></span>
+        <a id="update-notes-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden">What's new</a>
+      </div>
+      <div class="update-banner-actions">
+        <button type="button" id="update-now-btn" class="update-btn update-btn-primary">Update now</button>
+        <button type="button" id="update-later-btn" class="update-btn">Later</button>
+      </div>
+    </div>
+
     <!-- CONTENT WRAPPER -->
     <main id="main-content" tabindex="-1" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full pb-24 md:pb-8">

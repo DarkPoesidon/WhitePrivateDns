@@ -285,6 +285,7 @@ async function bootDashboard() {
   if (!authed) return; // 401 -> login modal is already shown
   await loadClients();
   startStatsPolling();
+  initUpdateCheck();
   startLiveStream();
   handleRouteFromURL();
 }

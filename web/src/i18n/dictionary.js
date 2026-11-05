@@ -58,6 +58,22 @@
     'Confirm with your current password': 'با رمز عبور فعلی تأیید کنید',
     'SAVE NEW CREDENTIALS': 'ذخیرهٔ اطلاعات جدید',
     'CANCEL': 'انصراف',
+
+    /* --- update notification --- */
+    'Update available': 'به‌روزرسانی جدید موجود است',
+    "What's new": 'تغییرات جدید',
+    'Update now': 'به‌روزرسانی',
+    'Later': 'بعداً',
+    'UPDATE': 'به‌روزرسانی',
+    'Update WhitePrivateDns': 'به‌روزرسانی WhitePrivateDns',
+    'Two-factor code': 'کد دومرحله‌ای',
+    'Starting update…': 'در حال شروع به‌روزرسانی…',
+    'Updating — the panel will reload when it is back': 'در حال به‌روزرسانی — پنل پس از بازگشت سرویس خودکار بارگذاری می‌شود',
+    'The service restarts and the panel is unavailable for about a minute. A backup is taken first and restored automatically if the update fails. Enter your current password to continue.':
+      'سرویس راه‌اندازی مجدد می‌شود و پنل حدود یک دقیقه در دسترس نیست. ابتدا پشتیبان گرفته می‌شود و اگر به‌روزرسانی شکست بخورد خودکار بازگردانده می‌شود. برای ادامه رمز عبور فعلی را وارد کنید.',
+    'Update could not be started': 'شروع به‌روزرسانی ممکن نشد',
+    'Network error starting the update': 'خطای شبکه هنگام شروع به‌روزرسانی',
+    'This install cannot update itself': 'این نصب نمی‌تواند خودش را به‌روزرسانی کند',
     'Cancel': 'انصراف',
     'Save': 'ذخیره',
     'SAVE': 'ذخیره',

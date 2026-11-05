@@ -52,3 +52,17 @@ body>aside>div:last-child{border-color:var(--border-color)}#copy-ip-btn,#restart
 [data-theme="light"]{--c-cyan-200:19 99 54;--c-cyan-950:230 244 233;--c-blue-200:25 105 62;--c-blue-300:26 113 68;--c-blue-600:17 91 48;--c-purple-300:66 105 73;--c-purple-600:57 100 65;--c-purple-700:47 88 54;--c-orange-300:69 99 75;--c-orange-400:77 111 83;--c-orange-500:61 104 71;--c-orange-600:48 86 57;--c-indigo-500:32 112 61;--c-indigo-600:26 99 53;--c-indigo-700:21 83 44;--c-teal-500:25 114 67;--accent-purple:#456c4d}
 /* Touch devices: give small controls a 44px hit area without changing their look. */
 @media (pointer:coarse){.remove-upstream,.console-text-button,#add-upstream-btn,#new-upstream-input,#toggle-api-key-visibility{position:relative;min-height:44px;min-width:44px}.console-text-button{padding:0 4px}.remove-upstream{width:44px;height:44px}.lang-btn{min-height:44px}}
+/* Update banner: shown above the content when a newer release exists. */
+.update-banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:10px 16px;background:rgba(103,211,148,.10);border-bottom:1px solid rgba(103,211,148,.35);font-size:13px}
+.update-banner.hidden{display:none}
+.update-banner-text{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-width:0}
+.update-banner-text svg{width:16px;height:16px;flex:none;color:#67d394}
+.update-banner-text a{color:#67d394;text-decoration:underline}
+.update-banner-actions{display:flex;gap:8px}
+.update-btn{min-height:36px;padding:0 14px;border-radius:8px;border:1px solid rgba(103,211,148,.45);background:transparent;color:inherit;font-weight:700;font-size:12px}
+.update-btn:hover:not(:disabled){background:rgba(103,211,148,.15)}
+.update-btn:disabled{opacity:.55;cursor:not-allowed}
+.update-btn-primary{background:#67d394;color:#04130a;border-color:#67d394}
+.update-btn-primary:hover:not(:disabled){background:#86e0ab}
+.update-btn:focus-visible{outline:2px solid #67d394;outline-offset:2px}
+@media (pointer:coarse){.update-btn{min-height:44px}}

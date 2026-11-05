@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"flag"
@@ -30,6 +31,7 @@ import (
 	"whiteprivatedns/internal/service"
 	"whiteprivatedns/internal/service/acme"
 	"whiteprivatedns/internal/tui"
+	"whiteprivatedns/internal/update"
 	"whiteprivatedns/internal/version"
 	internalWeb "whiteprivatedns/internal/web"
 	webAssets "whiteprivatedns/web"
@@ -538,6 +540,21 @@ func main() {
 	// A relay target resolving to our own public IP is a loop; on NAT'd clouds
 	// that address is on no interface, so the guard needs it from config.
 	sniServer.SetSelfAddrProvider(dnsHandler.PublicIP)
+
+	// Release check: one request to api.github.com every 6 hours. Opt out with
+	// WHITEPRIVATEDNS_UPDATE_CHECK=0; point at a fork with WHITEPRIVATEDNS_REPOSITORY.
+	if os.Getenv("WHITEPRIVATEDNS_UPDATE_CHECK") != "0" {
+		repo := os.Getenv("WHITEPRIVATEDNS_REPOSITORY")
+		if repo == "" {
+			repo = update.DefaultRepository
+		}
+		if checker, err := update.New(repo, version.Display()); err != nil {
+			log.Printf("[Update] Update checks disabled: %v", err)
+		} else {
+			webServer.SetUpdater(checker)
+			go checker.Run(context.Background(), 6*time.Hour)
+		}
+	}
 	webServer.SetAuthSettings(authSettings)
 
 	// v2.2.0: the embedded ACME client replaces certbot/acme.sh. It ships in

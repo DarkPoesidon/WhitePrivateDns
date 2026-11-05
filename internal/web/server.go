@@ -28,6 +28,7 @@ import (
 	"whiteprivatedns/internal/httpx"
 	"whiteprivatedns/internal/service"
 	"whiteprivatedns/internal/service/acme"
+	"whiteprivatedns/internal/update"
 	"whiteprivatedns/internal/version"
 )
 
@@ -40,6 +41,7 @@ type WebServer struct {
 	upstreams         *upstream.UpstreamPool
 	dohHandler        http.Handler
 	dnsPublicIPUpdate func(string)
+	updater           *update.Checker
 	settings          *database.ServerSettings
 	tlsSettings       *database.TLSSettings
 	dnsCfg            *database.DNSSettings
@@ -688,6 +690,8 @@ func (ws *WebServer) buildAdminMux() *http.ServeMux {
 	mux.HandleFunc("/api/auth/ldap", ws.requireAuth(ws.handleLDAPSettings))
 	mux.HandleFunc("/api/auth/sse-ticket", ws.requireAuth(ws.handleSSETicket))
 	mux.HandleFunc("/api/benchmark", ws.requireAuth(ws.handleBenchmark))
+	mux.HandleFunc("/api/update/status", ws.requireAuth(ws.handleUpdateStatus))
+	mux.HandleFunc("/api/update/apply", ws.requireAuth(ws.handleUpdateApply))
 	mux.HandleFunc("/api/upstreams/add", ws.requireAuth(ws.handleUpstreamsAdd))
 	mux.HandleFunc("/api/upstreams/delete", ws.requireAuth(ws.handleUpstreamsDelete))
 	mux.HandleFunc("/api/tls/issue", ws.requireAuth(ws.handleTLSSettings))
