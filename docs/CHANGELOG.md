@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v2.2.0-beta.6] — Dashboard updates, personal DoH links and a hardening pass
+
+### Added
+- **Update notifications and one-click update.** The daemon checks GitHub Releases at start-up and every six hours. A banner shows the new version and its release notes; **Update now** asks for the current password (and a 2FA code when enabled), downloads the release's `whiteprivatedns-update.sh`, verifies it against `checksums.txt` and runs it under `systemd-run`, so backup, restart and rollback stay in `update.sh`. Linux + systemd + root installs at `/opt/whiteprivatedns` only; other layouts get the notification. `WHITEPRIVATEDNS_UPDATE_CHECK=0` disables it, `WHITEPRIVATEDNS_REPOSITORY` selects a fork. New: `GET/POST /api/update/status`, `POST /api/update/apply`.
+- **Personal DoH link** `/dns-query/<token>/<secret>`: a device that speaks DoH re-asserts its subscription on every request and its registered address follows IP changes, with the same gates as `/ip/<token>`. Printed on the Bot Card.
+- **New React + Ant Design panel** at `/<admin-path>/ui/` (Overview, Clients, Policies, Live queries, API gateway, Settings, Connect guide; EN/FA with RTL; light, dark and ultra-dark themes). The classic dashboard at `/<admin-path>/dash/` is unchanged and remains the default.
+- Dashboard: 44 px touch targets on touch devices, `aria-label` on icon-only buttons, integer QPS axis.
+
+### Fixed (security)
+- **Proxy bypass via HTTPS/SVCB:** proxied names answered HTTPS/SVCB queries from upstream, leaking `ipv4hint`/`ipv6hint` that let clients skip the relay. They now get an empty NOERROR.
+- A proxied A query with no usable public IP now answers SERVFAIL instead of falling through to the real address.
+- **Login lockout** is keyed per IPv6 /64 (rotating addresses inside one prefix no longer bypassed it) and the tracker is hard-capped.
+- **Relay:** connections still in the handshake use a separate 2048-slot pool released as soon as the destination is read, so silent connections cannot starve running relays; targets resolving to the configured public IP are refused (NAT'd clouds); IPv4-first staggered dialling (RFC 8305) stops a black-holed IPv6 route stalling every connection for 5 s.
+- **Docker** runs as uid 10001 with only `NET_BIND_SERVICE`. **Upgrading a Docker install:** run `sudo chown -R 10001:10001 data certs` once.
+
+### Fixed
+- Social preset now covers the Meta hosts that carry images and messaging (`fbsbx.com`, `facebook.net`, `fb.com`, `fb.me`, `messenger.com`, `m.me`, `instagr.am`, `threads.net`, `whatsapp.net`, `wa.me`) — pictures no longer fail while text loads.
+- README, SECURITY and API docs: TUI lockout entry is `[13]`, the cache is not an LRU, stale claims removed; both READMEs synced.
+
+### Notes
+- Update from an installed beta.5 once with `update.sh` (see `docs/UPDATE.md`); later updates can use the dashboard button.
+- Not covered by this release: QUIC/HTTP-3 relaying (the relay is TCP only).
+
+---
+
 ## [v2.2.0-beta.5] — Public-mode guard and DNS access diagnosis
 
 - Restricted anonymous SNI/HTTP relay connections in public mode to active `PROXY` domains. Private mode remains the default.
