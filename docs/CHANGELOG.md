@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v2.2.0-beta.8] — Login and layout fixes for the new panel
+
+- **Login** now matches the new panel: same colours and themes (light, dark, ultra dark), no fake placeholders, one language choice shared with the panel, and a translated message on wrong credentials. It is still a self-contained document.
+- **Policies:** fixed the downloads warning overflowing its card and rendering behind Custom rules. Groups and custom rules are now tabs instead of one long page.
+- **Layout:** removed the browser's default page margin, which forced a scrollbar on every page. Overview is compact, and Settings and API gateway use two columns on wide screens.
+
+---
+
 ## [v2.2.0-beta.7] — React panel opens by default
 
 - The bare `/<admin-path>` address and the post-login redirect now open the new React + Ant Design panel (`/<admin-path>/ui/`). The classic dashboard is unchanged and stays at `/<admin-path>/dash/`; the new panel's sidebar links back to it.
