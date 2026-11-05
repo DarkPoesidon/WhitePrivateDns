@@ -53,6 +53,38 @@ export interface PanelConfig {
   server?: { public_ip?: string; admin_username?: string }
   auth?: { totp_enabled?: boolean }
   doh_url?: string
+  subscription_origin?: string
+}
+
+export interface ClientRow {
+  id: string
+  uuid: string
+  name: string
+  token: string
+  allowed_ips: string[] | null
+  traffic_limit_gb: number
+  traffic_used_bytes: number
+  expires_at: string
+  last_seen: string
+  total_queries: number
+  enabled: boolean
+  note: string
+  custom_policies: string[] | null
+  register_secret: string
+  traffic_reset_cycle: string
+  quota_exceeded?: boolean
+  next_traffic_reset?: string
+}
+
+export interface ClientsResponse {
+  clients: ClientRow[] | null
+  allow_all: boolean
+  public_ip: string
+}
+
+export interface PolicyEntry {
+  key: string
+  label: string
 }
 
 export interface UpdateStatus {

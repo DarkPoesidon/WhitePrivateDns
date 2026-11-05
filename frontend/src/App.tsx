@@ -8,6 +8,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { ADMIN_BASE } from './api/client'
 import { isRtl } from './i18n'
 import AppLayout from './layout/AppLayout'
+import Clients from './pages/Clients'
 import Migrating from './pages/Migrating'
 import Overview from './pages/Overview'
 import { themeFor, ThemeModeProvider, useMode } from './theme'
@@ -31,7 +32,7 @@ function Themed() {
             <Route element={<AppLayout />}>
               <Route index element={<Navigate to="/overview" replace />} />
               <Route path="overview" element={<Overview />} />
-              <Route path="clients" element={<Migrating legacyRoute="/clients" />} />
+              <Route path="clients" element={<Clients />} />
               <Route path="policies" element={<Migrating legacyRoute="/rules" />} />
               <Route path="logs" element={<Migrating legacyRoute="/logs" />} />
               <Route path="api" element={<Migrating legacyRoute="/api" />} />
