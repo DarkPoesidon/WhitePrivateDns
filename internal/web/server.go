@@ -42,6 +42,7 @@ type WebServer struct {
 	dohHandler        http.Handler
 	dnsPublicIPUpdate func(string)
 	updater           *update.Checker
+	ui                *uiServer
 	settings          *database.ServerSettings
 	tlsSettings       *database.TLSSettings
 	dnsCfg            *database.DNSSettings
@@ -382,6 +383,14 @@ func (ws *WebServer) BuildHandler() http.Handler {
 		}
 		if p == ap+"/dash/login" {
 			http.Redirect(w, r, ap+"/login", http.StatusFound)
+			return
+		}
+		if p == ap+"/ui" {
+			http.Redirect(w, r, ap+"/ui/", http.StatusFound)
+			return
+		}
+		if strings.HasPrefix(p, ap+"/ui/") {
+			ws.serveUI(w, r, ap, p)
 			return
 		}
 		if strings.HasPrefix(p, ap+"/dash/") {

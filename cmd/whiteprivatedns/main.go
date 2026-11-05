@@ -542,6 +542,7 @@ func main() {
 		webAssets.StaticFS,
 	)
 	webServer.SetSubscriptionSettings(subscriptionSettings)
+	webServer.SetUIFS(webAssets.UIFS)
 	webServer.SetDNSPublicIPUpdater(dnsHandler.SetPublicIP)
 	// A relay target resolving to our own public IP is a loop; on NAT'd clouds
 	// that address is on no interface, so the guard needs it from config.
