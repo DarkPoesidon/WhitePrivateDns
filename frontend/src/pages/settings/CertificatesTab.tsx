@@ -88,10 +88,10 @@ export default function CertificatesTab() {
   const { data: cfg } = useConfig()
   if (!cfg) return <Card loading />
   return (
-    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+    <div className="card-columns">
       <CertCard purpose="dot" title={t('settings.certs.dotTitle')} help={t('settings.certs.dotHelp')} initialDomain={cfg.tls?.dot_domain ?? ''} initialEmail={cfg.tls?.email ?? ''} showEmail={false} />
       <CertCard purpose="subscription" title={t('settings.certs.subTitle')} help={t('settings.certs.subHelp')} initialDomain={cfg.subscription?.domain ?? ''} initialEmail={cfg.tls?.email ?? ''} showEmail={false} />
       <CertCard purpose="panel" title={t('settings.certs.panelTitle')} help={t('settings.certs.panelHelp')} initialDomain={cfg.tls?.domain ?? ''} initialEmail={cfg.tls?.email ?? ''} showEmail />
-    </Space>
+    </div>
   )
 }

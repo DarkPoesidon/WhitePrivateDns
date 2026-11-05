@@ -135,7 +135,7 @@ export default function AppLayout() {
           </Space>
         </Header>
         <UpdateBanner />
-        <Content style={{ padding: mobile ? 12 : 24 }}>
+        <Content style={{ padding: mobile ? 12 : 16 }}>
           <Outlet />
         </Content>
       </Layout>

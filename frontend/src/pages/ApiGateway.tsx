@@ -112,6 +112,7 @@ export default function ApiGateway() {
         <Typography.Text type="secondary">{t('api.subtitle')}</Typography.Text>
       </div>
 
+      <div className="card-columns">
       <Card loading={!cfg} title={t('api.docs')} extra={<Button type="primary" icon={<BookOutlined />} href={`${ADMIN_BASE}/api/v1/docs`} target="_blank" rel="noopener noreferrer">{t('api.openDocs')}</Button>}>
         <Typography.Text type="secondary">{t('api.docsHelp')}</Typography.Text>
         <div style={{ marginTop: 8 }}>
@@ -169,6 +170,8 @@ export default function ApiGateway() {
         />
         <Typography.Text type="secondary">{t('api.snippetsNote')}</Typography.Text>
       </Card>
+
+      </div>
 
       <ReauthModal open={regen} danger title={t('api.regenTitle')} body={t('api.regenBody')} okText={t('api.regenerate')} onCancel={() => setRegen(false)} onSubmit={async (r) => void (await rotate.mutateAsync(r))} />
     </Space>
