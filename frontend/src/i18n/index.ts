@@ -5,7 +5,7 @@ import { policiesEn, policiesFa } from './policies'
 import { enPages, faPages } from './panelPages'
 
 const en = {
-  nav: { overview: 'Overview', clients: 'Clients', policies: 'Policies', logs: 'Live queries', api: 'API gateway', settings: 'Settings', guide: 'Connect guide' },
+  nav: { overview: 'Overview', clients: 'Clients', policies: 'Policies', logs: 'Live queries', api: 'API gateway', settings: 'Settings', guide: 'Connect guide', classic: 'Classic panel' },
   common: { signOut: 'Sign out', theme: 'Theme', light: 'Light', dark: 'Dark', ultra: 'Ultra dark', language: 'Language', loading: 'Loading…', retry: 'Retry', cancel: 'Cancel', openLegacy: 'Open in classic panel', migrating: 'This page is being migrated to the new panel.', migratingHint: 'Everything still works in the classic panel in the meantime.' },
   overview: {
     title: 'Overview', subtitle: 'DNS traffic, resolver health and system load in one place.',
@@ -43,7 +43,7 @@ const en = {
 }
 
 const fa: typeof en = {
-  nav: { overview: 'نمای کلی', clients: 'مشترکین', policies: 'سیاست‌ها', logs: 'کوئری‌های زنده', api: 'درگاه API', settings: 'تنظیمات', guide: 'راهنمای اتصال' },
+  nav: { overview: 'نمای کلی', clients: 'مشترکین', policies: 'سیاست‌ها', logs: 'کوئری‌های زنده', api: 'درگاه API', settings: 'تنظیمات', guide: 'راهنمای اتصال', classic: 'پنل کلاسیک' },
   common: { signOut: 'خروج', theme: 'پوسته', light: 'روشن', dark: 'تیره', ultra: 'تیرهٔ مطلق', language: 'زبان', loading: 'در حال بارگذاری…', retry: 'تلاش مجدد', cancel: 'انصراف', openLegacy: 'باز کردن در پنل کلاسیک', migrating: 'این صفحه در حال انتقال به پنل جدید است.', migratingHint: 'تا آن زمان همه‌چیز در پنل کلاسیک کار می‌کند.' },
   overview: {
     title: 'نمای کلی', subtitle: 'ترافیک DNS، سلامت ریزالور و بار سیستم در یک نگاه.',

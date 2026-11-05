@@ -270,7 +270,7 @@
               return;
             }
             try { localStorage.setItem('whiteprivatedns_token', body.token); } catch (e2) { /* private mode */ }
-            window.location.replace(BASE + '/dash/home');
+            window.location.replace(BASE + '/ui/');
           });
         }).catch(function () {
           showError(DICT[lang].errNet);

@@ -78,3 +78,19 @@ func TestReactPanelIsInvisibleOutsideTheAdminPathAndWhenNotEmbedded(t *testing.T
 		t.Errorf("/ui/ outside the admin path = %d, want 404", w.Code)
 	}
 }
+
+// With the React panel attached the bare admin path lands on it; /dash keeps
+// opening the classic dashboard, which stays available as a fallback.
+func TestBareAdminPathOpensTheReactPanel(t *testing.T) {
+	ws, _, cleanup := setupTestWebServer(t)
+	defer cleanup()
+	ws.SetUIFS(webassets.UIFS)
+	h := ws.BuildHandler()
+	ap := "/" + ws.adminPath()
+	if w := uiGet(h, http.MethodGet, ap); w.Code != http.StatusFound || w.Header().Get("Location") != ap+"/ui/" {
+		t.Errorf("bare admin path = %d -> %q, want redirect to %s/ui/", w.Code, w.Header().Get("Location"), ap)
+	}
+	if w := uiGet(h, http.MethodGet, ap+"/dash"); w.Code != http.StatusFound || w.Header().Get("Location") != ap+"/dash/" {
+		t.Errorf("/dash = %d -> %q, want redirect to %s/dash/", w.Code, w.Header().Get("Location"), ap)
+	}
+}
