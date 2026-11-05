@@ -897,7 +897,7 @@ Sorting on `expires_at` as text is exact while the server's clock is UTC, which 
 Clears the per-address login lockouts the panel's brute-force guard recorded. The
 tracker lives in the daemon's memory, so this endpoint is the only way to lift a
 lockout (for example an office NAT that got locked out) without restarting the
-service. The TUI's **[12] Clear Login Lockouts** entry calls exactly this
+service. The TUI's **[13] Clear Login Lockouts** entry calls exactly this
 endpoint over loopback.
 
 - **Method:** `POST` — body `{"code": "123456"}` (the current TOTP code; required

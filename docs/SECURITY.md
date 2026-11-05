@@ -154,7 +154,7 @@ They are the reason several classes of issue are "by design" rather than bugs.
   `crypto/rand` entropy and are never derived from anything guessable.
 - **Login lockout**: 3 failures from one address locks it for 10 minutes. The
   operator can clear it without a restart (`POST /api/auth/unlock`, or TUI entry
-  `[12]`), which requires a session or the API key, plus a TOTP code when 2FA is
+  `[13]`), which requires a session or the API key, plus a TOTP code when 2FA is
   on.
 - **TOTP (RFC 6238)** with a proper enrollment flow: the secret is shown once,
   and confirmation requires a code. When enabled, password changes and API-key

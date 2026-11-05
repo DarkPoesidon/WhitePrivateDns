@@ -12,6 +12,8 @@
 
 <p align="center">
   <img src="docs/whiteprivatedns-dashboard-2026.png" alt="WhitePrivateDns network overview — live telemetry, resolver status and QPS chart" width="880">
+  <br>
+  <sub>The dashboard under load: query rate, cache hit ratio, upstream latency and resolver percentiles.</sub>
 </p>
 
 > [!NOTE]
@@ -39,6 +41,8 @@
 | :--- | :--- |
 | **[docs/TUTORIAL.md](docs/TUTORIAL.md)** | Step-by-step walkthrough: first boot, custom domain for the subscriber portal, adding clients, issuing registration tokens. **Start here.** |
 | **[SECURITY.md](docs/SECURITY.md)** | Threat model, encryption specifics, hardening checklist, RFC compliance, vulnerability reporting. **Read before exposing the install.** |
+| **[docs/INSTALL.md](docs/INSTALL.md)** | Installation on every supported platform (Linux, Windows, macOS). |
+| **[docs/UPDATE.md](docs/UPDATE.md)** | Updating an existing install, from the dashboard or the command line. |
 | **[API.md](docs/API.md)** | REST API v1 (deprecated) and v2, with Python / Node.js / cURL samples. |
 | **[docs/PRESET_CATALOG.md](docs/PRESET_CATALOG.md)** | The full 171+ preset catalog, by category. |
 | **[CHANGELOG.md](docs/CHANGELOG.md)** | Release history and the fix behind each one. |
@@ -133,7 +137,7 @@ The CDN or Tunnel route must already work; saving a URL does not create it.
 
 ## 🚀 Quick Installation & Deployment
 
-Already running WhitePrivateDns on Linux? Use the [in-place update guide](docs/UPDATE.md). It keeps your accounts, configuration, keys, and certificates. The installer below creates a fresh installation.
+Already running WhitePrivateDns on Linux? The dashboard tells you when a new release is out and can install it with one click — see [Updating](docs/UPDATE.md). It keeps your accounts, configuration, keys, and certificates. The installer below creates a fresh installation.
 
 ### Option 1: Install the Linux service from a release (no Go or checkout)
 
@@ -164,7 +168,7 @@ Install Go 1.26.4 or newer and Git first, then clone the repository:
 git clone https://github.com/DarkPoesidon/WhitePrivateDns.git
 cd WhitePrivateDns
 mkdir -p bin
-go build -ldflags="-s -w" -o bin/whiteprivatedns ./cmd/whiteprivatedns
+go build -trimpath -ldflags="-s -w" -o bin/whiteprivatedns ./cmd/whiteprivatedns
 ./bin/whiteprivatedns -version
 ```
 
@@ -179,6 +183,12 @@ docker compose up -d
 Dashboard source is kept in `web/src/`. After changing a fragment, run `node tools/build-web-assets.mjs` to regenerate the embedded HTML, CSS and JavaScript. CI checks that the generated files are current.
 
 Create `data/` and `certs/` before the first `up`. Everything that has to survive a rebuild lives in `data/` — `data.db`, `master.key` and `config.json` — and the container names all three paths explicitly, so an image update never comes back to an empty database. `config.json` is optional: drop one in to seed the first run, or leave the directory empty and let the daemon generate its own.
+
+The container runs as an unprivileged user (uid/gid `10001`) with only the `NET_BIND_SERVICE` capability, which is what lets it bind ports 53, 80, 443 and 853. The bind-mounted folders must be writable by that user, so on a fresh checkout — and once when upgrading from an image that ran as root — run:
+
+```bash
+sudo chown -R 10001:10001 data certs
+```
 
 The container runs with `network_mode: host` on purpose. A NAT hop on every UDP datagram is latency added to the query that starts a game, and the daemon has to see the real client address — subscriber recognition, the per-source rate limit and the access list all key on it. Behind Docker's userland proxy every query would arrive from the bridge address, so one client's flood would rate-limit the whole subnet and every subscriber would look like the same subscriber.
 
@@ -201,7 +211,8 @@ The container runs with `network_mode: host` on purpose. A NAT hop on every UDP 
 - Layer-4 TCP relaying without SSL termination: the TLS session stays end-to-end between the client and the origin, and WhitePrivateDns never holds the keys for it.
 - Anti-DPI TLS ClientHello fragmentation, on by default (`enable_fragmentation`, with a configurable chunk size and inter-chunk delay).
 - A `sync.Pool` of 32 KB buffers, so a relayed connection does not allocate its own — the payload is still copied through user space, and each direction carries an inactivity deadline that is refreshed per chunk so half-open connections are reaped instead of pinned.
-- Up to 4096 concurrent relays; beyond that new connections are rejected rather than queued, which keeps a flood from exhausting memory.
+- Up to 4096 concurrent relays; beyond that new connections are rejected rather than queued, which keeps a flood from exhausting memory. Connections that have not yet named a destination are capped separately (2048) and release their slot as soon as the SNI or `Host` header is read, so silent connections cannot starve relays that are already running.
+- A target that resolves to a private, loopback or link-local address, or back to this server's own public IP, is refused — the relay cannot be aimed inward.
 
 ### 👤 3. Subscriber Management & 1-Click IP Sync
 - **Two addresses, two jobs.** `/sub/{token}` is the subscriber's **portal** — a
@@ -317,7 +328,7 @@ Optional hardening on top, all in Settings:
 - **Two-Factor Authentication** — RFC 6238 TOTP. Enroll from Settings → *Two-Factor Authentication*: the secret is shown exactly once, one code confirms it, and from then on logins (plus every password/API-key change) require a current code. Disabling demands both factors one last time.
 - **LDAP** — authenticate operators against Active Directory/OpenLDAP (`ldaps://` verified against the system certificate store, bind/search/bind flow, 5-second timeout). Modes: local only, LDAP only, or LDAP with local fallback.
 - **Session idle window** — revoke a dashboard session after N minutes without use (5–1440, default 15). Applies live on save; the 24-hour absolute ceiling is unchanged.
-- **Login lockouts** — 3 failures from one address locks it for 10 minutes. Clear it without a restart from TUI entry `[12]` or `POST /api/auth/unlock` (session or API key, plus a TOTP code when 2FA is on).
+- **Login lockouts** — 3 failures from one address locks it for 10 minutes (an IPv6 address counts as its whole /64, so rotating addresses inside one prefix does not help). Clear it without a restart from TUI entry `[13]` or `POST /api/auth/unlock` (session or API key, plus a TOTP code when 2FA is on).
 - **Subscription Portal** — the subscriber pages (`/sub/<token>`, `/ip/<token>`, and the dedicated listener if you set a port) stay public by design; Settings controls the title, the domain and port their links advertise, and an optional custom stylesheet that is sanitised (no `@import`, no external `url()`, no script) before it reaches a subscriber's browser.
 
 For the full threat model, the exact list of encrypted fields, and a
@@ -386,10 +397,17 @@ on every start.
 - **Gaming Policies:** 1-click toggles for every preset category, plus custom
   proxied/blocked domains, DoH tokens and static records.
 - **Live Stream:** Real-time Server-Sent Events (SSE) stream of DNS queries.
+- **Update notifications:** the daemon checks GitHub Releases at start-up and every six hours. When a newer version exists a banner appears with the release notes; **Update now** asks for your password (and a 2FA code if enabled), downloads the release's updater, verifies it against the release checksums and runs it — backup, restart and automatic rollback included. Works on the standard Linux/systemd install; other layouts get the notification only. Disable with `WHITEPRIVATEDNS_UPDATE_CHECK=0`. Details: [docs/UPDATE.md](docs/UPDATE.md).
 - **Settings & SSL:** the subscription portal (title, domain, port),
   two-factor authentication, LDAP, session idle window, hidden admin path,
   certificate issuance, and the REST API gateway (master key, exposure toggle,
   integration snippets).
+
+<p align="center">
+  <img src="docs/whiteprivatedns-update-banner.png" alt="Dashboard update banner: a newer release is available, with What's new, Update now and Later" width="760">
+  <br>
+  <sub>The update banner (illustrative: it appears only when GitHub has a newer release).</sub>
+</p>
 
 ---
 
@@ -424,7 +442,7 @@ two versions:
 A query walks four layers, in this order:
 
 1. **Access control** — `IsIPAllowed(clientIP)` is a single map read behind a `sync.RWMutex`. Four indexes (`idMap`, `ipMap`, `tokenMap`, `uuidMap`) are rebuilt from BoltDB on change and re-filed one account at a time on a subscriber IP registration, so the public `/ip/{token}` endpoint never triggers a full rescan. Under `access.allow_all: true` an address that matches no index is served as anonymous `Public` rather than refused — see the warning in [First-Run Hardening](#-first-run-hardening).
-2. **Cache** — a 64-shard LRU keyed by name+type+class. A hit returns a *copy* of the stored message, because the caller has to rewrite the transaction ID and count the TTLs down.
+2. **Cache** — a 64-shard cache keyed by name+type+class, evicting the entry nearest expiry when a shard is full. A hit returns a *copy* of the stored message, because the caller has to rewrite the transaction ID and count the TTLs down.
 3. **Policy match** — an exact-match map plus a longest-suffix wildcard index over the 171+ presets and any per-subscriber or admin-wide custom rules. Longest suffix wins, so `cdn.example.com` can be routed differently from `*.example.com`.
 4. **Action** — `proxy` spoofs the answer to this server so the SNI relay picks the connection up; `direct` races the configured upstreams and forwards the unaltered reply; `block` sinkholes it.
 
@@ -460,10 +478,10 @@ panel that requires authentication has no public page to light up.
 
 | Dimension | Score | Basis |
 | :--- | :---: | :--- |
-| 🔐 **Security** | **93 / 100** | Three full Mantis audit rounds + a fix-verification pass — **50+ findings, every one fixed with a named regression test** (master-key scoping, TOTP single-use, LDAP scoping, DoH surface restriction, port-drift, safe installers). A T3MP3ST-style external-attacker campaign against a live deployment found every headline control holding and produced one LOW, fixed live. Race detector: 20/20 packages, zero races. Deductions: the open-resolver posture remains one toggle away (documented non-goal), no WAF or volumetric DDoS layer (the provider's job), the admin path is defence-in-depth only. |
+| 🔐 **Security** | **93 / 100** | Three full Mantis audit rounds + a fix-verification pass — **50+ findings, every one fixed with a named regression test** (master-key scoping, TOTP single-use, LDAP scoping, DoH surface restriction, port-drift, safe installers). A T3MP3ST-style external-attacker campaign against a live deployment found every headline control holding and produced one LOW, fixed live. CI runs the whole suite under the race detector on every push. Deductions: the open-resolver posture remains one toggle away (documented non-goal), no WAF or volumetric DDoS layer (the provider's job), the admin path is defence-in-depth only. |
 | ⚡ **Performance** | **90 / 100** | The hot paths are allocation-free nanosecond operations (subscriber lookup ~17 ns, exact rule match ~52 ns, cache hit ~258 ns — benchmarked, see Architecture), the cache is 64-shard concurrent, DoT holds idle connections (RFC 7828) instead of re-handshaking, relays draw from a `sync.Pool`, and the whole thing is one zero-CGO binary. Deductions: the subscriber index sits behind one RWMutex and does not scale with cores (documented shape), no published end-to-end wire latency numbers, the v1.2.0-era field reports (CPU pegged, memory leak) are fixed but the memory of them is why this is not a 95. |
 | 🔎 **SEO** | **70 / 100** | Deliberate and honest: the public landing page serves `noindex, nofollow` **by design** — a private resolver's landing page has no business ranking, and the subscriber portal carries per-request `Vary` headers so no cache serves one subscriber's page to another. What Google's guidelines ask for structurally is there: real `<title>`, single `<h1>`, viewport meta, semantic HTML, mobile-first rendering. Deductions: no sitemap, no Open Graph/structured data, no indexable content — because the product is not a content site. Raise the score by removing one meta tag if you want the landing indexed. |
-| 🧹 **Code hygiene** | **95 / 100** | gofmt/go vet clean across 20 packages, JS/Python/shell syntax gates, a markup↔JS consistency test that catches dead DOM lookups, changelog discipline, and an offline-bundle mirror kept byte-identical. Deduction: the tree carries private planning notes in `.idea/` — keep them out of the published repository. |
+| 🧹 **Code hygiene** | **95 / 100** | gofmt and go vet are enforced on every package in CI, with JS/Python/shell syntax gates, a markup↔JS consistency test that catches dead DOM lookups, changelog discipline, and an offline-bundle mirror kept byte-identical. |
 
 ---
 
