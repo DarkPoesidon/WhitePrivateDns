@@ -371,6 +371,12 @@ func (ws *WebServer) BuildHandler() http.Handler {
 		//    versioned external API exactly as /api/v1/... used to sit at the
 		//    root.
 		ap := "/" + ws.adminPath()
+		// The bare admin path opens the React panel when it is attached; the
+		// classic dashboard stays reachable at /dash/ as a fallback.
+		if p == ap && ws.ui != nil {
+			http.Redirect(w, r, ap+"/ui/", http.StatusFound)
+			return
+		}
 		if p == ap || p == ap+"/dash" {
 			http.Redirect(w, r, ap+"/dash/", http.StatusFound)
 			return

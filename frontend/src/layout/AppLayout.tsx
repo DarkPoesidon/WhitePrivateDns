@@ -2,6 +2,7 @@ import {
   ApiOutlined,
   AppstoreOutlined,
   DashboardOutlined,
+  ExportOutlined,
   FileTextOutlined,
   GlobalOutlined,
   LogoutOutlined,
@@ -15,13 +16,14 @@ import { Button, Drawer, Dropdown, Grid, Layout, Menu, Space, Typography } from 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { signOut } from '../api/client'
+import { ADMIN_BASE, signOut } from '../api/client'
 import i18n from '../i18n'
 import { useMode, type Mode } from '../theme'
 import UpdateBanner from './UpdateBanner'
 
 const { Sider, Header, Content } = Layout
 
+const CLASSIC = '__classic'
 const ITEMS = [
   { key: '/overview', icon: <DashboardOutlined />, label: 'nav.overview' },
   { key: '/clients', icon: <TeamOutlined />, label: 'nav.clients' },
@@ -46,8 +48,17 @@ export default function AppLayout() {
     <Menu
       mode="inline"
       selectedKeys={[ITEMS.find((i) => pathname.startsWith(i.key))?.key ?? '/overview']}
-      items={ITEMS.map((i) => ({ key: i.key, icon: i.icon, label: t(i.label) }))}
+      items={[
+        ...ITEMS.map((i) => ({ key: i.key, icon: i.icon, label: t(i.label) })),
+        { type: 'divider' as const },
+        { key: CLASSIC, icon: <ExportOutlined />, label: t('nav.classic') },
+      ]}
       onClick={({ key }) => {
+        // The classic dashboard stays available as a fallback.
+        if (key === CLASSIC) {
+          window.location.assign(`${ADMIN_BASE}/dash/`)
+          return
+        }
         nav(key)
         setDrawer(false)
       }}
