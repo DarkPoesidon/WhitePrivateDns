@@ -30,6 +30,12 @@ const (
 	// descriptors.
 	maxConcurrentRelays = 4096
 
+	// maxPendingHandshakes caps connections accepted but not yet carrying a
+	// destination. They are kept apart from relay slots, so silent connections
+	// can delay new handshakes for at most handshakeTimeout but never starve
+	// established relays.
+	maxPendingHandshakes = 2048
+
 	// handshakeTimeout bounds how long a connection may sit without producing a
 	// parseable ClientHello or Host header.
 	handshakeTimeout = 5 * time.Second
@@ -130,12 +136,21 @@ type Server struct {
 	guard *targetGuard
 	// slots is a counting semaphore: a relay takes one for its lifetime.
 	slots chan struct{}
+	// pending is the semaphore for connections still in the handshake.
+	pending chan struct{}
 }
 
 // SetChallengeResponder attaches the ACME challenge source. Called once at
 // wiring time, before listeners accept.
 func (s *Server) SetChallengeResponder(r ChallengeResponder) {
 	s.acme = r
+}
+
+// SetSelfAddrProvider tells the relay which public address clients reach it on,
+// so a target resolving to it is refused even when no local interface holds it.
+// Wire it before Start; the provider is read per connection.
+func (s *Server) SetSelfAddrProvider(f func() string) {
+	s.guard.publicAddr = f
 }
 
 // SetPublicDomainPolicy restricts anonymous public-mode relays to published
@@ -158,6 +173,7 @@ func NewServer(
 		access:   access,
 		guard:    newTargetGuard(),
 		slots:    make(chan struct{}, maxConcurrentRelays),
+		pending:  make(chan struct{}, maxPendingHandshakes),
 	}
 	if m, ok := access.(TrafficMeter); ok {
 		s.meter = m
@@ -303,6 +319,23 @@ func (s *Server) handleConnection(ctx context.Context, clientConn net.Conn, isTL
 
 	tuneTCP(clientConn)
 
+	// Bound connections that have not yet named a destination. The slot is
+	// released as soon as the handshake is read, not held for the relay.
+	select {
+	case s.pending <- struct{}{}:
+	default:
+		s.refused.Add(1)
+		return
+	}
+	handshaking := true
+	endHandshake := func() {
+		if handshaking {
+			handshaking = false
+			<-s.pending
+		}
+	}
+	defer endHandshake()
+
 	// ACME HTTP-01 challenge serving (v2.2.0), before the access gate.
 	//
 	// The CA's validator is not a subscriber and never can be — it connects to
@@ -360,17 +393,6 @@ func (s *Server) handleConnection(ctx context.Context, clientConn net.Conn, isTL
 		return
 	}
 
-	// Take a relay slot before doing any work on behalf of the client, so an
-	// overloaded proxy sheds load at accept time instead of after paying for a
-	// handshake parse and a DNS lookup.
-	select {
-	case s.slots <- struct{}{}:
-		defer func() { <-s.slots }()
-	default:
-		s.refused.Add(1)
-		return
-	}
-
 	bufPtr := handshakeBufPool.Get().(*[]byte)
 	defer handshakeBufPool.Put(bufPtr)
 	buf := *bufPtr
@@ -422,6 +444,17 @@ func (s *Server) handleConnection(ctx context.Context, clientConn net.Conn, isTL
 	// allow_all enabled, the old source-IP gate admitted that as an unrestricted
 	// public TCP relay. Accept only names which the current DNS policy proxies.
 	if s.access != nil && client == nil && !s.publicRelayAllowed(hostname) {
+		s.refused.Add(1)
+		return
+	}
+
+	// The destination is known: leave the handshake pool and take a relay slot
+	// before paying for a DNS lookup and a dial.
+	endHandshake()
+	select {
+	case s.slots <- struct{}{}:
+		defer func() { <-s.slots }()
+	default:
 		s.refused.Add(1)
 		return
 	}

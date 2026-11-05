@@ -147,6 +147,11 @@ func (h *Handler) SetPublicIP(ip string) {
 
 // TotalQueries is the number of questions this handler has processed since start,
 // across every transport (UDP, TCP, DoT, DoH).
+func (h *Handler) PublicIP() string {
+	s, _ := h.publicIP.Load().(string)
+	return s
+}
+
 func (h *Handler) TotalQueries() uint64 {
 	return h.totalQueries.Load()
 }

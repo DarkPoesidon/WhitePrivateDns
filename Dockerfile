@@ -36,14 +36,24 @@ WORKDIR /app
 # ca-certificates: the ACME client and the outbound public-IP probe both need a
 # trust store. tzdata: expiry timestamps and quota cycles are rendered in the
 # operator's zone, and without this every container is UTC whatever TZ says.
-RUN apk add --no-cache ca-certificates tzdata
+#
+# libcap provides setcap: the daemon runs as an unprivileged user and
+# gets just the right to bind ports below 1024 (53, 80, 443, 853) through a file
+# capability, instead of running as root on the host network.
+RUN apk add --no-cache ca-certificates tzdata libcap \
+    && addgroup -S -g 10001 wpdns \
+    && adduser -S -u 10001 -G wpdns -H -h /app wpdns
 
 COPY --from=builder /out/whiteprivatedns /app/whiteprivatedns
 
 # Created here as well as declared below, so a run with no bind mount still has
 # somewhere to put the key: the master key is written before anything else, and a
 # missing directory there is a fatal start rather than a warning.
-RUN mkdir -p /app/data /app/certs
+RUN setcap cap_net_bind_service=+ep /app/whiteprivatedns \
+    && mkdir -p /app/data /app/certs \
+    && chown -R wpdns:wpdns /app/data /app/certs
+
+USER wpdns
 
 # DNS (53), SNI proxy (80/443), DoT (853), dashboard (8080) and HTTPS/DoH (8443).
 # Decorative under `network_mode: host`, which is what docker-compose.yml uses.

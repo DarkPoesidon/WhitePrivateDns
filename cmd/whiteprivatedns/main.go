@@ -535,6 +535,9 @@ func main() {
 	)
 	webServer.SetSubscriptionSettings(subscriptionSettings)
 	webServer.SetDNSPublicIPUpdater(dnsHandler.SetPublicIP)
+	// A relay target resolving to our own public IP is a loop; on NAT'd clouds
+	// that address is on no interface, so the guard needs it from config.
+	sniServer.SetSelfAddrProvider(dnsHandler.PublicIP)
 	webServer.SetAuthSettings(authSettings)
 
 	// v2.2.0: the embedded ACME client replaces certbot/acme.sh. It ships in

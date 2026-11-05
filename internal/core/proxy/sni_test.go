@@ -359,7 +359,7 @@ func TestGuardStatsStartsAtZero(t *testing.T) {
 func TestFullRelayTableIsRefusedNotUnreadable(t *testing.T) {
 	s := NewServer(database.SNIProxySettings{}, "127.0.0.1", "", nil)
 
-	// Fill the semaphore so the slot acquisition below takes its default branch.
+	// Fill the semaphore so the slot acquisition takes its default branch.
 	for range cap(s.slots) {
 		s.slots <- struct{}{}
 	}
@@ -368,9 +368,9 @@ func TestFullRelayTableIsRefusedNotUnreadable(t *testing.T) {
 	defer client.Close()
 	defer server.Close()
 
-	// Nothing is ever read from this connection, so the peer need not write: the
-	// drop happens before the handshake read.
-	s.handleConnection(context.Background(), server, true, 443)
+	// The slot is taken once the destination is known, so the peer must send one.
+	go func() { _, _ = client.Write([]byte("GET / HTTP/1.1\r\nHost: example.com\r\n\r\n")) }()
+	s.handleConnection(context.Background(), server, false, 80)
 
 	refused, unreadable := s.GuardStats()
 	if refused != 1 {
@@ -379,5 +379,38 @@ func TestFullRelayTableIsRefusedNotUnreadable(t *testing.T) {
 	if unreadable != 0 {
 		t.Errorf("unreadable = %d, want 0: a full relay table is a refusal, not an "+
 			"unreadable destination, and conflating them points the operator at the wrong fault", unreadable)
+	}
+}
+
+// Connections stuck in the handshake are capped apart from relay slots, and the
+// refusal is counted as a decision, not as an unreadable destination.
+func TestPendingHandshakeCapIsRefused(t *testing.T) {
+	s := NewServer(database.SNIProxySettings{}, "127.0.0.1", "", nil)
+	for range cap(s.pending) {
+		s.pending <- struct{}{}
+	}
+	client, server := net.Pipe()
+	defer client.Close()
+	defer server.Close()
+	s.handleConnection(context.Background(), server, true, 443)
+	if refused, unreadable := s.GuardStats(); refused != 1 || unreadable != 0 {
+		t.Fatalf("refused=%d unreadable=%d, want 1 and 0", refused, unreadable)
+	}
+}
+
+// A full handshake pool must not be consumed by relays that already have a
+// destination: the pending slot is returned before the relay slot is taken.
+func TestHandshakeSlotReleasedAfterDestinationRead(t *testing.T) {
+	s := NewServer(database.SNIProxySettings{}, "127.0.0.1", "", nil)
+	s.guard.lookupIP = func(context.Context, string) ([]netip.Addr, error) {
+		return nil, errors.New("test stops before a dial")
+	}
+	client, server := net.Pipe()
+	defer client.Close()
+	defer server.Close()
+	go func() { _, _ = client.Write([]byte("GET / HTTP/1.1\r\nHost: example.com\r\n\r\n")) }()
+	s.handleConnection(context.Background(), server, false, 80)
+	if len(s.pending) != 0 {
+		t.Fatalf("pending slots held after handleConnection: %d", len(s.pending))
 	}
 }
