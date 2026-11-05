@@ -161,3 +161,6 @@ root@*
 /uiaudit-*.png
 # third-party skill docs that landed in the tree
 docs/superpowers/
+
+# The React panel needs a lockfile so CI can run `npm ci` and rebuild web/ui reproducibly.
+!frontend/package-lock.json
