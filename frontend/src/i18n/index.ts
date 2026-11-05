@@ -2,6 +2,7 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { logsEn, logsFa } from './logs'
 import { policiesEn, policiesFa } from './policies'
+import { enPages, faPages } from './panelPages'
 
 const en = {
   nav: { overview: 'Overview', clients: 'Clients', policies: 'Policies', logs: 'Live queries', api: 'API gateway', settings: 'Settings', guide: 'Connect guide' },
@@ -38,6 +39,7 @@ const en = {
   policies: policiesEn,
   logs: logsEn,
   update: { available: 'Update available', whatsNew: "What's new", now: 'Update now', later: 'Later', updating: 'Updating — the panel will reload when it is back', confirmTitle: 'Update WhitePrivateDns', confirmBody: 'The service restarts and the panel is unavailable for about a minute. A backup is taken first and restored automatically if the update fails. Enter your current password to continue.', password: 'Current password', code: 'Two-factor code', failed: 'Update could not be started' },
+  ...enPages,
 }
 
 const fa: typeof en = {
@@ -75,6 +77,7 @@ const fa: typeof en = {
   policies: policiesFa,
   logs: logsFa,
   update: { available: 'به‌روزرسانی جدید موجود است', whatsNew: 'تغییرات جدید', now: 'به‌روزرسانی', later: 'بعداً', updating: 'در حال به‌روزرسانی — پنل پس از بازگشت سرویس بارگذاری می‌شود', confirmTitle: 'به‌روزرسانی WhitePrivateDns', confirmBody: 'سرویس راه‌اندازی مجدد می‌شود و پنل حدود یک دقیقه در دسترس نیست. ابتدا پشتیبان گرفته می‌شود و در صورت شکست خودکار بازگردانده می‌شود. برای ادامه رمز عبور فعلی را وارد کنید.', password: 'رمز عبور فعلی', code: 'کد دومرحله‌ای', failed: 'شروع به‌روزرسانی ممکن نشد' },
+  ...faPages,
 }
 
 const saved = (() => {
