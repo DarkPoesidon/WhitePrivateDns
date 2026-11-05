@@ -58,7 +58,7 @@ export default function GeneralTab() {
   const adminPath = cfg?.server?.admin_path ?? ADMIN_BASE.slice(1)
 
   return (
-    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+    <div className="card-columns">
       <Card loading={!cfg} title={t('settings.general.network')}>
         <Form layout="vertical">
           <Form.Item label={t('settings.general.relayIp')} help={t('settings.general.relayIpHelp')} validateStatus={ip && !ipOk ? 'error' : undefined}>
@@ -112,6 +112,6 @@ export default function GeneralTab() {
           </Popconfirm>
         </Space>
       </Card>
-    </Space>
+    </div>
   )
 }

@@ -1,7 +1,7 @@
 # ⚡ WhitePrivateDns — گیت‌وی گیمینگ و اسمارت دی‌ان‌اس مستقل
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release-v2.2.0--beta.7-00f0ff?style=for-the-badge&logo=rocket" alt="نسخه v2.2.0-beta.7">
+  <img src="https://img.shields.io/badge/Release-v2.2.0--beta.8-00f0ff?style=for-the-badge&logo=rocket" alt="نسخه v2.2.0-beta.8">
   <img src="https://img.shields.io/badge/Status-Production--Ready%20Beta-amber?style=for-the-badge" alt="وضعیت">
   <img src="https://img.shields.io/badge/Language-Go%201.26-00ADD8?style=for-the-badge&logo=go" alt="Go 1.26">
   <img src="https://img.shields.io/badge/Architecture-Single%20Binary%20(Zero%20CGO)-a855f7?style=for-the-badge" alt="تک‌باینری بدون CGO">
@@ -118,8 +118,8 @@ python3 scripts/network_probe.py --dns-ip 203.0.113.10 \
 
 ```bash
 apt-get update && apt-get install -y ca-certificates curl openssl
-curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.7/scripts/install.sh
-env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.7 bash /tmp/whiteprivatedns-install.sh
+curl -fsSLo /tmp/whiteprivatedns-install.sh https://raw.githubusercontent.com/DarkPoesidon/WhitePrivateDns/v2.2.0-beta.8/scripts/install.sh
+env WHITEPRIVATEDNS_REPOSITORY=DarkPoesidon/WhitePrivateDns WHITEPRIVATEDNS_REF=v2.2.0-beta.8 bash /tmp/whiteprivatedns-install.sh
 ```
 
 </div>

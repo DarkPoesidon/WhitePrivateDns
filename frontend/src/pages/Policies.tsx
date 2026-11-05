@@ -207,6 +207,7 @@ export default function Policies() {
   const { message, modal } = AntApp.useApp()
   const save = useRulesMutation()
   const [q, setQ] = useState('')
+  const [tab, setTab] = useState<string>()
   const [pending, setPending] = useState<Set<string>>(new Set())
 
   const cfg = useQuery({ queryKey: CONFIG_KEY, queryFn: () => request<ConfigResponse>('/api/config') })
@@ -293,28 +294,34 @@ export default function Policies() {
 
       {visible.length === 0 && <Empty description={t('policies.noMatch', { q: q.trim() })} />}
 
-      {visible.map((g) => (
-        <Card
-          key={g.id}
-          size="small"
-          title={<div><div>{t(`policies.group.${g.id}.title`)}</div><Typography.Text type="secondary" style={{ fontSize: 12, fontWeight: 400, whiteSpace: 'normal' }}>{t(`policies.group.${g.id}.desc`)}</Typography.Text></div>}
-          styles={{ header: { paddingBlock: 10 } }}
-          extra={<Tag>{t('policies.enabledOf', { on: g.items.filter((p) => isOn(p.key)).length, total: g.items.length })}</Tag>}
-        >
-          <Row gutter={[12, 12]}>
-            {g.shown.map((p) => (
-              <Col key={p.key} xs={24} md={12} xl={8}>
-                <PresetCard p={p} on={isOn(p.key)} busy={pending.has(p.key)} onToggle={(n) => toggle(p.key, n)} />
-                {p.key === 'enable_downloads' && (
+      <Tabs
+        activeKey={tab === 'custom' || visible.some((g) => g.id === tab) ? tab : (visible[0]?.id ?? 'custom')}
+        onChange={setTab}
+        items={[
+          ...visible.map((g) => ({
+            key: g.id,
+            label: `${t(`policies.group.${g.id}.title`)} (${g.items.filter((p) => isOn(p.key)).length}/${g.items.length})`,
+            children: (
+              <>
+                <Typography.Paragraph type="secondary">{t(`policies.group.${g.id}.desc`)}</Typography.Paragraph>
+                <Row gutter={[12, 12]}>
+                  {g.shown.map((p) => (
+                    <Col key={p.key} xs={24} md={12} xl={8} xxl={6}>
+                      <PresetCard p={p} on={isOn(p.key)} busy={pending.has(p.key)} onToggle={(n) => toggle(p.key, n)} />
+                    </Col>
+                  ))}
+                </Row>
+                {g.items.some((p) => p.key === 'enable_downloads') && (
                   <Alert style={{ marginTop: 12 }} type="warning" showIcon title={t('policies.downloadsWarnTitle')} description={<ul style={{ paddingInlineStart: 18, margin: 0 }}>{warn.map((s) => <li key={s}>{s}</li>)}</ul>} />
                 )}
-              </Col>
-            ))}
-          </Row>
-        </Card>
-      ))}
-
-      <Card title={t('policies.custom.title')} size="small">
+              </>
+            ),
+          })),
+          {
+            key: 'custom',
+            label: t('policies.custom.title'),
+            children: (
+              <>
         <Typography.Paragraph type="secondary">{t('policies.custom.subtitle')}</Typography.Paragraph>
         <Tabs
           items={[
@@ -324,7 +331,11 @@ export default function Policies() {
             { key: 'records', label: `${t('policies.custom.records')} (${Object.keys(asRecords(rules.custom_records)).length})`, children: <RecordsEditor rules={rules} /> },
           ]}
         />
-      </Card>
+      </>
+            ),
+          },
+        ]}
+      />
     </Space>
   )
 }

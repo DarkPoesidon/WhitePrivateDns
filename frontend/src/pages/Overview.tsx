@@ -27,7 +27,7 @@ function Gauge({ label, value, sub }: { label: string; value: number | null; sub
   const v = value ?? 0
   return (
     <div style={{ textAlign: 'center' }}>
-      <Progress type="dashboard" percent={v} size={120} format={(p) => (value === null ? '—' : `${p}%`)} strokeColor={v > 85 ? '#ff4d4f' : v > 65 ? '#faad14' : '#12a37f'} />
+      <Progress type="dashboard" percent={v} size={96} format={(p) => (value === null ? '—' : `${p}%`)} strokeColor={v > 85 ? '#ff4d4f' : v > 65 ? '#faad14' : '#12a37f'} />
       <div>
         <Typography.Text strong>{label}</Typography.Text>
       </div>
@@ -61,7 +61,7 @@ export default function Overview() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} xl={6}>
-          <Card>
+          <Card size="small">
             <Statistic title={t('overview.queryRate')} value={s.qps} precision={1} suffix="QPS" />
             <Typography.Text type="secondary">
               {t('overview.totalQueries')}: {s.total_queries.toLocaleString()}
@@ -69,7 +69,7 @@ export default function Overview() {
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={6}>
-          <Card>
+          <Card size="small">
             <Statistic title={`${t('overview.cache')} ${t('overview.hitRatio')}`} value={s.cache_hit_ratio * (s.cache_hit_ratio <= 1 ? 100 : 1)} precision={1} suffix="%" />
             <Typography.Text type="secondary">
               {s.cache_entries.toLocaleString()} {t('overview.items')}
@@ -77,7 +77,7 @@ export default function Overview() {
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={6}>
-          <Card>
+          <Card size="small">
             <Statistic title={t('overview.relay')} value={s.active_relays} suffix={t('overview.activeRelays')} />
             <Space size={4} wrap>
               <Tag>{`${t('overview.totalRelays')}: ${s.total_relays}`}</Tag>
@@ -87,7 +87,7 @@ export default function Overview() {
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={6}>
-          <Card>
+          <Card size="small">
             <Statistic title={t('overview.traffic')} value={`↓ ${s.speed_in_kbps.toFixed(1)}  ↑ ${s.speed_out_kbps.toFixed(1)}`} suffix="KB/s" />
             <Typography.Text type="secondary">
               {bytes(s.bytes_recv)} ↓ · {bytes(s.bytes_sent)} ↑
@@ -97,9 +97,9 @@ export default function Overview() {
       </Row>
 
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={14}>
-          <Card title={t('overview.system')}>
-            <Row gutter={16} justify="space-around">
+        <Col xs={24} lg={8}>
+          <Card size="small" title={t('overview.system')} style={{ height: '100%' }}>
+            <Row gutter={8} justify="space-around">
               <Col>
                 <Gauge label={t('overview.cpu')} value={pct(s.system_cpu_percent)} sub={`${s.num_cpu} ${t('overview.cores')}`} />
               </Col>
@@ -111,19 +111,20 @@ export default function Overview() {
                 />
               </Col>
               <Col>
-                <Space orientation="vertical" size={4} style={{ paddingTop: 24 }}>
-                  <Statistic title={t('overview.uptime')} value={duration(s.uptime_sec)} />
-                  <Typography.Text type="secondary">
-                    {t('overview.goroutines')}: {s.num_goroutines}
-                  </Typography.Text>
-                </Space>
+                <Statistic title={t('overview.uptime')} value={duration(s.uptime_sec)} />
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  {t('overview.goroutines')}: {s.num_goroutines}
+                </Typography.Text>
               </Col>
             </Row>
           </Card>
         </Col>
-        <Col xs={24} lg={10}>
-          <Card title={t('overview.latency')} extra={<Typography.Text type="secondary">{t('overview.latencyHint')}</Typography.Text>}>
-            <Row gutter={[8, 8]}>
+        <Col xs={24} sm={12} lg={8}>
+          <Card size="small" title={t('overview.latency')} style={{ height: '100%' }}>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {t('overview.latencyHint')}
+            </Typography.Text>
+            <Row gutter={[8, 8]} style={{ marginTop: 8 }}>
               {(
                 [
                   ['p50', lat?.p50_ms],
@@ -138,7 +139,9 @@ export default function Overview() {
               ))}
             </Row>
           </Card>
-          <Card title={t('overview.limits')} style={{ marginTop: 16 }}>
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <Card size="small" title={t('overview.limits')} style={{ height: '100%' }}>
             <Space size="large" wrap>
               <Statistic title={t('overview.rateLimited')} value={s.rate_limited} />
               <Statistic title={t('overview.accessDenied')} value={s.access_denied} />
@@ -148,7 +151,7 @@ export default function Overview() {
         </Col>
       </Row>
 
-      <Card title={t('overview.upstreams')}>
+      <Card size="small" title={t('overview.upstreams')}>
         <Table
           size="small"
           rowKey="address"

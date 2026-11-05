@@ -271,11 +271,11 @@ function Lockouts() {
 
 export default function SecurityTab() {
   return (
-    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+    <div className="card-columns">
       <Credentials />
       <TwoFactor />
       <Ldap />
       <Lockouts />
-    </Space>
+    </div>
   )
 }

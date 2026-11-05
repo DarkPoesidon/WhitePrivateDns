@@ -155,9 +155,9 @@ function Maintenance() {
 
 export default function NetworkTab() {
   return (
-    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+    <div className="card-columns">
       <Upstreams />
       <Maintenance />
-    </Space>
+    </div>
   )
 }
