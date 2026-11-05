@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v2.2.0-beta.7] — React panel opens by default
+
+- The bare `/<admin-path>` address and the post-login redirect now open the new React + Ant Design panel (`/<admin-path>/ui/`). The classic dashboard is unchanged and stays at `/<admin-path>/dash/`; the new panel's sidebar links back to it.
+
+---
+
 ## [v2.2.0-beta.6] — Dashboard updates, personal DoH links and a hardening pass
 
 ### Added
