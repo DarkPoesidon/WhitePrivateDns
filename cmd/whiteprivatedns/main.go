@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"flag"
@@ -30,6 +31,7 @@ import (
 	"whiteprivatedns/internal/service"
 	"whiteprivatedns/internal/service/acme"
 	"whiteprivatedns/internal/tui"
+	"whiteprivatedns/internal/update"
 	"whiteprivatedns/internal/version"
 	internalWeb "whiteprivatedns/internal/web"
 	webAssets "whiteprivatedns/web"
@@ -455,6 +457,12 @@ func main() {
 
 	dnsHandler := dns.NewHandler(clientService, c, m, u, statsService, serverSettings.PublicIP)
 	dohHandler := dns.NewDoHHandler(dnsHandler)
+	// Personal DoH links: /dns-query/<token>/<secret> keeps a device registered
+	// when its address changes.
+	dohHandler.SetDeviceBinder(func(token, secret, ip string) error {
+		_, _, err := clientService.RegisterIP(token, secret, ip)
+		return err
+	})
 
 	// DoH bearer tokens (v2.1.0 B-07 remediation): config.json's access block
 	// used to parse doh_tokens and drop them on the floor, while the dashboard's
@@ -534,7 +542,26 @@ func main() {
 		webAssets.StaticFS,
 	)
 	webServer.SetSubscriptionSettings(subscriptionSettings)
+	webServer.SetUIFS(webAssets.UIFS)
 	webServer.SetDNSPublicIPUpdater(dnsHandler.SetPublicIP)
+	// A relay target resolving to our own public IP is a loop; on NAT'd clouds
+	// that address is on no interface, so the guard needs it from config.
+	sniServer.SetSelfAddrProvider(dnsHandler.PublicIP)
+
+	// Release check: one request to api.github.com every 6 hours. Opt out with
+	// WHITEPRIVATEDNS_UPDATE_CHECK=0; point at a fork with WHITEPRIVATEDNS_REPOSITORY.
+	if os.Getenv("WHITEPRIVATEDNS_UPDATE_CHECK") != "0" {
+		repo := os.Getenv("WHITEPRIVATEDNS_REPOSITORY")
+		if repo == "" {
+			repo = update.DefaultRepository
+		}
+		if checker, err := update.New(repo, version.Display()); err != nil {
+			log.Printf("[Update] Update checks disabled: %v", err)
+		} else {
+			webServer.SetUpdater(checker)
+			go checker.Run(context.Background(), 6*time.Hour)
+		}
+	}
 	webServer.SetAuthSettings(authSettings)
 
 	// v2.2.0: the embedded ACME client replaces certbot/acme.sh. It ships in

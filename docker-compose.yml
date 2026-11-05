@@ -24,6 +24,18 @@ services:
     # same subscriber.
     network_mode: "host"
 
+    # The image runs as uid/gid 10001, not root. Capabilities are cut to the one
+    # the daemon needs (binding ports 53/80/443/853, granted to the binary as a
+    # file capability in the Dockerfile). `no-new-privileges` is deliberately NOT
+    # set: it would stop that file capability from taking effect.
+    #
+    # Upgrading from an image that ran as root? The bind mounts are root-owned:
+    #   sudo chown -R 10001:10001 data certs
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
     volumes:
       - ./data:/app/data
       - ./certs:/app/certs

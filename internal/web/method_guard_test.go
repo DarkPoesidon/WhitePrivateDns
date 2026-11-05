@@ -37,6 +37,8 @@ var guardExemptions = map[string]string{
 	"/dns-query": "ws.dohHandler is built in internal/core/dns. Its switch on r.Method and the " +
 		"Allow: GET, POST it sets live in doh.go — RFC 8484 defines exactly those two verbs — and " +
 		"are covered by that package's own tests.",
+	"/dns-query/": "The personal DoH link (/dns-query/<token>/<secret>) is served by the same ws.dohHandler as " +
+		"/dns-query, so the same method switch in internal/core/dns/doh.go decides every verb.",
 }
 
 // minRegisteredRoutes is a floor under the walk itself. There were 32 registrations when this

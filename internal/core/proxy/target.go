@@ -204,6 +204,10 @@ type targetGuard struct {
 	lookupIP   func(ctx context.Context, host string) ([]netip.Addr, error)
 	localAddrs func() map[netip.Addr]struct{}
 	now        func() time.Time
+
+	// publicAddr returns the operator-configured relay address. On NAT'd clouds
+	// (AWS, GCP) that address is not on any interface, so localAddrs cannot see it.
+	publicAddr func() string
 }
 
 func newTargetGuard() *targetGuard {
@@ -221,6 +225,11 @@ func newTargetGuard() *targetGuard {
 // at worst a route to a service bound to the machine's public address, which no
 // block list of reserved ranges can describe.
 func (g *targetGuard) isSelf(addr netip.Addr) bool {
+	if g.publicAddr != nil {
+		if pub, err := netip.ParseAddr(strings.TrimSpace(g.publicAddr())); err == nil && pub.Unmap() == addr {
+			return true
+		}
+	}
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	if g.selfAddrs == nil || g.now().Sub(g.refreshed) > selfAddrTTL {

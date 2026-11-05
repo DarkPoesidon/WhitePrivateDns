@@ -152,9 +152,9 @@ curl -s http://127.0.0.1:8080/api/v1/version
 ```json
 {
   "version": "2.2.0",
-  "channel": "beta.5",
+  "channel": "beta.6",
   "codename": "WhitePrivateDns",
-  "display": "v2.2.0-beta.5",
+  "display": "v2.2.0-beta.6",
   "hash": "<fingerprint>",
   "go": "go1.26"
 }
@@ -184,9 +184,9 @@ same payload the dashboard polls. Every field below is present on every response
   "status": "healthy",
   "version": {
     "version": "2.2.0",
-    "channel": "beta.5",
+    "channel": "beta.6",
     "codename": "WhitePrivateDns",
-    "display": "v2.2.0-beta.5",
+    "display": "v2.2.0-beta.6",
     "hash": "<fingerprint>",
     "go": "go1.26"
   },
@@ -897,7 +897,7 @@ Sorting on `expires_at` as text is exact while the server's clock is UTC, which 
 Clears the per-address login lockouts the panel's brute-force guard recorded. The
 tracker lives in the daemon's memory, so this endpoint is the only way to lift a
 lockout (for example an office NAT that got locked out) without restarting the
-service. The TUI's **[12] Clear Login Lockouts** entry calls exactly this
+service. The TUI's **[13] Clear Login Lockouts** entry calls exactly this
 endpoint over loopback.
 
 - **Method:** `POST` — body `{"code": "123456"}` (the current TOTP code; required

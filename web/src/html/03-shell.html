@@ -63,17 +63,33 @@
         <button type="button" data-theme-toggle aria-pressed="false" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700 transition" title="Switch to light theme" aria-label="Switch to light theme">
           <i data-feather="moon" class="w-4 h-4"></i>
         </button>
-        <button id="mobile-open-diag" class="px-1.5 py-2.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition" title="Run Diagnostics">
+        <button id="mobile-open-diag" class="px-1.5 py-2.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition" title="Run Diagnostics" aria-label="Run Diagnostics">
           <i data-feather="activity" class="w-4 h-4"></i>
         </button>
-        <button id="mobile-restart-btn" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-orange-400 border border-slate-700 transition" title="Restart Engine">
+        <button id="mobile-restart-btn" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-orange-400 border border-slate-700 transition" title="Restart Engine" aria-label="Restart Engine">
           <i data-feather="power" class="w-4 h-4"></i>
         </button>
-        <button id="mobile-logout-btn" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-red-400 border border-slate-700 transition" title="Sign Out">
+        <button id="mobile-logout-btn" class="px-1.5 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-red-400 border border-slate-700 transition" title="Sign Out" aria-label="Sign Out">
           <i data-feather="log-out" class="w-4 h-4"></i>
         </button>
       </div>
     </header>
+
+    <!-- UPDATE BANNER. Hidden until /api/update/status reports a newer release.
+         Version numbers live in their own data-no-i18n span so the sentence around them
+         stays a fixed, translatable string. -->
+    <div id="update-banner" class="update-banner hidden" role="status" aria-live="polite">
+      <div class="update-banner-text">
+        <i data-feather="download-cloud" aria-hidden="true"></i>
+        <strong id="update-banner-title">Update available</strong>
+        <span id="update-versions" class="font-mono" dir="ltr" data-no-i18n></span>
+        <a id="update-notes-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden">What's new</a>
+      </div>
+      <div class="update-banner-actions">
+        <button type="button" id="update-now-btn" class="update-btn update-btn-primary">Update now</button>
+        <button type="button" id="update-later-btn" class="update-btn">Later</button>
+      </div>
+    </div>
 
     <!-- CONTENT WRAPPER -->
     <main id="main-content" tabindex="-1" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full pb-24 md:pb-8">

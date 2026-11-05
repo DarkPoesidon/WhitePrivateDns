@@ -26,7 +26,8 @@ and how to report a problem.
 
 | Version | Status | Security fixes |
 | :--- | :--- | :--- |
-| `v2.2.0-beta.5` (WhitePrivateDns) | Current beta | ✅ Yes |
+| `v2.2.0-beta.6` (WhitePrivateDns) | Current beta | ✅ Yes |
+| `v2.2.0-beta.1`–`beta.5` | Superseded | ❌ Upgrade first |
 | `v2.0.x`–`v2.1.x` beta | Superseded | ❌ Upgrade first |
 | `v1.x` | End of life | ❌ No |
 
@@ -154,7 +155,7 @@ They are the reason several classes of issue are "by design" rather than bugs.
   `crypto/rand` entropy and are never derived from anything guessable.
 - **Login lockout**: 3 failures from one address locks it for 10 minutes. The
   operator can clear it without a restart (`POST /api/auth/unlock`, or TUI entry
-  `[12]`), which requires a session or the API key, plus a TOTP code when 2FA is
+  `[13]`), which requires a session or the API key, plus a TOTP code when 2FA is
   on.
 - **TOTP (RFC 6238)** with a proper enrollment flow: the secret is shown once,
   and confirmation requires a code. When enabled, password changes and API-key

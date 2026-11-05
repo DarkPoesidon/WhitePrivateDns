@@ -856,3 +856,20 @@ func TestConcurrentMatchDuringReload(t *testing.T) {
 
 	wg.Wait()
 }
+
+// Images, attachments and messaging for the Meta apps come from hosts outside
+// facebook.com and fbcdn.net. A name left direct while its page is proxied is how
+// "text loads but pictures do not" happens.
+func TestSocialPresetCoversMetaImageAndMessagingHosts(t *testing.T) {
+	m := NewMatcher()
+	m.LoadDefaultPresets()
+	for _, host := range []string{
+		"www.facebook.com", "scontent-fra5-2.xx.fbcdn.net", "static.xx.fbcdn.net",
+		"lookaside.fbsbx.com", "connect.facebook.net", "www.messenger.com",
+		"mmg.whatsapp.net", "media-fra3-1.cdn.whatsapp.net", "scontent.cdninstagram.com", "www.threads.net",
+	} {
+		if action, _ := m.Match(host); action != ActionProxy {
+			t.Errorf("%s is not proxied (got %v)", host, action)
+		}
+	}
+}

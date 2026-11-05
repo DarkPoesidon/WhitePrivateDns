@@ -481,3 +481,26 @@ func TestOtherRefusalsDoNotClaimProhibited(t *testing.T) {
 		}
 	}
 }
+
+// A proxied name must never leak the real address: HTTPS/SVCB hints point clients
+// straight at the origin, and an unset public IP must fail closed.
+func TestProxyActionDoesNotLeakDirectAnswers(t *testing.T) {
+	h, _, m := newGuardHandler(t)
+	m.SetCustomRules([]string{"svc.internal.test"}, nil, nil, nil)
+
+	for _, qt := range []uint16{dns.TypeHTTPS, dns.TypeSVCB} {
+		q := new(dns.Msg)
+		q.SetQuestion("svc.internal.test.", qt)
+		resp := h.ProcessQuery(q, "203.0.113.5")
+		if resp == nil || resp.Rcode != dns.RcodeSuccess || len(resp.Answer) != 0 {
+			t.Fatalf("type %d: want empty NOERROR, got %s %v", qt, rcodeOf(resp), resp)
+		}
+	}
+
+	h.publicIP.Store("")
+	q := new(dns.Msg)
+	q.SetQuestion("svc.internal.test.", dns.TypeA)
+	if resp := h.ProcessQuery(q, "203.0.113.5"); resp == nil || resp.Rcode != dns.RcodeServerFailure {
+		t.Fatalf("empty public IP: want SERVFAIL, got %s", rcodeOf(resp))
+	}
+}

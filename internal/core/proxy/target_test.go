@@ -193,3 +193,16 @@ func TestTargetGuardResolve(t *testing.T) {
 		t.Error("resolve on a name with no answer must fail")
 	}
 }
+
+// On NAT'd clouds the public address is on no interface; the configured relay
+// address must still count as this host.
+func TestTargetGuardRefusesConfiguredPublicAddress(t *testing.T) {
+	g := testGuard(map[string][]string{"loop.example": {"45.33.32.156"}}, nil)
+	g.publicAddr = func() string { return "45.33.32.156" }
+	if err := g.vet("loop.example", netip.MustParseAddr("45.33.32.156")); !errors.Is(err, ErrTargetSelf) {
+		t.Fatalf("vet = %v, want ErrTargetSelf", err)
+	}
+	if err := g.vet("ok.example", netip.MustParseAddr("93.184.216.34")); err != nil {
+		t.Fatalf("unrelated address refused: %v", err)
+	}
+}

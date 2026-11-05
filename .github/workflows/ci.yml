@@ -53,6 +53,13 @@ jobs:
       - name: Check generated dashboard assets
         run: node tools/build-web-assets.mjs --check
 
+      - name: React panel builds and is up to date
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          git diff --exit-code -- ../web/ui
+
       - name: Dashboard chart regression tests
         run: node --test tests/web/*.test.cjs
 
