@@ -8,8 +8,11 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { ADMIN_BASE } from './api/client'
 import { isRtl } from './i18n'
 import AppLayout from './layout/AppLayout'
+import ApiGateway from './pages/ApiGateway'
+import Guide from './pages/Guide'
 import Migrating from './pages/Migrating'
 import Overview from './pages/Overview'
+import Settings from './pages/Settings'
 import { themeFor, ThemeModeProvider, useMode } from './theme'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 1000, refetchOnWindowFocus: false } } })
@@ -34,9 +37,9 @@ function Themed() {
               <Route path="clients" element={<Migrating legacyRoute="/clients" />} />
               <Route path="policies" element={<Migrating legacyRoute="/rules" />} />
               <Route path="logs" element={<Migrating legacyRoute="/logs" />} />
-              <Route path="api" element={<Migrating legacyRoute="/api" />} />
-              <Route path="settings" element={<Migrating legacyRoute="/settings" />} />
-              <Route path="guide" element={<Migrating legacyRoute="/guide" />} />
+              <Route path="api" element={<ApiGateway />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="guide" element={<Guide />} />
               <Route path="*" element={<Navigate to="/overview" replace />} />
             </Route>
           </Routes>

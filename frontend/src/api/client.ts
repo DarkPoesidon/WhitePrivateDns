@@ -9,11 +9,18 @@ const TOKEN_KEY = 'whiteprivatedns_token' // shared with the login page and the 
 
 export const api = (path: string) => ADMIN_BASE + path
 export const getToken = () => localStorage.getItem(TOKEN_KEY) ?? ''
+export const setToken = (v: string) => localStorage.setItem(TOKEN_KEY, v)
 export const loginUrl = () => `${ADMIN_BASE}/login`
 
 export function signOut() {
   localStorage.removeItem(TOKEN_KEY)
   window.location.assign(loginUrl())
+}
+
+// Admin-path rotation moves the login to another namespace, so the target is overridable.
+export function signOutTo(loginPath: string) {
+  localStorage.removeItem(TOKEN_KEY)
+  window.location.assign(loginPath)
 }
 
 export class ApiError extends Error {

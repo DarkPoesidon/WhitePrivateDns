@@ -48,11 +48,57 @@ export interface Version {
   hash: string
 }
 
+export interface TlsConfig {
+  domain?: string
+  email?: string
+  dot_domain?: string
+  panel_https?: boolean
+}
+
+export interface AuthSnapshot {
+  totp_enabled?: boolean
+  totp_configured?: boolean
+  totp_enrolling?: boolean
+  ldap_enabled?: boolean
+  ldap_server_url?: string
+  ldap_bind_dn?: string
+  ldap_base_dn?: string
+  ldap_user_attr?: string
+  ldap_login_mode?: string
+  ldap_reachable?: boolean | null
+}
+
+export interface SubscriptionConfig {
+  enabled: boolean
+  domain: string
+  port: number
+  uri_path: string
+  title: string
+  theme_css: string
+  cert_path: string
+  key_path: string
+  use_panel_certificate: boolean
+}
+
+export interface ServerConfig {
+  public_ip?: string
+  web_port?: number
+  admin_username?: string
+  admin_path?: string
+  api_key?: string
+  api_bind?: string
+  session_idle_minutes?: number
+}
+
 export interface PanelConfig {
   version?: Version
-  server?: { public_ip?: string; admin_username?: string }
-  auth?: { totp_enabled?: boolean }
+  server?: ServerConfig
+  tls?: TlsConfig
+  auth?: AuthSnapshot
+  subscription?: SubscriptionConfig
+  subscription_origin?: string
   doh_url?: string
+  public_doh_url?: string
 }
 
 export interface UpdateStatus {
@@ -63,4 +109,60 @@ export interface UpdateStatus {
   can_apply: boolean
   blocked_reason?: string
   in_progress: boolean
+  checked_at?: string
+  error?: string
+}
+
+export interface AcmeStatus {
+  running: boolean
+  purpose?: string
+  domain?: string
+  stage?: string
+  progress?: number
+  detail?: string
+  error?: string
+  last_detail?: string
+}
+
+export interface DiagResult {
+  name: string
+  target: string
+  success: boolean
+  latency_ms: number
+}
+
+export interface DiagReport {
+  overall_score: number
+  overall_quality: string
+  avg_latency_ms: number
+  reachable: number
+  total: number
+  results: DiagResult[]
+}
+
+export interface AcmeStatus {
+  running: boolean
+  purpose?: string
+  domain?: string
+  stage?: string
+  progress?: number
+  detail?: string
+  error?: string
+  last_detail?: string
+}
+
+export interface DiagResult {
+  name: string
+  target: string
+  success: boolean
+  latency_ms: number
+}
+
+export interface DiagReport {
+  overall_score: number
+  overall_quality: string
+  avg_latency_ms: number
+  reachable: number
+  total: number
+  results: DiagResult[]
 }

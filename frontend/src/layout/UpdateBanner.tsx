@@ -9,7 +9,7 @@ const DISMISS = 'wpdns_update_dismissed'
 
 // Waits for the daemon to go away and come back, then reloads to the login page:
 // an update restarts the service, and sessions live in memory.
-function waitForRestart(onTimeout: () => void) {
+export function waitForRestart(onTimeout: () => void) {
   const started = Date.now()
   let sawDown = false
   const tick = async () => {
