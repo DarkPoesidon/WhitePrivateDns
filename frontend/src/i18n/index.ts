@@ -1,5 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { logsEn, logsFa } from './logs'
+import { policiesEn, policiesFa } from './policies'
 
 const en = {
   nav: { overview: 'Overview', clients: 'Clients', policies: 'Policies', logs: 'Live queries', api: 'API gateway', settings: 'Settings', guide: 'Connect guide' },
@@ -33,6 +35,8 @@ const en = {
     modeConfirmTitle: 'Open DNS to everyone?', modeConfirmBody: 'Turning the whitelist off lets any IP use this resolver. Relay traffic stays limited to active proxy rules.', modeConfirmOk: 'Allow everyone',
     modeOn: 'Whitelist enforced', modeOff: 'Public DNS enabled',
   },
+  policies: policiesEn,
+  logs: logsEn,
   update: { available: 'Update available', whatsNew: "What's new", now: 'Update now', later: 'Later', updating: 'Updating — the panel will reload when it is back', confirmTitle: 'Update WhitePrivateDns', confirmBody: 'The service restarts and the panel is unavailable for about a minute. A backup is taken first and restored automatically if the update fails. Enter your current password to continue.', password: 'Current password', code: 'Two-factor code', failed: 'Update could not be started' },
 }
 
@@ -68,6 +72,8 @@ const fa: typeof en = {
     modeConfirmTitle: 'DNS برای همه باز شود؟', modeConfirmBody: 'با خاموش کردن فهرست مجاز، هر آی‌پی می‌تواند از این ریزالور استفاده کند. ترافیک رله همچنان به قوانین پروکسی فعال محدود می‌ماند.', modeConfirmOk: 'اجازه به همه',
     modeOn: 'فهرست مجاز فعال شد', modeOff: 'DNS عمومی فعال شد',
   },
+  policies: policiesFa,
+  logs: logsFa,
   update: { available: 'به‌روزرسانی جدید موجود است', whatsNew: 'تغییرات جدید', now: 'به‌روزرسانی', later: 'بعداً', updating: 'در حال به‌روزرسانی — پنل پس از بازگشت سرویس بارگذاری می‌شود', confirmTitle: 'به‌روزرسانی WhitePrivateDns', confirmBody: 'سرویس راه‌اندازی مجدد می‌شود و پنل حدود یک دقیقه در دسترس نیست. ابتدا پشتیبان گرفته می‌شود و در صورت شکست خودکار بازگردانده می‌شود. برای ادامه رمز عبور فعلی را وارد کنید.', password: 'رمز عبور فعلی', code: 'کد دومرحله‌ای', failed: 'شروع به‌روزرسانی ممکن نشد' },
 }
 

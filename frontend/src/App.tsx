@@ -9,8 +9,10 @@ import { ADMIN_BASE } from './api/client'
 import { isRtl } from './i18n'
 import AppLayout from './layout/AppLayout'
 import Clients from './pages/Clients'
+import Logs from './pages/Logs'
 import Migrating from './pages/Migrating'
 import Overview from './pages/Overview'
+import Policies from './pages/Policies'
 import { themeFor, ThemeModeProvider, useMode } from './theme'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 1000, refetchOnWindowFocus: false } } })
@@ -33,8 +35,8 @@ function Themed() {
               <Route index element={<Navigate to="/overview" replace />} />
               <Route path="overview" element={<Overview />} />
               <Route path="clients" element={<Clients />} />
-              <Route path="policies" element={<Migrating legacyRoute="/rules" />} />
-              <Route path="logs" element={<Migrating legacyRoute="/logs" />} />
+              <Route path="policies" element={<Policies />} />
+              <Route path="logs" element={<Logs />} />
               <Route path="api" element={<Migrating legacyRoute="/api" />} />
               <Route path="settings" element={<Migrating legacyRoute="/settings" />} />
               <Route path="guide" element={<Migrating legacyRoute="/guide" />} />
