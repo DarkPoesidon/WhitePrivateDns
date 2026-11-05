@@ -1934,7 +1934,7 @@ function initChart() {
           y: {
             beginAtZero: true,
             grid: { color: pal.grid },
-            ticks: { color: pal.tick, font: { size: 10, family: 'JetBrains Mono' } }
+            ticks: { precision: 0, color: pal.tick, font: { size: 10, family: 'JetBrains Mono' } }
           }
         }
       }
