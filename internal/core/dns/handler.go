@@ -488,6 +488,23 @@ func (h *Handler) ProcessQuery(r *dns.Msg, clientIP string, protocol ...string) 
 
 	case matcher.ActionProxy:
 		publicIP := h.publicIP.Load().(string)
+		// No usable public IP: fail closed. Falling through would hand the
+		// client the real upstream address and silently bypass the proxy.
+		if q.Qtype == dns.TypeA && publicIP == "" {
+			m := new(dns.Msg)
+			m.SetRcode(r, dns.RcodeServerFailure)
+			h.logQuery(start, clientIP, accountName, proto, domain, ruleName, "PROXY_FAILED", false)
+			return m
+		}
+		// HTTPS/SVCB records carry ipv4hint/ipv6hint that point clients straight
+		// at the real host. Answer empty NOERROR so they fall back to the
+		// proxied A record.
+		if q.Qtype == dns.TypeHTTPS || q.Qtype == dns.TypeSVCB {
+			m := new(dns.Msg)
+			m.SetReply(r)
+			h.logQuery(start, clientIP, accountName, proto, domain, ruleName, "PROXY_SVCB_SINK", false)
+			return m
+		}
 		if q.Qtype == dns.TypeA && publicIP != "" {
 			m := new(dns.Msg)
 			m.SetReply(r)
