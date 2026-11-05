@@ -317,8 +317,9 @@ here the way `discordcdn.com` belongs to the Discord preset.
 | Platform | Hosts |
 | :--- | :--- |
 | X (Twitter) | `x.com`, `*.x.com`, `twitter.com`, `*.twitter.com`, `twimg.com`, `*.twimg.com`, `t.co` |
-| Instagram | `instagram.com`, `*.instagram.com`, `cdninstagram.com`, `*.cdninstagram.com` |
-| Facebook | `facebook.com`, `*.facebook.com`, `fbcdn.net`, `*.fbcdn.net` |
-| WhatsApp | `whatsapp.com`, `*.whatsapp.com` |
+| Instagram | `instagram.com`, `*.instagram.com`, `cdninstagram.com`, `*.cdninstagram.com`, `instagr.am` |
+| Facebook / Messenger | `facebook.com`, `*.facebook.com`, `fbcdn.net`, `*.fbcdn.net`, `fb.com`, `*.fb.com`, `fb.me`, `fbsbx.com`, `*.fbsbx.com`, `facebook.net`, `*.facebook.net`, `messenger.com`, `*.messenger.com`, `m.me` |
+| WhatsApp | `whatsapp.com`, `*.whatsapp.com`, `whatsapp.net`, `*.whatsapp.net`, `wa.me` |
+| Threads | `threads.net`, `*.threads.net` |
 | Telegram | `telegram.org`, `*.telegram.org`, `t.me` |
 | Reddit | `reddit.com`, `*.reddit.com`, `redd.it`, `*.redditstatic.com`, `*.redditstatic.com` |

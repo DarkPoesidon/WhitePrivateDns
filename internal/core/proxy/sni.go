@@ -532,21 +532,97 @@ func (s *Server) publicRelayAllowed(hostname string) bool {
 	return s.publicDomainAllowed != nil && s.publicDomainAllowed(hostname)
 }
 
-// dialVetted connects to the first reachable vetted address. Passing an address
-// rather than a hostname closes the window in which a second lookup — the one
-// the dialer would perform — could return an address the guard never saw.
-func (s *Server) dialVetted(ctx context.Context, addrs []netip.Addr, port int) (net.Conn, error) {
-	dialer := &net.Dialer{Timeout: handshakeTimeout, KeepAlive: 30 * time.Second}
-	var lastErr error
-	for _, addr := range addrs {
-		conn, err := dialer.DialContext(ctx, "tcp", net.JoinHostPort(addr.String(), strconv.Itoa(port)))
-		if err == nil {
-			return conn, nil
+// dialStagger is how long one dial attempt runs alone before the next address
+// is tried in parallel (RFC 8305 "connection attempt delay").
+const dialStagger = 250 * time.Millisecond
+
+// raceOrder puts IPv4 first and alternates families. Sites such as Facebook's CDN
+// publish AAAA records, and a VPS whose IPv6 route is black-holed (common) would
+// otherwise stall every connection for the full dial timeout before IPv4 is tried.
+func raceOrder(addrs []netip.Addr) []netip.Addr {
+	var v4, v6 []netip.Addr
+	for _, a := range addrs {
+		if a.Is4() {
+			v4 = append(v4, a)
+		} else {
+			v6 = append(v6, a)
 		}
-		lastErr = err
 	}
-	if lastErr == nil {
-		lastErr = errors.New("proxy: no target addresses to dial")
+	out := make([]netip.Addr, 0, len(addrs))
+	for i := 0; i < len(v4) || i < len(v6); i++ {
+		if i < len(v4) {
+			out = append(out, v4[i])
+		}
+		if i < len(v6) {
+			out = append(out, v6[i])
+		}
+	}
+	return out
+}
+
+// dialVetted connects to the first vetted address to answer, racing addresses
+// with a short stagger so one dead address cannot hold a connection hostage.
+// Passing addresses rather than a hostname closes the window in which a second
+// lookup — the one the dialer would perform — could return an address the guard
+// never saw.
+func (s *Server) dialVetted(ctx context.Context, addrs []netip.Addr, port int) (net.Conn, error) {
+	ordered := raceOrder(addrs)
+	if len(ordered) == 0 {
+		return nil, errors.New("proxy: no target addresses to dial")
+	}
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	dialer := &net.Dialer{Timeout: handshakeTimeout, KeepAlive: 30 * time.Second}
+	type result struct {
+		conn net.Conn
+		err  error
+	}
+	results := make(chan result, len(ordered))
+	launch := func(a netip.Addr) {
+		go func() {
+			c, err := dialer.DialContext(ctx, "tcp", net.JoinHostPort(a.String(), strconv.Itoa(port)))
+			results <- result{c, err}
+		}()
+	}
+
+	launch(ordered[0])
+	next, inflight := 1, 1
+	timer := time.NewTimer(dialStagger)
+	defer timer.Stop()
+	var lastErr error
+	for inflight > 0 {
+		select {
+		case r := <-results:
+			inflight--
+			if r.err == nil {
+				// Close any attempt that also succeeded after the winner.
+				go func(n int) {
+					for ; n > 0; n-- {
+						if x := <-results; x.conn != nil {
+							_ = x.conn.Close()
+						}
+					}
+				}(inflight)
+				return r.conn, nil
+			}
+			lastErr = r.err
+			if next < len(ordered) {
+				launch(ordered[next])
+				next++
+				inflight++
+				timer.Reset(dialStagger)
+			}
+		case <-timer.C:
+			if next < len(ordered) {
+				launch(ordered[next])
+				next++
+				inflight++
+				timer.Reset(dialStagger)
+			}
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
 	}
 	return nil, lastErr
 }

@@ -414,3 +414,49 @@ func TestHandshakeSlotReleasedAfterDestinationRead(t *testing.T) {
 		t.Fatalf("pending slots held after handleConnection: %d", len(s.pending))
 	}
 }
+
+func TestRaceOrderPutsIPv4FirstAndAlternates(t *testing.T) {
+	in := []netip.Addr{
+		netip.MustParseAddr("2606:4700::1"), netip.MustParseAddr("2606:4700::2"),
+		netip.MustParseAddr("1.1.1.1"), netip.MustParseAddr("1.0.0.1"),
+	}
+	want := []string{"1.1.1.1", "2606:4700::1", "1.0.0.1", "2606:4700::2"}
+	got := raceOrder(in)
+	for i := range want {
+		if got[i].String() != want[i] {
+			t.Fatalf("raceOrder = %v, want %v", got, want)
+		}
+	}
+}
+
+// A dead first address (a black-holed IPv6 route in production) must not delay a
+// working one by the full dial timeout.
+func TestDialVettedSkipsDeadAddressQuickly(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+	go func() {
+		for {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			_ = c.Close()
+		}
+	}()
+	port := ln.Addr().(*net.TCPAddr).Port
+	s := NewServer(database.SNIProxySettings{}, "127.0.0.1", "", nil)
+	start := time.Now()
+	// 192.0.2.1 (TEST-NET-1) never answers; the loopback listener does.
+	conn, err := s.dialVetted(context.Background(),
+		[]netip.Addr{netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("127.0.0.1")}, port)
+	if err != nil {
+		t.Fatalf("dialVetted: %v", err)
+	}
+	_ = conn.Close()
+	if d := time.Since(start); d > 2*time.Second {
+		t.Fatalf("took %v; a dead first address must not stall the dial", d)
+	}
+}

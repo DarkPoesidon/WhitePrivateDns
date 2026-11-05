@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/miekg/dns"
 	"whiteprivatedns/internal/netutil"
@@ -17,6 +18,8 @@ type DoHHandler struct {
 	// ?token= to be served. Comparison is constant-time per entry. An empty
 	// list means the endpoint is open to whoever the access layer allows.
 	tokens []string
+
+	devices deviceLinks
 }
 
 func NewDoHHandler(h *Handler) *DoHHandler {
@@ -67,7 +70,28 @@ func (h *DoHHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	clientIP := netutil.ClientIP(r)
 
-	if !h.tokenOK(r) {
+	// A personal link (/dns-query/<token>/<secret>) both authenticates the device
+	// and keeps its registered address current. It is rate limited per source
+	// like any query, so guessing secrets is not free.
+	deviceLink := false
+	if strings.HasPrefix(r.URL.Path, "/dns-query/") {
+		token, secret, ok := splitDevicePath(r.URL.Path)
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		if !h.dnsHandler.limiter.allow(clientIP, netutil.PeerIP(r)) {
+			http.Error(w, "Too many requests", http.StatusTooManyRequests)
+			return
+		}
+		if status := h.devices.bind(token, secret, clientIP); status != 0 {
+			http.Error(w, "Invalid or unusable device link", status)
+			return
+		}
+		deviceLink = true
+	}
+
+	if !deviceLink && !h.tokenOK(r) {
 		http.Error(w, "Missing or invalid DoH token", http.StatusUnauthorized)
 		return
 	}

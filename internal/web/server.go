@@ -340,7 +340,7 @@ func (ws *WebServer) BuildHandler() http.Handler {
 		}
 
 		// 3. DNS-over-HTTPS, a service endpoint rather than a web page.
-		if p == "/dns-query" && ws.dohHandler != nil {
+		if (p == "/dns-query" || strings.HasPrefix(p, "/dns-query/")) && ws.dohHandler != nil {
 			ws.dohHandler.ServeHTTP(w, r)
 			return
 		}
@@ -495,7 +495,7 @@ func (ws *WebServer) BuildDoHHandler() http.Handler {
 	inner := ws.buildAdminMux()
 	return ws.withSecurityHeaders(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := cleanRequestPath(r.URL.Path)
-		if p == "/dns-query" ||
+		if p == "/dns-query" || strings.HasPrefix(p, "/dns-query/") ||
 			strings.HasPrefix(p, "/sub/") ||
 			strings.HasPrefix(p, "/ip/") ||
 			strings.HasPrefix(p, "/api/sub/") ||
@@ -628,6 +628,7 @@ func (ws *WebServer) buildAdminMux() *http.ServeMux {
 	// 2. DNS-over-HTTPS (DoH) endpoint
 	if ws.dohHandler != nil {
 		mux.Handle("/dns-query", ws.dohHandler)
+		mux.Handle("/dns-query/", ws.dohHandler)
 	}
 
 	// 3. Real-time Server-Sent Events (SSE) log stream. These two are the only

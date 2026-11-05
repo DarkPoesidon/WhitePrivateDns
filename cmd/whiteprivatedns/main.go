@@ -457,6 +457,12 @@ func main() {
 
 	dnsHandler := dns.NewHandler(clientService, c, m, u, statsService, serverSettings.PublicIP)
 	dohHandler := dns.NewDoHHandler(dnsHandler)
+	// Personal DoH links: /dns-query/<token>/<secret> keeps a device registered
+	// when its address changes.
+	dohHandler.SetDeviceBinder(func(token, secret, ip string) error {
+		_, _, err := clientService.RegisterIP(token, secret, ip)
+		return err
+	})
 
 	// DoH bearer tokens (v2.1.0 B-07 remediation): config.json's access block
 	// used to parse doh_tokens and drop them on the floor, while the dashboard's

@@ -235,6 +235,16 @@ The container runs with `network_mode: host` on purpose. A NAT hop on every UDP 
   there. Open the port in the host firewall too (`ufw allow <port>/tcp`); the
   panel can bind it but cannot open a firewall for you. Reachability from
   outside is the one thing the card cannot verify, and it says so.
+- **A personal DoH link that follows IP changes.** Plain DNS has no device
+  identity — only the source address — so a phone whose address changes looks
+  like a stranger until it registers again. A DoH request can carry a
+  credential: give the device `https://<doh-host>/dns-query/<slug>/<secret>` (it
+  is printed on the *Bot Card*) in its Secure DNS / DoH setting and every query
+  re-asserts "this address is that subscriber", moving the binding on its own.
+  The same gates apply as for `/ip/` (suspended, expired, over quota, address
+  owned by another account → refused). Consoles and routers that cannot do DoH
+  still register through the portal or a scripted `POST /ip/<slug>`. Treat the
+  link like the secret: anyone holding it can move the binding.
 - **RFC 9562 v4 UUIDs:** stable unique identifiers for all clients (the standard that supersedes RFC 4122).
 - **Plan Durations & Traffic Limits:** daily/monthly/yearly/lifetime expiry with
   live quota enforcement.

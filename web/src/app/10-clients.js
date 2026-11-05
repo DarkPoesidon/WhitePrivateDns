@@ -473,7 +473,12 @@ function renderClientsView(data) {
 // secret, the address to point their console at, and the API endpoint for a
 // scripted client. The secret is printed because this text is written by an
 // authenticated operator into a private chat with their customer.
-function generateClientTelegramMessage(clientId, clientName, expStr, subUrl, regApiUrl, secret, dnsIP) {
+function generateClientTelegramMessage(clientId, clientName, expStr, subUrl, regApiUrl, secret, dnsIP, dohLink) {
+  const dohBlock = dohLink ? `
+
+📱 اگر آیپی شما مدام عوض می‌شود (گوشی یا کامپیوتر):
+این آدرس DoH اختصاصی را در تنظیمات «DNS امن» مرورگر یا سیستم‌عامل وارد کنید تا ثبت آیپی خودکار انجام شود و دیگر لازم نباشد دوباره ثبت کنید. این لینک محرمانه است؛ آن را برای کسی نفرستید:
+${dohLink}` : '';
   const serverLine = dnsIP || '(server address not configured)';
   const secretLine = secret ? secret : '(no secret on file — regenerate it in the panel)';
   return `🎮 اکانت SmartDNS شما آماده است
@@ -498,7 +503,7 @@ ${subUrl}
 ${secretLine}
 
 🔗 آدرس API ثبت آیپی (برای اتوماسیون):
-${regApiUrl}`;
+${regApiUrl}${dohBlock}`;
 }
 
 // Attach Client View Event Listeners
@@ -668,7 +673,12 @@ function initClientEventListeners() {
       const regApiUrl = cardBtn.dataset.regUrl;
       const secret = cardBtn.dataset.secret;
       const ip = cardBtn.dataset.ip;
-      const msg = generateClientTelegramMessage(id, cardBtn.dataset.name, exp, subUrl, regApiUrl, secret, ip);
+      // Personal DoH link: devices that speak DoH re-register themselves when their
+      // address changes. Needs the daemon's DoH URL, the slug and the secret.
+      const slug = (regApiUrl || '').split('/').pop();
+      const dohBase = (currentConfig && typeof currentConfig.doh_url === 'string') ? currentConfig.doh_url.replace(/\/+$/, '') : '';
+      const dohLink = dohBase && slug && secret ? `${dohBase}/${slug}/${secret}` : '';
+      const msg = generateClientTelegramMessage(id, cardBtn.dataset.name, exp, subUrl, regApiUrl, secret, ip, dohLink);
       copyText(msg, cardBtn);
       showToast('Persian client card copied for Telegram!', 'success');
       return;
